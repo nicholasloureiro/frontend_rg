@@ -36,6 +36,9 @@
   --color-error: #ef4444;
   --color-warning: #f59e0b;
   --color-info: #3b82f6;
+
+  --sidebar-width: 300px;
+  --sidebar-width-collapsed: 90px;
 }
 
 /* Tema Claro */
