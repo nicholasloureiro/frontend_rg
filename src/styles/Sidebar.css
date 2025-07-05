@@ -1,7 +1,7 @@
 .sidebar {
     width: var(--sidebar-width);
     height: -webkit-fill-available;
-    background-color: var(--color-bg-secondary);
+    background-color: #1E1E1E;
     transition: all 0.3s ease-in-out !important;
 }
 
@@ -200,7 +200,7 @@
 }
 
 .dropdown-item:hover {
-    background-color: var(--color-secondary) !important;
+    background-color: #1e1c1c !important;
     padding-left: 12px !important;
     cursor: pointer;
     transition: all 0.3s ease-in-out !important;

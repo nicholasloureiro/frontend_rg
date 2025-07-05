@@ -18,6 +18,7 @@
   /* Cores de fundo - Tema Escuro */
   --color-bg-primary: #3C342F;
   --color-bg-secondary: #1E1E1E;
+  --color-bg-header: #26201c;
   --color-bg-input: #2a2a2a;
   --color-bg-card: #2d2d2d;
   
@@ -48,7 +49,7 @@
   --color-secondary: #ffffff;
   
   /* Cores de texto - Tema Claro */
-  --color-text-primary: #1a1a1a;
+  --color-text-primary: #212529;
   --color-text-secondary: #4a5568;
   --color-text-muted: #718096;
   --color-text-placeholder: #a0aec0;
@@ -57,7 +58,9 @@
   --color-bg-primary: #f8fafc;
   --color-bg-secondary: #ffffff;
   --color-bg-input: #ffffff;
+  --color-bg-header: #e5e5e5;
   --color-bg-card: #ffffff;
+  --backgroundTheme: #aac2e5;
   
   /* Cores de borda - Tema Claro */
   --color-border: #e2e8f0;
@@ -93,6 +96,7 @@
   --color-bg-secondary: #1E1E1E;
   --color-bg-input: #2a2a2a;
   --color-bg-card: #2d2d2d;
+  --backgroundTheme: #1d1d25;
   
   /* Cores de borda */
   --color-border: #404040;

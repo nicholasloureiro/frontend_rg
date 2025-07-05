@@ -1,0 +1,320 @@
+.header-container {
+    width: 100%;
+    height: 100px;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 32px;
+    background-color: var(--color-bg-header);
+}
+
+.actions {
+    width: 15%;
+    display: flex;
+    justify-content: flex-end;
+    margin-right: 32px;
+    margin-top: 10px;
+}
+
+.titulo {
+    width: 80%;
+    display: flex;
+    align-items: flex-end;
+    color: var(--color-text-primary);
+}
+
+#toggleSidebarButtonHeader {
+    width: 50px !important;
+    height: 50px !important;
+    padding: 0 !important;
+}
+
+.form-switch .form-check-input:checked {
+    background-image: url("/src/assets/moon.png") !important;
+    background-color: var(--backgroundTheme) !important;
+    box-shadow: var(--color-shadow-card);
+    background-size: 32px !important;
+    border-color: var(--color-border) !important;
+    transition: all 0.3s ease-in-out !important;
+}
+
+.form-switch .form-check-input {
+    background-image: url("/src/assets/sun.png") !important;
+    background-color: var(--backgroundTheme) !important;
+    background-size: contain;
+    box-shadow: var(--color-shadow-card);
+    width: 65px !important;
+    height: 36px !important;
+    transition: all 0.3s ease-in-out !important;
+    margin-top: 0;
+}
+
+.form-switch .form-check-input {
+    border-radius: 20px !important;
+}
+
+.form-switch .form-check-input:focus {
+    box-shadow: none;
+}
+
+.titulo h1 {
+    font-size: 32px !important;
+}
+
+.notification-tabs__empty {
+    margin: 15px 0;
+}
+
+
+
+
+.notificacao {
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    box-shadow: var(--color-shadow-card);
+    border: none;
+    border-radius: 12px !important;
+    height: 35px !important;
+    border-color: var(--color-border) !important;
+    margin-right: 10px;
+    transition: all 0.3s ease-in-out !important;
+}
+
+.notificacao:hover .bi-bell {
+    display: inline-block;
+    /* Garante que o ícone possa ser animado corretamente */
+    animation: swing 0.5s ease-in-out;
+}
+
+.notificacao:hover {
+
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-secondary);
+}
+
+.notificacao:focus {
+    color: var(--color-text-primary) !important;
+    background-color: var(--color-bg-secondary) !important
+}
+
+button.notificacao.btn {
+    color: var(--color-text-primary) !important;
+    background-color: var(--color-bg-secondary) !important;
+}
+
+.theme {
+    background-color: var(--color-accent);
+    color: var(--color-primary);
+    border-radius: 20px;
+    padding: 0px 15px;
+
+}
+
+.theme:hover {
+    background-color: var(--color-accent);
+    color: var(--color-primary);
+    border-radius: 20px;
+    padding: 0px 15px;
+    box-shadow: var(--color-shadow-card);
+}
+
+.theme:active {
+    background-color: var(--color-accent) !important;
+    color: var(--color-primary) !important;
+    border: none !important;
+}
+
+.theme:focus {
+    background-color: var(--color-accent) !important;
+    box-shadow: none !important;
+}
+
+.theme i {
+    color: var(--color-text-primary);
+}
+
+
+.notification-card {
+    margin: 10px 10px 10px 0 !important;
+    width: 90% !important;
+    border-radius: 12px !important;
+    margin: 15px auto !important;
+    border-width: px !important;
+    box-shadow: var(--color-shadow-card);
+    display: flex;
+    flex-direction: row !important;
+    background-color: var(--color-bg-card) !important;
+    color: var(--color-text-primary) !important;
+}
+
+#toggleSidebarButtonHeader {
+    display: none !important;
+}
+
+
+.notification-card__logo {
+    width: 60px;
+    display: flex;
+    align-items: flex-start;
+    margin: 10px 0 0 10px;
+    border: 1px solid #DFDFDF;
+    height: min-content;
+    border-radius: 12px;
+    padding: 15px 5px;
+    justify-content: center;
+}
+
+.notification-card__image {
+    width: 48px;
+}
+
+.notification-card__content {
+    width: calc(100% - 70px);
+}
+
+.notification-card__title {
+    display: flex;
+    align-items: center;
+    font-size: 16px !important;
+    font-weight: 600;
+}
+
+.notification-card__subject {
+    font-size: 14px !important;
+    font-weight: 500;
+    margin-left: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.notification-card__urgent-status {
+    color: red;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+.notification-card__white-space {
+    width: 90% !important;
+    white-space: nowrap !important;
+}
+
+.notification-card__read_at {
+    color: rgb(56, 194, 56) !important;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+.notification-card__collapse-content {
+    font-size: 14px !important;
+}
+
+.notification-card__divider {
+    margin: 25px auto 10px auto !important;
+    width: 95%;
+    height: 1px;
+    background-color: #DFDFDF;
+    margin: 5px 0;
+}
+
+.notification-card__collapse:hover {
+    cursor: pointer !important;
+}
+
+
+@keyframes swing {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(-15deg);
+    }
+
+    50% {
+        transform: rotate(15deg);
+    }
+
+    75% {
+        transform: rotate(-10deg);
+    }
+
+    100% {
+        transform: rotate(10deg);
+    }
+}
+
+
+
+@media screen and (max-width: 500px) {
+    .actions {
+        position: absolute !important;
+        right: 10px !important;
+    }
+
+    .titulo {
+        width: 100% !important;
+
+
+    }
+
+}
+
+@media screen and (max-width: 425px) {
+    .card-carga__titulo .bi-circle-fill {
+        margin: 0 !important;
+    }
+
+    .card-carga {
+        padding: 25px 15px !important;
+    }
+
+    .card-cargas-item {
+        padding: 0 !important;
+    }
+
+    .titulo h1 {
+        font-size: 28px !important;
+        width: 85% !important;
+    }
+
+    .actions {
+        right: 30px !important;
+        justify-content: center !important;
+    }
+
+    .actions>.notificacao,
+    .theme>i {
+        font-size: 14px !important;
+    }
+
+    .card-carga__conteudo--content {
+        padding: 10px 0 !important;
+    }
+
+    .card-carga__conteudo {
+        width: 95% !important;
+        margin: auto !important;
+    }
+
+    .notificacao {
+        display: flex;
+        align-items: center;
+        margin-right: 10px;
+    }
+
+}
+
+
+@media screen and (max-width: 375px) {
+
+    .titulo {
+        & h1 {
+            font-size: 24px !important;
+        }
+    }
+
+}

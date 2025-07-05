@@ -11,7 +11,7 @@
 
 .main-content {
   margin-left: var(--sidebar-width);
-  background-color: var(--background-main);
+  background-color: var(--color-bg-primary);
   width: calc(100% - var(--sidebar-width));
   min-height: 100dvh;
   transition: all 0.3s ease-in-out !important;
@@ -20,5 +20,11 @@
 .main-content.collapsed {
   width: calc(100% - var(--sidebar-width-collapsed));
   margin-left: var(--sidebar-width-collapsed);
+  transition: all 0.3s ease-in-out !important;
+}
+
+.main-content.no-sidebar {
+  margin-left: 0;
+  width: 100%;
   transition: all 0.3s ease-in-out !important;
 }
