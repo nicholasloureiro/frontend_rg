@@ -82,14 +82,14 @@ const dashboardValues = {
   devolucoes: { emAtraso: 3, hoje: 0, proximos10: 1 },
 };
 const resumoValues = {
-  totalPedidosDia: 'R$ 1.200,00',
-  totalRecebidoDia: 'R$ 950,00',
+  totalPedidosDia: 1200.0,
+  totalRecebidoDia: 950.0,
   numPedidosDia: 8,
-  totalPedidosSemana: 'R$ 8.500,00',
-  totalRecebidoSemana: 'R$ 7.200,00',
+  totalPedidosSemana: 8500.0,
+  totalRecebidoSemana: 7200.0,
   numPedidosSemana: 42,
-  totalPedidosMes: 'R$ 32.000,00',
-  totalRecebidoMes: 'R$ 28.500,00',
+  totalPedidosMes: 32000.0,
+  totalRecebidoMes: 28500.0,
   numPedidosMes: 180,
 };
 
