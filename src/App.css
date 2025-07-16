@@ -58,24 +58,25 @@ select:focus {
 .PhoneInput {
   background-color: var(--background-inputs);
   border: 1px solid var(--color-border) !important;
-  padding: 12px 16px !important;
-  font-size: 1rem;
-  font-weight: 400;
-  line-height: 1.5;
+  font-size: 12px !important;
   border-radius: 8px;
   color: var(--color-text-primary) !important;
+  padding: 6px 12px;
   transition: all 0s ease-in-out !important;
+}
+
+.PhoneInputCountrySelect {
+ background-color: transparent !important;
+ border: none !important;
 }
 
 .PhoneInput input{
   transition: all 0s ease-in-out !important;
-  background-color: var(--background-inputs) !important;
 
 }
 
 .PhoneInputInput {
   border: none !important;
-  background-color: var(--background-inputs) !important;
   color: var(--color-text-primary) !important;
 }
 
@@ -115,6 +116,13 @@ select:focus {
   color: var(--font-color-disabled) !important;
 }
 
+.react-datepicker__input-container input{
+  height: 35px !important;
+}
+
+.react-datepicker__calendar-icon{
+ display: flex !important;
+}
 
 .bi-eye, .bi-eye-slash{
   color: var(--color-text-primary) !important;

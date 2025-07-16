@@ -64,6 +64,7 @@ div.dataFinal > div > div > input {
 
 .react-datepicker__input-container input{
     cursor: pointer;
+    padding-left: 30px !important;
 }
 
 .react-datepicker__close-icon::after{

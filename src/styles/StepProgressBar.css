@@ -1,0 +1,95 @@
+.step-progress-container {
+    width: 100%;
+    padding: 20px 0;
+}
+
+.step-progress-track {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    height: 80px;
+}
+
+.step-progress-background {
+    position: absolute;
+    top: 24px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #d0d0d0;
+    z-index: 0;
+    transform: translateY(-10px);
+}
+
+.step-progress-filled {
+    position: absolute;
+    top: 24px;
+    transform: translateY(-10px);
+    height: 2px;
+    background-color: var(--color-accent);
+    z-index: 1;
+    transition: width 0.3s ease, left 0.3s ease;
+}
+
+
+.step-progress-step {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.step-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--color-border);
+    background-color: var(--color-bg-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    margin-bottom: 6px;
+}
+
+.step-circle.completed {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-primary);
+    transition: all 0.3s ease;
+}
+
+.step-circle.active {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.step-circle.future {
+    border-color: #d0d0d0;
+    color: transparent;
+}
+
+.step-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--color-accent);
+}
+
+.step-check {
+    font-weight: bold;
+    color: var(--color-primary);
+    font-size: 14px;
+}
+
+.step-label {
+    font-size: 13.6px;
+    color: var(--color-text-primary);
+    max-width: 100%;
+    word-break: break-word;
+}

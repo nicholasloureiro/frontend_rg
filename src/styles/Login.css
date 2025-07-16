@@ -31,19 +31,19 @@
 }
 
 .login-company-name {
-  font-size: 3.5rem;
+  font-size: 56px;
   font-weight: 700;
   letter-spacing: 1px;
 }
 
 .login-title {
-  font-size: 2.5rem;
+  font-size: 40px;
   font-weight: 700;
   margin-bottom: 16px;
 }
 
 .login-highlight {
-  font-size: 2rem;
+  font-size: 32px;
   font-weight: 700;
   color: #FFD600;
   margin-bottom: 16px;
@@ -51,7 +51,7 @@
 }
 
 .login-desc {
-  font-size: 1.1rem;
+  font-size: 17.6px;
   color: #f3f3f3;
   max-width: 400px;
 }
@@ -76,13 +76,13 @@
 }
 
 .login-header h1 {
-  font-size: 2rem;
+  font-size: 32px;
   font-weight: 700;
   margin-bottom: 8px;
 }
 
 .login-header p {
-  font-size: 1rem;
+  font-size: 16px;
   line-height: 1.5;
 }
 
@@ -119,6 +119,10 @@
   font-size: 16px;
   transition: all 0.2s ease;
   background: #f8fafc;
+}
+
+#input-login {
+  padding-left: 40px !important;
 }
 
 .form-input:focus {
@@ -219,16 +223,17 @@
 }
 
 .login-button {
-  width: 100%;
+ width: 120px;
   background: #CBA135;
   color: #F5F5F5 ;
   border: none;
   border-radius: 8px;
-  padding: 14px 0;
-  font-size: 1.1rem;
+  padding: 5px 0;
+  font-size: 17.6px;
   font-weight: 700;
   cursor: pointer;
   margin-top: 8px;
+  margin-left: auto;
   transition: background 0.2s;
   box-shadow: 0 2px 8px 0 rgba(255, 214, 0, 0.08);
 }
@@ -265,7 +270,7 @@
 
 .login-footer p {
   color: #909090;
-  font-size: 1rem;
+  font-size: 16px;
 }
 
 .signup-link {
@@ -314,7 +319,7 @@
     margin: 0 0 24px 0;
   }
   .login-title, .login-highlight {
-    font-size: 1.3rem;
+    font-size: 20.8px;
   }
 }
 

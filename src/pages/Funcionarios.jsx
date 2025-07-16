@@ -7,6 +7,7 @@ import ptBR from 'react-phone-number-input/locale/pt-BR';
 import Swal from 'sweetalert2';
 import '../styles/Funcionarios.css';
 import Header from '../components/Header';
+import Button from '../components/Button';
 
 const Funcionarios = () => {
   const [funcionarios, setFuncionarios] = useState([]);
@@ -169,13 +170,10 @@ const Funcionarios = () => {
     <>
     <Header nomeHeader={'Funcionários'} />
     <div className="funcionarios-container">
-      <div className="funcionarios-header">
-        <p style={{marginLeft: '5px', marginBottom: '-25px'}}>Cadastre e gerencie os funcionários do sistema</p>
-      </div>
 
       {/* Formulário de Cadastro */}
-      <div className="form-section">
-        <h2>{editingId ? 'Editar Funcionário' : 'Cadastrar Novo Funcionário'}</h2>
+      <div className="form-section" style={{ backgroundColor: 'var(--color-bg-card)' }}>
+        <h2 style={{ fontSize: '18px' }}>{editingId ? 'Editar Funcionário' : 'Cadastrar Novo Funcionário'}</h2>
         <form onSubmit={handleSubmit} className="funcionario-form">
           <div className="form-row">
             <div className="form-group">
@@ -188,6 +186,7 @@ const Funcionarios = () => {
                 onChange={handleInputChange}
                 required
                 placeholder="Digite o nome completo"
+                style={{ height: '35px' }}
               />
             </div>
             <div className="form-group">
@@ -200,6 +199,7 @@ const Funcionarios = () => {
                 onChange={handleInputChange}
                 required
                 placeholder="000.000.000-00"
+                style={{ height: '35px' }}
               />
             </div>
           </div>
@@ -227,11 +227,12 @@ const Funcionarios = () => {
                 onChange={handleInputChange}
                 required
                 placeholder="email@exemplo.com"
+                style={{ height: '35px' }}
               />
             </div>
           </div>
 
-          <div className="form-row">
+          <div className="form-row mb-0">
             <div className="form-group">
               <label htmlFor="cargo">Cargo *</label>
               <select
@@ -240,6 +241,7 @@ const Funcionarios = () => {
                 value={formData.cargo}
                 onChange={handleInputChange}
                 required
+                style={{ height: '35px' }}
               >
                 <option value="">Selecione um cargo</option>
                 <option value="ADMINISTRADOR">ADMINISTRADOR</option>
@@ -247,25 +249,21 @@ const Funcionarios = () => {
                 <option value="RECEPÇÃO">RECEPÇÃO</option>
               </select>
             </div>
+            <div className="form-group"></div>
           </div>
 
-          <div className="form-actions">
-            <button type="submit" className="btn-primary">
-              {editingId ? 'Atualizar' : 'Cadastrar'}
-            </button>
+  
+            <Button text={editingId ? 'Atualizar' : 'Cadastrar'} type="submit" variant="primary" style={{ width: 'fit-content', marginLeft: 'auto' }} />
             {editingId && (
-              <button type="button" onClick={handleCancelEdit} className="btn-secondary">
-                Cancelar
-              </button>
+              <Button text="Cancelar" type="button" variant="secondary" onClick={handleCancelEdit} style={{ width: 'fit-content', marginLeft: 'auto' }} />
             )}
-          </div>
         </form>
       </div>
 
       {/* Listagem de Funcionários */}
       <div className="list-section">
         <div className="list-header">
-          <h2>Funcionários Cadastrados</h2>
+          <h2 style={{ fontSize: '18px' }}>Funcionários Cadastrados</h2>
           <div className="search-container">
             <input
               type="text"

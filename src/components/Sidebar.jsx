@@ -108,10 +108,11 @@ const Sidebar = ({ setSideOpen }) => {
         {/* links */}
         <div className="nav flex-column" style={{ height: '100%' }}>
           <SidebarLink to="/dashboard" iconBoot={'graph-up'} label="Dashboard" onClick={toggleSidebar} />
+          <SidebarLink to="/triagem" iconBoot={'clipboard-check'} label="Triagem" onClick={toggleSidebar} />
           <SidebarLink to="/ordens" iconBoot={'list-check'} label="Ordens de serviço" onClick={toggleSidebar} />
           <SidebarLink to="/clientes" iconBoot={'people'} label="Clientes" onClick={toggleSidebar} />
           <SidebarLink to="/funcionarios" iconBoot={'person-lines-fill'} label="Funcionários" onClick={toggleSidebar} />
-          <SidebarLink to="/triagem" iconBoot={'clipboard-check'} label="Triagem" onClick={toggleSidebar} />
+          
           <div className="mt-auto mb-3" style={{ width: '100%', justifyContent: 'center', display: 'flex' }}>
             <span className="version" style=
               {{ color: 'white', fontSize: '12px', textAlign: 'center', cursor: 'default' }} >Roupa de Gala® - 2025</span>

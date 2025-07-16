@@ -9,14 +9,14 @@
 }
 
 .funcionarios-header h1 {
-  font-size: 2.5rem;
+  font-size: 40px;
   font-weight: 600;
   color: var(--color-text-primary);
   margin-bottom: 8px;
 }
 
 .funcionarios-header p {
-  font-size: 1.1rem;
+  font-size: 17.6px;
   color: var(--color-text-secondary);
 }
 
@@ -25,12 +25,11 @@
   background: var(--color-bg-card);
   border-radius: 8px;
   padding: 32px;
-  margin-bottom: 32px;
   border: 1px solid var(--color-border);
 }
 
 .form-section h2 {
-  font-size: 1.5rem;
+  font-size: 24px;
   font-weight: 600;
   color: var(--color-text-primary);
   margin-bottom: 24px;
@@ -57,17 +56,17 @@
 .form-group label {
   font-weight: 500;
   color: var(--color-text-primary);
-  font-size: 0.9rem;
+  font-size: 12px;
 }
 
 .form-group input,
 .form-group select {
-  padding: 12px 16px;
+  padding: 5px 10px !important;
   border: 1px solid var(--color-border);
   border-radius: 6px;
   background: var(--color-bg-input);
   color: var(--color-text-primary);
-  font-size: 1rem;
+  font-size: 12px;
   transition: border-color 0.2s ease;
 }
 
@@ -81,8 +80,8 @@
 .phone-input {
   background-color: var(--color-bg-input);
   border: 1px solid var(--color-border) !important;
-  padding: 12px 16px;
-  font-size: 1rem;
+  padding: 5px 10px !important;
+  font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
   border-radius: 6px;
@@ -95,7 +94,7 @@
   background-color: var(--color-bg-input) !important;
   color: var(--color-text-primary) !important;
   padding: 0 !important;
-  font-size: 1rem;
+  font-size: 16px;
 }
 
 .phone-input--focus {
@@ -108,6 +107,7 @@
 
 .form-group input::placeholder {
   color: var(--color-text-placeholder);
+  font-size: 12px !important;
 }
 
 .form-actions {
@@ -123,7 +123,7 @@
   border: none;
   border-radius: 6px;
   font-weight: 500;
-  font-size: 1rem;
+  font-size: 16px;
   cursor: pointer;
   transition: background-color 0.2s ease;
   min-width: 120px;
@@ -166,7 +166,7 @@
 }
 
 .list-header h2 {
-  font-size: 1.5rem;
+  font-size: 24px;
   font-weight: 600;
   color: var(--color-text-primary);
 }
@@ -183,7 +183,7 @@
   border-radius: 6px;
   background: var(--color-bg-input);
   color: var(--color-text-primary);
-  font-size: 1rem;
+  font-size: 16px;
   transition: border-color 0.2s ease;
 }
 
@@ -198,7 +198,7 @@
   top: 50%;
   transform: translateY(-50%);
   color: var(--color-text-placeholder);
-  font-size: 1.1rem;
+  font-size: 17.6px;
 }
 
 /* Grid de Funcionários */
@@ -240,7 +240,7 @@
 }
 
 .funcionario-avatar i {
-  font-size: 1.5rem;
+  font-size: 24px;
   color: var(--color-primary);
 }
 
@@ -250,7 +250,7 @@
 }
 
 .funcionario-info h3 {
-  font-size: 1.1rem;
+  font-size: 17.6px;
   font-weight: 600;
   color: var(--color-text-primary);
   margin-bottom: 4px;
@@ -263,7 +263,7 @@
   display: inline-block;
   padding: 4px 12px;
   border-radius: 16px;
-  font-size: 0.75rem;
+  font-size: 12px;
   font-weight: 500;
   color: white;
   text-transform: uppercase;
@@ -287,7 +287,7 @@
   justify-content: center;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  font-size: 1rem;
+  font-size: 16px;
 }
 
 
@@ -313,7 +313,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.9rem;
+  font-size: 14.4px;
   color: var(--color-text-secondary);
 }
 
@@ -339,13 +339,13 @@
 }
 
 .no-results i {
-  font-size: 3rem;
+  font-size: 48px;
   margin-bottom: 16px;
   color: var(--color-text-muted);
 }
 
 .no-results p {
-  font-size: 1.1rem;
+  font-size: 17.6px;
 }
 
 /* Responsividade */
@@ -355,7 +355,7 @@
   }
 
   .funcionarios-header h1 {
-    font-size: 2rem;
+    font-size: 32px;
   }
 
   .form-section,
@@ -409,16 +409,16 @@
 
 @media (max-width: 480px) {
   .funcionarios-header h1 {
-    font-size: 1.75rem;
+    font-size: 28px;
   }
 
   .funcionarios-header p {
-    font-size: 1rem;
+    font-size: 16px;
   }
 
   .form-section h2,
   .list-header h2 {
-    font-size: 1.25rem;
+    font-size: 20px;
   }
 
   .funcionario-avatar {
@@ -427,14 +427,14 @@
   }
 
   .funcionario-avatar i {
-    font-size: 1.25rem;
+    font-size: 20px;
   }
 
   .funcionario-info h3 {
-    font-size: 1rem;
+    font-size: 16px;
   }
 
   .detail-item {
-    font-size: 0.85rem;
+    font-size: 13.6px;
   }
 } 

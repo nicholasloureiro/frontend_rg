@@ -65,6 +65,7 @@ const Login = () => {
                 placeholder="Digite seu email"
                 required
                 className="form-input"
+                id='input-login'
               />
             </div>
           </div>
@@ -79,36 +80,18 @@ const Login = () => {
                 placeholder="Digite sua senha"
                 required
                 className="form-input"
+                id='input-login'
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="password-toggle"
               >
-                {!showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {!showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
           </div>
-          <div className="form-options">
-            <label className="checkbox-container">
-              <input
-                type="checkbox"
-                name="rememberMe"
-                checked={formData.rememberMe}
-                onChange={handleInputChange}
-                className="checkbox-input"
-              />
-              <span className="checkmark"></span>
-              Manter logado
-            </label>
-            <button
-              type="button"
-              onClick={handleForgotPassword}
-              className="forgot-password"
-            >
-              Esqueceu a senha?
-            </button>
-          </div>
+          
           <button
             type="submit"
             disabled={isLoading}

@@ -143,7 +143,7 @@ const EditingProfile = ({ handleCloseModal }) => {
                         </div>
                         <div className="col-md-6">
                             <label>Telefone</label>
-                            <PhoneInput className={isEditable ? 'inputTelefone' : 'inputTelefone-disabled'} placeholder="Telefone" value={formData.phone_number} labels={ptBR} onChange={handlePhoneChange} defaultCountry="BR" />
+                            <PhoneInput className={isEditable ? 'inputTelefone' : 'inputTelefone-disabled'} placeholder="Telefone" value={formData.phone_number} labels={ptBR} onChange={handlePhoneChange} defaultCountry="BR" style={{ height: '40px' }} />
                         </div>
                     </div>
                 </div>

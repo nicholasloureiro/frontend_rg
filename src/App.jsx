@@ -11,6 +11,7 @@ import { setSidebarState } from './store/slices/sidebarSlice'
 import 'react-phone-number-input/style.css';
 import './App.css'
 import Triagem from './pages/Triagem'
+import OrdemServico from './pages/OrdemServico'
 
 function AppContent() {
   const { theme } = useTheme();
@@ -38,6 +39,7 @@ function AppContent() {
           <Route path="/login" element={<Login />} />
           <Route path="/funcionarios" element={<Funcionarios />} />
           <Route path="/triagem" element={<Triagem />} />
+          <Route path="/ordens" element={<OrdemServico />} />
         </Routes>
       </main>
     </div>

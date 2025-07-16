@@ -128,7 +128,7 @@ const Home = () => {
             </div>
           ))}
         </div>
-        <div className="dashboard-grid" style={{marginTop: 32}}>
+        <div className="dashboard-grid" >
           {resumoSections.map((section) => (
             <div className="dashboard-section" key={section.section}>
               <h3 style={{marginBottom: 12}}>{section.section}</h3>
