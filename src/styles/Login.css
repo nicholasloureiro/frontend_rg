@@ -105,7 +105,7 @@
 
 .input-icon {
   position: absolute;
-  left: 16px;
+  left: 8px;
   color: #CBA135;
   z-index: 1;
   transition: color 0.2s ease;
@@ -119,10 +119,18 @@
   font-size: 16px;
   transition: all 0.2s ease;
   background: #f8fafc;
+  border-top-left-radius: 6px !important;
+  border-bottom-left-radius: 6px !important;
+  border-top-right-radius: 6px !important;
+  border-bottom-right-radius: 6px !important;
 }
-
+.input-label {
+  font-size: 12px;
+  font-weight: 400;
+  color: #F5F5F5;
+}
 #input-login {
-  padding-left: 40px !important;
+  padding-left: 35px !important;
 }
 
 .form-input:focus {
@@ -232,8 +240,6 @@
   font-size: 17.6px;
   font-weight: 700;
   cursor: pointer;
-  margin-top: 8px;
-  margin-left: auto;
   transition: background 0.2s;
   box-shadow: 0 2px 8px 0 rgba(255, 214, 0, 0.08);
 }
