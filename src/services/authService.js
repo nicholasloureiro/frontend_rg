@@ -41,12 +41,26 @@ export const logout = async () => {
   try {
     const refreshToken = localStorage.getItem('refreshToken');
     if (refreshToken) {
-      await api.post('/api/v1/service-orders/pre-triage/', {
+      await api.post('/api/v1/auth/logout/', {
         refresh: refreshToken
       });
     }
   } catch (error) {
     // Mesmo se falhar, continua com o logout local
     console.error('Erro ao fazer logout no servidor:', error);
+  }
+};
+
+// Função para atualizar informações do usuário
+export const updateProfile = async (formData) => {
+  try {
+    const response = await api.put('/api/v1/auth/me/update/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
   }
 }; 

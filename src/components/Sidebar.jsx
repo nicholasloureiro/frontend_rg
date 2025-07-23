@@ -5,6 +5,7 @@ import ChangePassword from './ChangePassword';
 import EditingProfile from './EditingProfile';
 import { useAuth } from '../hooks/useAuth';
 import { logout as logoutService } from '../services/authService';
+import { capitalizeText } from '../utils/capitalizeText';
 
 import '../styles/Sidebar.css';
 
@@ -37,7 +38,7 @@ const Sidebar = ({ setSideOpen }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showModalPassword, setShowModalPassword] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const handleCloseModal = () => setShowModal(false);
@@ -65,9 +66,13 @@ const Sidebar = ({ setSideOpen }) => {
     }
   };
 
-  // Obtém o nome do usuário para exibir (primeiro nome)
+  // Obtém o nome do usuário para exibir (nome completo)
   // Prioriza: user.person.name > user.first_name > user.username
   const getUserDisplayName = () => {
+    if (isLoading || !user) {
+      return 'Carregando...';
+    }
+    
     console.log('Dados do usuário no Sidebar:', user);
     console.log('user.person?.name:', user?.person?.name);
     console.log('user.first_name:', user?.first_name);
@@ -75,13 +80,12 @@ const Sidebar = ({ setSideOpen }) => {
     
     // Prioriza o nome da pessoa (mais completo)
     if (user?.person?.name) {
-      const firstName = user.person.name.split(' ')[0]; // Retorna apenas o primeiro nome
-      return firstName;
+      return capitalizeText(user.person.name); // Retorna o nome completo capitalizado
     }
     
     // Fallback para first_name do usuário
     if (user?.first_name) {
-      return user.first_name;
+      return capitalizeText(user.first_name);
     }
     
     // Fallback para username
@@ -94,16 +98,20 @@ const Sidebar = ({ setSideOpen }) => {
 
   // Obtém o nome completo do usuário
   const getFullUserName = () => {
+    if (isLoading || !user) {
+      return 'Carregando...';
+    }
+    
     if (user?.person?.name) {
-      return user.person.name;
+      return capitalizeText(user.person.name);
     }
     
     if (user?.first_name && user?.last_name) {
-      return `${user.first_name} ${user.last_name}`;
+      return capitalizeText(`${user.first_name} ${user.last_name}`);
     }
     
     if (user?.first_name) {
-      return user.first_name;
+      return capitalizeText(user.first_name);
     }
     
     return 'Usuário';
@@ -111,6 +119,10 @@ const Sidebar = ({ setSideOpen }) => {
 
   // Obtém o tipo de pessoa (ATENDENTE, etc.)
   const getPersonType = () => {
+    if (isLoading || !user) {
+      return null;
+    }
+    
     if (user?.person?.person_type?.type) {
       return user.person.person_type.type;
     }
@@ -144,7 +156,7 @@ const Sidebar = ({ setSideOpen }) => {
 
             <div className="ms-3 profile-info" style={{ width: '100%' }}>
               <h6 className="text-white mb-0" style={{ whiteSpace: 'normal' }}>
-                Olá, {getUserDisplayName()}.
+                Olá, {capitalizeText(getUserDisplayName())}.
               </h6>
               {getPersonType() && (
                 <small className="text-white-50" style={{ fontSize: '11px' }}>

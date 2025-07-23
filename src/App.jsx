@@ -19,12 +19,38 @@ function AppContent() {
   const { theme } = useTheme();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, getCurrentUser, isLoading } = useAuth();
   const isSidebarCollapsed = useSelector((state) => state.sidebar.isSidebarCollapsed);
   const location = useLocation();
   
   // Verifica se está na rota de login
   const isLoginPage = location.pathname === '/login';
+
+  // Carrega os dados do usuário quando a aplicação inicia
+  useEffect(() => {
+    const initializeApp = async () => {
+      // Verifica se há tokens no localStorage
+      const accessToken = localStorage.getItem('accessToken');
+      const refreshToken = localStorage.getItem('refreshToken');
+      
+      if (accessToken && refreshToken && !isAuthenticated) {
+        try {
+          console.log('Carregando dados do usuário...');
+          await getCurrentUser();
+          console.log('Dados do usuário carregados com sucesso');
+        } catch (error) {
+          console.error('Erro ao carregar dados do usuário:', error);
+          // Se falhar ao carregar dados do usuário, limpa os tokens inválidos
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('userData');
+          navigate('/login', { replace: true });
+        }
+      }
+    };
+
+    initializeApp();
+  }, []); // Executa apenas uma vez quando o componente monta
 
   useEffect(() => {
     // Se estiver autenticado e na rota raiz, redireciona para dashboard
@@ -32,6 +58,20 @@ function AppContent() {
       navigate('/dashboard');
     }
   }, [location.pathname, isAuthenticated, navigate]);
+
+  // Mostra loading enquanto carrega os dados do usuário
+  if (isLoading) {
+    return (
+      <div className="App d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+        <div className="text-center">
+          <div className="spinner-border text-warning" role="status" style={{ width: '3rem', height: '3rem' }}>
+            <span className="visually-hidden">Carregando...</span>
+          </div>
+          <p className="mt-3">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="App">
