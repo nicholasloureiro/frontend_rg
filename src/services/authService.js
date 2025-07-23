@@ -14,6 +14,16 @@ export const login = async (username, password) => {
   }
 };
 
+// Função para buscar informações do usuário logado
+export const getCurrentUser = async () => {
+  try {
+    const response = await api.get('/api/v1/auth/me/');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
 // Função para renovar tokens
 export const refreshTokens = async (refreshToken) => {
   try {

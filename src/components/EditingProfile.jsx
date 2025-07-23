@@ -1,5 +1,5 @@
 import '../styles/EditingProfile.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from './Button';
 import InputDate from './InputDate';
 import { capitalizeText } from '../utils/capitalizeText';
@@ -8,22 +8,74 @@ import PhoneInput from 'react-phone-number-input'
 import ptBR from 'react-phone-number-input/locale/pt-BR'
 import imageCompression from 'browser-image-compression';
 import { PencilSimple, PencilSimpleSlash, PencilSimpleLine } from '@phosphor-icons/react';
+import { useAuth } from '../hooks/useAuth';
 
 const EditingProfile = ({ handleCloseModal }) => {
+    // Usa os dados reais do usuário do estado global
+    // Estrutura esperada: user.person.name, user.person.contacts[0].email, etc.
+    const { user } = useAuth();
     const [imagePreview, setImagePreview] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const [loading, setLoading] = useState(false);
 
+    // Função para obter o primeiro contato (email e telefone)
+    const getFirstContact = () => {
+        console.log('Dados do usuário no EditingProfile:', user);
+        console.log('Contatos do usuário:', user?.person?.contacts);
+        
+        if (user?.person?.contacts && user.person.contacts.length > 0) {
+            return user.person.contacts[0];
+        }
+        return { email: '', phone: '' };
+    };
+
     const [formData, setFormData] = useState({
-        natural_person_id: '1',
-        full_name: 'João Silva',
-        birth_date: '1990-01-01',
-        gender: 'MALE',
-        email: 'joao.silva@email.com',
-        phone_number: '+5511999999999',
+        natural_person_id: user?.person?.id?.toString() || '',
+        full_name: user?.person?.name || '',
+        birth_date: user?.person?.birth_date || '',
+        gender: user?.person?.gender || '',
+        email: getFirstContact().email || user?.email || '',
+        phone_number: getFirstContact().phone || '',
         profile_picture: '',
-        cpf: '12345678901'
+        cpf: user?.person?.cpf || user?.username || ''
     });
+
+    // Atualiza o formulário quando os dados do usuário mudarem
+    useEffect(() => {
+        const firstContact = getFirstContact();
+        
+        // Converte o telefone para o formato internacional se necessário
+        let phoneNumber = firstContact.phone || '';
+        if (phoneNumber && !phoneNumber.startsWith('+')) {
+            // Se o telefone não tem código do país, adiciona o +55 do Brasil
+            phoneNumber = phoneNumber.replace(/\D/g, ''); // Remove caracteres não numéricos
+            if (phoneNumber.length === 11) {
+                phoneNumber = `+55${phoneNumber}`;
+            } else if (phoneNumber.length === 10) {
+                phoneNumber = `+55${phoneNumber}`;
+            }
+        }
+
+        // Converte a data para o formato correto se necessário
+        let birthDate = user?.person?.birth_date || '';
+        if (birthDate && typeof birthDate === 'string') {
+            // Se a data vier no formato ISO (YYYY-MM-DD), converte para Date
+            if (birthDate.includes('-')) {
+                birthDate = new Date(birthDate);
+            }
+        }
+        
+        setFormData({
+            natural_person_id: user?.person?.id?.toString() || '',
+            full_name: user?.person?.name || '',
+            birth_date: birthDate,
+            gender: user?.person?.gender || '',
+            email: firstContact.email || user?.email || '',
+            phone_number: phoneNumber,
+            profile_picture: '',
+            cpf: user?.person?.cpf || user?.username || ''
+        });
+    }, [user]);
 
     const [selectedFile, setSelectedFile] = useState(null);
     const [isEditable, setIsEditable] = useState(false);
@@ -102,11 +154,17 @@ const EditingProfile = ({ handleCloseModal }) => {
     };
 
     const isFormChanged = () => {
-        return !!selectedFile;
+        // Verifica se há arquivo selecionado ou se os dados foram modificados
+        if (selectedFile) return true;
+        
+        // Aqui você pode adicionar lógica para verificar se os dados foram modificados
+        // Por enquanto, retorna true se há arquivo ou se está em modo de edição
+        return isEditable;
     };
 
     return (
         <div className="container-editar-profile">
+            {/* Formulário de edição de perfil usando dados reais do usuário */}
             <form onSubmit={handleSubmit} className="form-editar-profile p-4">
                 <div className="dados-pessoais-section mb-4">
                     <div className="d-flex justify-content-between mb-3">

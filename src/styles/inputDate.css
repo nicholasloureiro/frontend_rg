@@ -31,6 +31,7 @@
 
 .react-datepicker__input-container input {
     color: var(--color-text-primary) !important;
+    border: 2px solid var(--color-border) !important;
     /* Cor que você deseja para o placeholder */
 }
 

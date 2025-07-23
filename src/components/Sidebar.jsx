@@ -65,19 +65,56 @@ const Sidebar = ({ setSideOpen }) => {
     }
   };
 
-  // Obtém o nome do usuário para exibir
+  // Obtém o nome do usuário para exibir (primeiro nome)
+  // Prioriza: user.person.name > user.first_name > user.username
   const getUserDisplayName = () => {
     console.log('Dados do usuário no Sidebar:', user);
-    console.log('user.name:', user?.name);
+    console.log('user.person?.name:', user?.person?.name);
+    console.log('user.first_name:', user?.first_name);
     console.log('user.username:', user?.username);
     
-    if (user?.name) {
-      return user.name.split(' ')[0]; // Retorna apenas o primeiro nome
+    // Prioriza o nome da pessoa (mais completo)
+    if (user?.person?.name) {
+      const firstName = user.person.name.split(' ')[0]; // Retorna apenas o primeiro nome
+      return firstName;
     }
+    
+    // Fallback para first_name do usuário
+    if (user?.first_name) {
+      return user.first_name;
+    }
+    
+    // Fallback para username
     if (user?.username) {
       return 'Usuário';
     }
+    
     return 'Usuário';
+  };
+
+  // Obtém o nome completo do usuário
+  const getFullUserName = () => {
+    if (user?.person?.name) {
+      return user.person.name;
+    }
+    
+    if (user?.first_name && user?.last_name) {
+      return `${user.first_name} ${user.last_name}`;
+    }
+    
+    if (user?.first_name) {
+      return user.first_name;
+    }
+    
+    return 'Usuário';
+  };
+
+  // Obtém o tipo de pessoa (ATENDENTE, etc.)
+  const getPersonType = () => {
+    if (user?.person?.person_type?.type) {
+      return user.person.person_type.type;
+    }
+    return null;
   };
 
   return (
@@ -109,6 +146,11 @@ const Sidebar = ({ setSideOpen }) => {
               <h6 className="text-white mb-0" style={{ whiteSpace: 'normal' }}>
                 Olá, {getUserDisplayName()}.
               </h6>
+              {getPersonType() && (
+                <small className="text-white-50" style={{ fontSize: '11px' }}>
+                  {getPersonType()}
+                </small>
+              )}
             </div>
           </div>
 

@@ -91,9 +91,10 @@ select:focus {
 }
 
 .form-control {
-  border-color: var(--color-border) !important;
   background-color: var(--background-inputs) !important;
   border-radius: 8px;
+  height: 35px !important;
+  border: 2px solid var(--color-border) !important;
 }
 
 .react-datepicker__input-container {
@@ -106,7 +107,7 @@ select:focus {
 
 .react-datepicker-wrapper div input {
   width: 100% !important;
-  border: 1px solid var(--color-border) !important;
+  border: 2px solid var(--color-border) !important;
   border-radius: 8px !important;
   background-color: var(--background-inputs) !important;
 }
@@ -117,13 +118,13 @@ select:focus {
 .react-datepicker__input-container input[readonly],
 .react-datepicker__input-container input:disabled {
   background-color: var(--background-inputs-disabled) !important;
-  border-color: var(--color-border) !important;
   opacity: 1 !important;
   color: var(--font-color-disabled) !important;
 }
 
 .react-datepicker__input-container input{
   height: 35px !important;
+  border: 2px solid var(--color-border) !important;
 }
 
 .react-datepicker__calendar-icon{

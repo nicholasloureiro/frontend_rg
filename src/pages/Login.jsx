@@ -10,7 +10,7 @@ import ptBR from 'react-phone-number-input/locale/pt-BR';
 import { useAuth } from '../hooks/useAuth';
 
 const Login = () => {
-  const { login } = useAuth();
+  const { login, getCurrentUser } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState({
@@ -72,8 +72,12 @@ const Login = () => {
       const data = await loginService(usernameSemMascara, formData.password);
       console.log('Login realizado com sucesso:', data);
 
-      // Salva as informações do usuário no Redux e os tokens no localStorage
-      login(data.user, data.access, data.refresh);
+      // Salva os tokens no Redux primeiro (sem dados do usuário)
+      login(null, data.access, data.refresh);
+
+      // Busca as informações completas do usuário através da API /api/v1/auth/me/
+      const userInfo = await getCurrentUser();
+      console.log('Informações do usuário obtidas:', userInfo);
 
       // Redireciona para a página desejada ou dashboard
       const redirectTo = searchParams.get('redirect') || '/dashboard';
@@ -179,9 +183,10 @@ const Login = () => {
               type="submit"
               disabled={isLoading}
               className="login-button"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
               {isLoading ? (
-                <div className="loading-spinner"></div>
+                <div className="loading-spinner" style={{ width: '20px', height: '20px', margin: '0' }}></div>
               ) : (
                 'Entrar'
               )}
