@@ -129,14 +129,33 @@ const Funcionarios = () => {
         });
       } else {
         // Adicionar novo funcionário
-        await registerEmployee(formData);
+        const response = await registerEmployee(formData);
 
         Swal.fire({
           icon: 'success',
           title: 'Funcionário cadastrado!',
-          text: 'O funcionário foi cadastrado com sucesso.',
-          timer: 2000,
-          showConfirmButton: false
+          html: `<p>O funcionário foi cadastrado com sucesso.</p>
+                 <p style="font-weight:bold;color:#CBA135;font-size:18px;">Senha gerada: <span style="background:#fff3cd;padding:4px 8px;border-radius:4px;">${response.password}</span></p>
+                 <p style="color:#b91c1c;">Guarde esta senha com cuidado!<br/>Ela é exibida apenas agora e não poderá ser recuperada depois.</p>` ,
+          showConfirmButton: true,
+          confirmButtonText: 'Fechar',
+          confirmButtonColor: '#CBA135',
+          allowOutsideClick: false,
+          didOpen: () => {
+            const btn = Swal.getConfirmButton();
+            btn.disabled = true;
+            let seconds = 6;
+            btn.textContent = `Fechar (${seconds})`;
+            const interval = setInterval(() => {
+              seconds--;
+              btn.textContent = `Fechar (${seconds})`;
+              if (seconds <= 0) {
+                clearInterval(interval);
+                btn.textContent = 'Fechar';
+                btn.disabled = false;
+              }
+            }, 1000);
+          }
         });
       }
 
@@ -352,7 +371,7 @@ const Funcionarios = () => {
               <div className="form-group"></div>
             </div>
 
-            <div className="form-actions">
+            <div className="form-actions-funcionarios">
               {editingId && (
                 <Button
                   text="Cancelar"

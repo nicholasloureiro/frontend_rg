@@ -9,12 +9,15 @@ import { mascaraCPF, mascaraCEP, formatarParaExibicaoDecimal } from '../utils/Ma
 import { capitalizeText } from '../utils/capitalizeText';
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
+import Swal from 'sweetalert2';
 
 const OrdemServico = () => {
     const [currentStep, setCurrentStep] = useState(0);
     const [showForm, setShowForm] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [isLoadingOrders, setIsLoadingOrders] = useState(true);
+    const [error, setError] = useState(null);
     const [formData, setFormData] = useState({
         // Cliente
         nome: '',
@@ -198,6 +201,34 @@ const OrdemServico = () => {
             }));
         }
     }, [inputValues.restante, formData.restante]);
+
+    // Função para carregar ordens de serviço
+    const loadOrders = async () => {
+        setIsLoadingOrders(true);
+        setError(null);
+        try {
+            // A lógica de carregamento será feita pelo ServiceOrderList
+            // Aqui apenas simulamos o carregamento inicial
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        } catch (error) {
+            console.error('Erro ao carregar ordens de serviço:', error);
+            setError('Não foi possível carregar a lista de ordens de serviço. Tente novamente.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro ao carregar ordens de serviço',
+                text: 'Não foi possível carregar a lista de ordens de serviço.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        } finally {
+            setIsLoadingOrders(false);
+        }
+    };
+
+    // Carregar ordens ao montar o componente
+    useEffect(() => {
+        loadOrders();
+    }, []);
 
 
 
@@ -872,6 +903,9 @@ const OrdemServico = () => {
                 <ServiceOrderList 
                     onSelectOrder={handleSelectOrder}
                     onCreateNew={handleCreateNew}
+                    isLoading={isLoadingOrders}
+                    error={error}
+                    onRetry={loadOrders}
                 />
             ) : (
                 <div className="ordem-servico-container">

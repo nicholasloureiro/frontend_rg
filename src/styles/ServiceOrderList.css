@@ -6,7 +6,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 32px;
 }
 
 .list-header h2 {
@@ -102,7 +101,7 @@
     width: 40px;
     height: 40px;
     border: 4px solid #e9ecef;
-    border-top: 4px solid #667eea;
+    border-top: 4px solid var(--color-accent) !important;
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 16px;
@@ -118,23 +117,43 @@
     }
 }
 
-.error-container {
+.error-state-service-order {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 60px 20px;
-    color: #dc3545;
+    color: var(--color-text-secondary);
+    text-align: center;
 }
 
-.error-container button {
+.error-state-service-order .bi-exclamation-triangle {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: var(--color-error);
+}
+
+.error-state-service-order i {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.error-state-service-order h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 8px;
+}
+
+.error-state-service-order p {
+    font-size: 16px;
+    margin-bottom: 24px;
+    color: var(--color-text-secondary);
+}
+
+.error-state-service-order button {
     margin-top: 16px;
-    padding: 8px 16px;
-    background: #dc3545;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
 }
 
 .empty-state {

@@ -3,12 +3,13 @@ import { serviceOrderService } from '../services/serviceOrderService';
 import '../styles/ServiceOrderList.css';
 import { capitalizeText } from '../utils/capitalizeText';
 import { mascaraTelefoneInternacional } from '../utils/Mascaras';
+import Button from './Button';
 
-const ServiceOrderList = ({ onSelectOrder, onCreateNew }) => {
+const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetry }) => {
     const [activeTab, setActiveTab] = useState('PENDENTE');
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const [internalError, setInternalError] = useState(null);
 
     const tabs = [
         { key: 'PENDENTE', label: 'PENDENTE', color: '#ff9800' },
@@ -19,12 +20,12 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew }) => {
 
     const fetchOrders = async (phase) => {
         setLoading(true);
-        setError(null);
+        setInternalError(null);
         try {
             const data = await serviceOrderService.getServiceOrdersByPhase(phase);
             setOrders(data);
         } catch (err) {
-            setError('Erro ao carregar ordens de serviço');
+            setInternalError('Erro ao carregar ordens de serviço');
             console.error('Erro:', err);
         } finally {
             setLoading(false);
@@ -73,6 +74,25 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew }) => {
     return (
         <div className="service-order-list-container">
             
+            {/* Header */}
+            <div className="list-header">
+                <h2 style={{ fontSize: '18px', color: 'var(--color-text-primary)' }}>
+                    Ordens de Serviço
+                    {(isLoading || loading) && (
+                        <span style={{ fontSize: '14px', color: 'var(--color-text-secondary)', marginLeft: '8px', fontWeight: 'normal' }}>
+                            (Carregando...)
+                        </span>
+                    )}
+                </h2>
+                <Button 
+                    text="Nova Ordem" 
+                    onClick={onCreateNew} 
+                    variant="primary" 
+                    iconName="plus" 
+                    iconPosition="left"
+                    style={{ width: 'fit-content' }}
+                />
+            </div>
 
             {/* Tabs */}
             <div className="tabs-container">
@@ -92,15 +112,17 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew }) => {
 
             {/* Content */}
             <div className="list-content">
-                {loading ? (
+                {(isLoading || loading) ? (
                     <div className="loading-container">
                         <div className="loading-spinner"></div>
                         <p>Carregando ordens de serviço...</p>
                     </div>
-                ) : error ? (
-                    <div className="error-container">
-                        <p>{error}</p>
-                        <button onClick={() => fetchOrders(activeTab)}>Tentar novamente</button>
+                ) : (error || internalError) ? (
+                    <div className="error-state-service-order">
+                        <i className="bi bi-exclamation-triangle"></i>
+                        <h3>Erro ao carregar ordens de serviço</h3>
+                        <p>{error || internalError}</p>
+                        <Button variant="primary" text="Tentar novamente" iconName="arrow-clockwise" iconPosition="left" onClick={onRetry || (() => fetchOrders(activeTab))} disabled={isLoading || loading} style={{ width: 'fit-content' }} />
                     </div>
                 ) : orders.length === 0 ? (
                     <div className="empty-state">

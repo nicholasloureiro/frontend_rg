@@ -108,11 +108,10 @@
   font-size: 12px !important;
 }
 
-.form-actions {
+.form-actions-funcionarios {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
-  margin-top: 8px;
 }
 
 .btn-primary,
@@ -494,7 +493,7 @@
     margin-top: 8px;
   }
 
-  .form-actions {
+  .form-actions-funcionarios {
     flex-direction: column;
   }
 
