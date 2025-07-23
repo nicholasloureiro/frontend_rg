@@ -144,7 +144,7 @@ const Funcionarios = () => {
           didOpen: () => {
             const btn = Swal.getConfirmButton();
             btn.disabled = true;
-            let seconds = 6;
+            let seconds = 10;
             btn.textContent = `Fechar (${seconds})`;
             const interval = setInterval(() => {
               seconds--;

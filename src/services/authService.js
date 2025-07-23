@@ -63,4 +63,17 @@ export const updateProfile = async (formData) => {
   } catch (error) {
     throw error.response?.data || error;
   }
+};
+
+// Função para resetar/alterar senha
+export const resetPassword = async (old_password, new_password) => {
+  try {
+    const response = await api.post('/api/v1/auth/password-reset/', {
+      old_password,
+      new_password
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
 }; 
