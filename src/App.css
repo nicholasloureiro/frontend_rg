@@ -123,6 +123,12 @@ select:focus {
   color: var(--font-color-disabled) !important;
 }
 
+input:disabled{
+  background-color: var(--background-inputs-disabled) !important;
+  opacity: 1 !important;
+  color: var(--font-color-disabled) !important;
+}
+
 .react-datepicker__input-container input{
   height: 35px !important;
   border: 2px solid var(--color-border) !important;

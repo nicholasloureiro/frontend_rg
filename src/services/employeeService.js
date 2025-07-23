@@ -23,9 +23,22 @@ export const getEmployees = async () => {
 };
 
 // Função para atualizar um funcionário existente
-export const updateEmployee = async (id, employeeData) => {
+export const updateEmployee = async (personId, employeeData) => {
   try {
-    const response = await api.put(`/api/v1/employees/${id}/`, employeeData);
+    const response = await api.put(`/api/v1/employees/${personId}/update/`, employeeData);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+// Função para alternar o status do funcionário (ativo/inativo)
+export const toggleEmployeeStatus = async (personId, active) => {
+  try {
+    const response = await api.post('/api/v1/employees/toggle-status/', {
+      person_id: personId,
+      active: active
+    });
     return response.data;
   } catch (error) {
     throw error.response?.data || error;
