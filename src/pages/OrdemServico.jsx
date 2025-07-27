@@ -5,7 +5,7 @@ import '../styles/OrdemServico.css';
 import Header from '../components/Header';
 import ServiceOrderList from '../components/ServiceOrderList';
 import { serviceOrderService } from '../services/serviceOrderService';
-import { mascaraCPF, mascaraCEP, formatarParaExibicaoDecimal } from '../utils/Mascaras';
+import { mascaraCPF, mascaraCEP, formatarParaExibicaoDecimal, formatarTelefoneParaExibicao } from '../utils/Mascaras';
 import { capitalizeText } from '../utils/capitalizeText';
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
@@ -19,8 +19,9 @@ const OrdemServico = () => {
     const [showForm, setShowForm] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [isLoadingOrders, setIsLoadingOrders] = useState(true);
     const [error, setError] = useState(null);
+    const [validationErrors, setValidationErrors] = useState({});
+    const [isLoadingOrders, setIsLoadingOrders] = useState(true);
     const [formData, setFormData] = useState({
         // Cliente
         nome: '',
@@ -36,14 +37,16 @@ const OrdemServico = () => {
         paletoNumero: '',
         paletoCor: '',
         paletoManga: '',
-        paletoAjuste: '',
+        paletoAjuste: false,
+        paletoAjusteValor: '',
         paletoExtras: '',
 
         // Camisa
         camisaNumero: '',
         camisaCor: '',
         camisaManga: '',
-        camisaAjuste: '',
+        camisaAjuste: false,
+        camisaAjusteValor: '',
         camisaExtras: '',
 
         // Calça
@@ -51,15 +54,32 @@ const OrdemServico = () => {
         calcaCor: '',
         calcaCintura: '',
         calcaPerna: '',
-        calcaAjuste: '',
+        calcaAjusteCos: false,
+        calcaAjusteComprimento: false,
+        calcaAjusteCosValor: '',
+        calcaAjusteComprimentoValor: '',
         calcaExtras: '',
 
         // Acessórios
         suspensorio: false,
+        suspensorioCor: '',
         passante: false,
-        corAcessorios: '',
+        passanteCor: '',
+        passanteExtensor: false,
         lenco: false,
+        lencoCor: '',
+        gravata: false,
+        gravataNumero: '',
+        gravataCor: '',
+        cinto: false,
+        cintoNumero: '',
+        cintoCor: '',
         sapato: false,
+        sapatoNumero: '',
+        sapatoCor: '',
+        colete: false,
+        coleteNumero: '',
+        coleteCor: '',
 
         // Pagamento
         dataPedido: '',
@@ -88,14 +108,16 @@ const OrdemServico = () => {
         paletoNumero: '',
         paletoCor: '',
         paletoManga: '',
-        paletoAjuste: '',
+        paletoAjuste: false,
+        paletoAjusteValor: '',
         paletoExtras: '',
 
         // Camisa
         camisaNumero: '',
         camisaCor: '',
         camisaManga: '',
-        camisaAjuste: '',
+        camisaAjuste: false,
+        camisaAjusteValor: '',
         camisaExtras: '',
 
         // Calça
@@ -103,15 +125,32 @@ const OrdemServico = () => {
         calcaCor: '',
         calcaCintura: '',
         calcaPerna: '',
-        calcaAjuste: '',
+        calcaAjusteCos: false,
+        calcaAjusteComprimento: false,
+        calcaAjusteCosValor: '',
+        calcaAjusteComprimentoValor: '',
         calcaExtras: '',
 
         // Acessórios
         suspensorio: false,
+        suspensorioCor: '',
         passante: false,
-        corAcessorios: '',
+        passanteCor: '',
+        passanteExtensor: false,
         lenco: false,
+        lencoCor: '',
+        gravata: false,
+        gravataNumero: '',
+        gravataCor: '',
+        cinto: false,
+        cintoNumero: '',
+        cintoCor: '',
         sapato: false,
+        sapatoNumero: '',
+        sapatoCor: '',
+        colete: false,
+        coleteNumero: '',
+        coleteCor: '',
 
         // Pagamento
         dataPedido: '',
@@ -159,12 +198,61 @@ const OrdemServico = () => {
                     restante: restante
                 }));
             }, 400);
+            
+            // Limpar erro do campo se foi preenchido corretamente
+            if (validationErrors[field]) {
+                const newErrors = { ...validationErrors };
+                delete newErrors[field];
+                setValidationErrors(newErrors);
+            }
             return;
         }
+        
         setInputValues(prev => ({
             ...prev,
             [field]: value
         }));
+        
+        // Limpar erro do campo se foi preenchido corretamente
+        if (validationErrors[field]) {
+            let shouldClear = false;
+            
+            // Para campos obrigatórios simples
+            if (['nome', 'telefone', 'cpf', 'cep', 'rua', 'numero', 'bairro', 'cidade', 
+                 'paletoNumero', 'paletoCor', 'paletoManga', 'camisaNumero', 'camisaCor', 'camisaManga',
+                 'calcaNumero', 'calcaCor', 'calcaCintura', 'calcaPerna', 'dataPedido', 'dataEvento'].includes(field)) {
+                shouldClear = value.trim() !== '';
+            }
+            
+            // Para campos de ajuste (só limpar se checkbox estiver marcado)
+            if (['paletoAjusteValor', 'camisaAjusteValor', 'calcaAjusteCosValor', 'calcaAjusteComprimentoValor'].includes(field)) {
+                const checkboxField = field.replace('Valor', '');
+                shouldClear = inputValues[checkboxField] && value.trim() !== '';
+            }
+            
+            // Para campos de acessórios (só limpar se checkbox estiver marcado)
+            if (['suspensorioCor', 'passanteCor', 'lencoCor'].includes(field)) {
+                const checkboxField = field.replace('Cor', '');
+                shouldClear = inputValues[checkboxField] && value.trim() !== '';
+            }
+            
+            // Para campos de acessórios com número e cor
+            if (['gravataNumero', 'gravataCor', 'cintoNumero', 'cintoCor', 'sapatoNumero', 'sapatoCor', 'coleteNumero', 'coleteCor'].includes(field)) {
+                const baseField = field.replace(/Numero|Cor/, '');
+                shouldClear = inputValues[baseField] && value.trim() !== '';
+            }
+            
+            // Para campos de pagamento
+            if (['total', 'sinal'].includes(field)) {
+                shouldClear = parseFloat(value) > 0;
+            }
+            
+            if (shouldClear) {
+                const newErrors = { ...validationErrors };
+                delete newErrors[field];
+                setValidationErrors(newErrors);
+            }
+        }
     };
 
     const handleInputBlur = (field, value) => {
@@ -214,6 +302,34 @@ const OrdemServico = () => {
             ...prev,
             [field]: value
         }));
+        
+        // Se desmarcou um checkbox, limpar erros dos campos relacionados
+        if (!value) {
+            const newErrors = { ...validationErrors };
+            
+            // Mapear campos relacionados aos checkboxes
+            const relatedFields = {
+                paletoAjuste: ['paletoAjusteValor'],
+                camisaAjuste: ['camisaAjusteValor'],
+                calcaAjusteCos: ['calcaAjusteCosValor'],
+                calcaAjusteComprimento: ['calcaAjusteComprimentoValor'],
+                suspensorio: ['suspensorioCor'],
+                passante: ['passanteCor'],
+                lenco: ['lencoCor'],
+                gravata: ['gravataNumero', 'gravataCor'],
+                cinto: ['cintoNumero', 'cintoCor'],
+                sapato: ['sapatoNumero', 'sapatoCor'],
+                colete: ['coleteNumero', 'coleteCor']
+            };
+            
+            if (relatedFields[field]) {
+                relatedFields[field].forEach(relatedField => {
+                    delete newErrors[relatedField];
+                });
+            }
+            
+            setValidationErrors(newErrors);
+        }
     };
 
     // Sincronizar formData com inputValues quando restante for calculado
@@ -278,18 +394,26 @@ const OrdemServico = () => {
         setSelectedOrder(null);
         setFormData({
             nome: '', telefone: '', cpf: '', cep: '', rua: '', numero: '', bairro: '', cidade: '',
-            paletoNumero: '', paletoCor: '', paletoManga: '', paletoAjuste: '', paletoExtras: '',
-            camisaNumero: '', camisaCor: '', camisaManga: '', camisaAjuste: '', camisaExtras: '',
-            calcaNumero: '', calcaCor: '', calcaCintura: '', calcaPerna: '', calcaAjuste: '', calcaExtras: '',
-            suspensorio: false, passante: false, corAcessorios: '', lenco: false, sapato: false,
+            paletoNumero: '', paletoCor: '', paletoManga: '', paletoAjuste: false, paletoAjusteValor: '', paletoExtras: '',
+            camisaNumero: '', camisaCor: '', camisaManga: '', camisaAjuste: false, camisaAjusteValor: '', camisaExtras: '',
+            calcaNumero: '', calcaCor: '', calcaCintura: '', calcaPerna: '', calcaAjusteCos: false,
+            calcaAjusteComprimento: false,
+            calcaAjusteCosValor: '',
+            calcaAjusteComprimentoValor: '',
+            calcaExtras: '',
+            suspensorio: false, suspensorioCor: '', passante: false, passanteCor: '', passanteExtensor: false, lenco: false, lencoCor: '', gravata: false, gravataNumero: '', gravataCor: '', cinto: false, cintoNumero: '', cintoCor: '', sapato: false, sapatoNumero: '', sapatoCor: '', colete: false, coleteNumero: '', coleteCor: '',
             dataPedido: '', dataEvento: '', ocasiao: '', tipoPagamento: 'Aluguel', total: '', sinal: '', restante: '', dataRetirada: ''
         });
         setInputValues({
             nome: '', telefone: '', cpf: '', cep: '', rua: '', numero: '', bairro: '', cidade: '',
-            paletoNumero: '', paletoCor: '', paletoManga: '', paletoAjuste: '', paletoExtras: '',
-            camisaNumero: '', camisaCor: '', camisaManga: '', camisaAjuste: '', camisaExtras: '',
-            calcaNumero: '', calcaCor: '', calcaCintura: '', calcaPerna: '', calcaAjuste: '', calcaExtras: '',
-            suspensorio: false, passante: false, corAcessorios: '', lenco: false, sapato: false,
+            paletoNumero: '', paletoCor: '', paletoManga: '', paletoAjuste: false, paletoAjusteValor: '', paletoExtras: '',
+            camisaNumero: '', camisaCor: '', camisaManga: '', camisaAjuste: false, camisaAjusteValor: '', camisaExtras: '',
+            calcaNumero: '', calcaCor: '', calcaCintura: '', calcaPerna: '', calcaAjusteCos: false,
+            calcaAjusteComprimento: false,
+            calcaAjusteCosValor: '',
+            calcaAjusteComprimentoValor: '',
+            calcaExtras: '',
+            suspensorio: false, suspensorioCor: '', passante: false, passanteCor: '', passanteExtensor: false, lenco: false, lencoCor: '', gravata: false, gravataNumero: '', gravataCor: '', cinto: false, cintoNumero: '', cintoCor: '', sapato: false, sapatoNumero: '', sapatoCor: '', colete: false, coleteNumero: '', coleteCor: '',
             dataPedido: '', dataEvento: '', ocasiao: '', tipoPagamento: 'Aluguel', total: '', sinal: '', restante: '', dataRetirada: ''
         });
         setCurrentStep(0);
@@ -306,10 +430,16 @@ const OrdemServico = () => {
         const address = client.addresses?.[0] || {};
         const city = address.cidade || {};
         
+        // Formatar o telefone para o componente PhoneInput
+        let telefoneFormatado = '';
+        if (contact.phone) {
+            telefoneFormatado = contact.phone.startsWith('+') ? contact.phone : `+55${contact.phone.substring(2)}`;
+        }
+
         // Mapear os dados para o formato do formulário
         const clientData = {
             nome: client.name || '',
-            telefone: contact.phone || '',
+            telefone: telefoneFormatado,
             cpf: client.cpf || '',
             cep: address.cep || '',
             rua: address.rua || '',
@@ -326,14 +456,16 @@ const OrdemServico = () => {
             paletoNumero: '',
             paletoCor: '',
             paletoManga: '',
-            paletoAjuste: '',
+            paletoAjuste: false,
+            paletoAjusteValor: '',
             paletoExtras: '',
 
             // Camisa
             camisaNumero: '',
             camisaCor: '',
             camisaManga: '',
-            camisaAjuste: '',
+            camisaAjuste: false,
+            camisaAjusteValor: '',
             camisaExtras: '',
 
             // Calça
@@ -341,15 +473,31 @@ const OrdemServico = () => {
             calcaCor: '',
             calcaCintura: '',
             calcaPerna: '',
-            calcaAjuste: '',
+            calcaAjusteCos: false,
+            calcaAjusteComprimento: false,
+            calcaAjusteCosValor: '',
+            calcaAjusteComprimentoValor: '',
             calcaExtras: '',
 
             // Acessórios
             suspensorio: false,
+            suspensorioCor: '',
             passante: false,
-            corAcessorios: '',
+            passanteCor: '',
             lenco: false,
+            lencoCor: '',
+            gravata: false,
+            gravataNumero: '',
+            gravataCor: '',
+            cinto: false,
+            cintoNumero: '',
+            cintoCor: '',
             sapato: false,
+            sapatoNumero: '',
+            sapatoCor: '',
+            colete: false,
+            coleteNumero: '',
+            coleteCor: '',
 
             // Pagamento
             dataPedido: order.order_date || '',
@@ -377,8 +525,9 @@ const OrdemServico = () => {
 
     // Função para finalizar a OS
     const handleFinalizeOS = async () => {
-        if (!validateCurrentStep()) {
-            alert('Por favor, preencha todos os campos obrigatórios antes de finalizar.');
+        const errors = validateFields();
+        if (Object.keys(errors).length > 0) {
+            setValidationErrors(errors);
             return;
         }
 
@@ -386,7 +535,6 @@ const OrdemServico = () => {
         try {
             const orderData = {
                 event_date: formData.dataEvento,
-                occasion: formData.ocasiao,
                 total_value: parseFloat(formData.total) || 0,
                 advance_payment: parseFloat(formData.sinal) || 0,
                 remaining_payment: parseFloat(formData.restante) || 0,
@@ -397,7 +545,7 @@ const OrdemServico = () => {
                     cpf: formData.cpf,
                     contacts: [
                         {
-                            phone: formData.telefone
+                            phone: formData.telefone ? formData.telefone.replace(/\D/g, '') : ''
                         }
                     ],
                     addresses: [
@@ -416,38 +564,71 @@ const OrdemServico = () => {
                 jacket_number: formData.paletoNumero,
                 jacket_color: formData.paletoCor,
                 jacket_sleeve: formData.paletoManga,
-                jacket_adjustment: formData.paletoAjuste,
+                jacket_adjustment: formData.paletoAjuste ? formData.paletoAjusteValor : '',
                 jacket_extras: formData.paletoExtras,
                 shirt_number: formData.camisaNumero,
                 shirt_color: formData.camisaCor,
                 shirt_sleeve: formData.camisaManga,
-                shirt_adjustment: formData.camisaAjuste,
+                shirt_adjustment: formData.camisaAjuste ? formData.camisaAjusteValor : '',
                 shirt_extras: formData.camisaExtras,
                 pants_number: formData.calcaNumero,
                 pants_color: formData.calcaCor,
                 pants_waist: formData.calcaCintura,
                 pants_leg: formData.calcaPerna,
-                pants_adjustment: formData.calcaAjuste,
+                pants_adjustment_cos: formData.calcaAjusteCos ? formData.calcaAjusteCosValor : '',
+                pants_adjustment_comprimento: formData.calcaAjusteComprimento ? formData.calcaAjusteComprimentoValor : '',
                 pants_extras: formData.calcaExtras,
                 suspenders: formData.suspensorio,
+                suspenders_color: formData.suspensorioCor,
                 belt_loop: formData.passante,
-                accessories_color: formData.corAcessorios,
+                belt_loop_color: formData.passanteCor,
+                belt_loop_extensor: formData.passanteExtensor,
                 tie: formData.lenco,
-                shoes: formData.sapato
+                tie_color: formData.lencoCor,
+                tie_accessory: formData.gravata,
+                tie_number: formData.gravataNumero,
+                tie_color_accessory: formData.gravataCor,
+                belt: formData.cinto,
+                belt_number: formData.cintoNumero,
+                belt_color: formData.cintoCor,
+                shoes: formData.sapato,
+                shoes_number: formData.sapatoNumero,
+                shoes_color: formData.sapatoCor,
+                vest: formData.colete,
+                vest_number: formData.coleteNumero,
+                vest_color: formData.coleteCor
             };
 
             if (selectedOrder) {
                 await serviceOrderService.updateServiceOrder(selectedOrder.id, orderData);
-                alert('Ordem de serviço atualizada com sucesso!');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sucesso!',
+                    text: 'Ordem de serviço atualizada com sucesso!',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
             } else {
                 await serviceOrderService.createServiceOrder(orderData);
-                alert('Ordem de serviço criada com sucesso!');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sucesso!',
+                    text: 'Ordem de serviço criada com sucesso!',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
             }
             
             handleBackToList();
         } catch (error) {
             console.error('Erro ao salvar ordem de serviço:', error);
-            alert('Erro ao salvar a ordem de serviço');
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro!',
+                text: 'Erro ao salvar a ordem de serviço',
+                timer: 3000,
+                showConfirmButton: false
+            });
         } finally {
             setLoading(false);
         }
@@ -467,32 +648,62 @@ const OrdemServico = () => {
                        inputValues.cidade.trim() !== '';
             
             case 1: // Paletó
-                return inputValues.paletoNumero.trim() !== '' && 
+                const paletoBaseValid = inputValues.paletoNumero.trim() !== '' && 
                        inputValues.paletoCor.trim() !== '' && 
-                       inputValues.paletoManga.trim() !== '' && 
-                       inputValues.paletoAjuste.trim() !== '';
+                       inputValues.paletoManga.trim() !== '';
+                const paletoAjusteValid = !inputValues.paletoAjuste || inputValues.paletoAjusteValor.trim() !== '';
+                return paletoBaseValid && paletoAjusteValid;
             
             case 2: // Camisa
-                return inputValues.camisaNumero.trim() !== '' && 
+                const camisaBaseValid = inputValues.camisaNumero.trim() !== '' && 
                        inputValues.camisaCor.trim() !== '' && 
-                       inputValues.camisaManga.trim() !== '' && 
-                       inputValues.camisaAjuste.trim() !== '';
+                       inputValues.camisaManga.trim() !== '';
+                const camisaAjusteValid = !inputValues.camisaAjuste || inputValues.camisaAjusteValor.trim() !== '';
+                return camisaBaseValid && camisaAjusteValid;
             
             case 3: // Calça
-                return inputValues.calcaNumero.trim() !== '' && 
+                const calcaBaseValid = inputValues.calcaNumero.trim() !== '' && 
                        inputValues.calcaCor.trim() !== '' && 
                        inputValues.calcaCintura.trim() !== '' && 
-                       inputValues.calcaPerna.trim() !== '' && 
-                       inputValues.calcaAjuste.trim() !== '';
+                       inputValues.calcaPerna.trim() !== '';
+                
+                // Validar ajustes apenas se os checkboxes estiverem marcados
+                const calcaAjusteCosValid = !inputValues.calcaAjusteCos || inputValues.calcaAjusteCosValor.trim() !== '';
+                const calcaAjusteComprimentoValid = !inputValues.calcaAjusteComprimento || inputValues.calcaAjusteComprimentoValor.trim() !== '';
+                
+                return calcaBaseValid && calcaAjusteCosValid && calcaAjusteComprimentoValid;
             
             case 4: // Acessórios
-                return inputValues.corAcessorios.trim() !== '';
+                // Acessórios não são obrigatórios por padrão
+                // Se um checkbox estiver marcado, os campos correspondentes se tornam obrigatórios
+                const suspensorioValid = !inputValues.suspensorio || inputValues.suspensorioCor.trim() !== '';
+                const passanteValid = !inputValues.passante || inputValues.passanteCor.trim() !== '';
+                const lencoValid = !inputValues.lenco || inputValues.lencoCor.trim() !== '';
+                const gravataValid = !inputValues.gravata || (inputValues.gravataNumero.trim() !== '' && inputValues.gravataCor.trim() !== '');
+                const cintoValid = !inputValues.cinto || (inputValues.cintoNumero.trim() !== '' && inputValues.cintoCor.trim() !== '');
+                const sapatoValid = !inputValues.sapato || (inputValues.sapatoNumero.trim() !== '' && inputValues.sapatoCor.trim() !== '');
+                const coleteValid = !inputValues.colete || (inputValues.coleteNumero.trim() !== '' && inputValues.coleteCor.trim() !== '');
+                
+                const acessoriosValid = suspensorioValid && passanteValid && lencoValid && gravataValid && cintoValid && sapatoValid && coleteValid;
+                
+                // Debug: mostrar quais campos estão falhando
+                if (!acessoriosValid) {
+                    console.log('Validação acessórios falhou:');
+                    console.log('Suspensorio:', inputValues.suspensorio, 'Cor:', inputValues.suspensorioCor, 'Valid:', suspensorioValid);
+                    console.log('Passante:', inputValues.passante, 'Cor:', inputValues.passanteCor, 'Valid:', passanteValid);
+                    console.log('Lenço:', inputValues.lenco, 'Cor:', inputValues.lencoCor, 'Valid:', lencoValid);
+                    console.log('Gravata:', inputValues.gravata, 'Número:', inputValues.gravataNumero, 'Cor:', inputValues.gravataCor, 'Valid:', gravataValid);
+                    console.log('Cinto:', inputValues.cinto, 'Número:', inputValues.cintoNumero, 'Cor:', inputValues.cintoCor, 'Valid:', cintoValid);
+                    console.log('Sapato:', inputValues.sapato, 'Número:', inputValues.sapatoNumero, 'Cor:', inputValues.sapatoCor, 'Valid:', sapatoValid);
+                    console.log('Colete:', inputValues.colete, 'Número:', inputValues.coleteNumero, 'Cor:', inputValues.coleteCor, 'Valid:', coleteValid);
+                }
+                
+                return acessoriosValid;
             
             case 5: // Pagamento
                 return inputValues.dataPedido.trim() !== '' && 
                        inputValues.dataEvento.trim() !== '' && 
-                       inputValues.ocasiao.trim() !== '' && 
-                       inputValues.total.trim() !== '' && 
+                       parseFloat(inputValues.total) > 0 && 
                        inputValues.sinal.trim() !== '';
             
             default:
@@ -500,18 +711,107 @@ const OrdemServico = () => {
         }
     };
 
+    // Função para validar campos específicos e retornar erros
+    const validateFields = () => {
+        const errors = {};
+        
+        switch (currentStep) {
+            case 0: // Cliente
+                if (!inputValues.nome.trim()) errors.nome = 'Nome é obrigatório';
+                if (!inputValues.telefone.trim()) errors.telefone = 'Telefone é obrigatório';
+                if (!inputValues.cpf.trim()) errors.cpf = 'CPF é obrigatório';
+                if (!inputValues.cep.trim()) errors.cep = 'CEP é obrigatório';
+                if (!inputValues.rua.trim()) errors.rua = 'Endereço é obrigatório';
+                if (!inputValues.numero.trim()) errors.numero = 'Número é obrigatório';
+                if (!inputValues.bairro.trim()) errors.bairro = 'Bairro é obrigatório';
+                if (!inputValues.cidade.trim()) errors.cidade = 'Cidade é obrigatória';
+                break;
+                
+            case 1: // Paletó
+                if (!inputValues.paletoNumero.trim()) errors.paletoNumero = 'Número é obrigatório';
+                if (!inputValues.paletoCor.trim()) errors.paletoCor = 'Cor é obrigatória';
+                if (!inputValues.paletoManga.trim()) errors.paletoManga = 'Manga é obrigatória';
+                if (inputValues.paletoAjuste && !inputValues.paletoAjusteValor.trim()) {
+                    errors.paletoAjusteValor = 'Ajuste é obrigatório quando marcado';
+                }
+                break;
+                
+            case 2: // Camisa
+                if (!inputValues.camisaNumero.trim()) errors.camisaNumero = 'Número é obrigatório';
+                if (!inputValues.camisaCor.trim()) errors.camisaCor = 'Cor é obrigatória';
+                if (!inputValues.camisaManga.trim()) errors.camisaManga = 'Manga é obrigatória';
+                if (inputValues.camisaAjuste && !inputValues.camisaAjusteValor.trim()) {
+                    errors.camisaAjusteValor = 'Ajuste é obrigatório quando marcado';
+                }
+                break;
+                
+            case 3: // Calça
+                if (!inputValues.calcaNumero.trim()) errors.calcaNumero = 'Número é obrigatório';
+                if (!inputValues.calcaCor.trim()) errors.calcaCor = 'Cor é obrigatória';
+                if (!inputValues.calcaCintura.trim()) errors.calcaCintura = 'Cós é obrigatório';
+                if (!inputValues.calcaPerna.trim()) errors.calcaPerna = 'Comprimento é obrigatório';
+                if (inputValues.calcaAjusteCos && !inputValues.calcaAjusteCosValor.trim()) {
+                    errors.calcaAjusteCosValor = 'Ajuste do cós é obrigatório quando marcado';
+                }
+                if (inputValues.calcaAjusteComprimento && !inputValues.calcaAjusteComprimentoValor.trim()) {
+                    errors.calcaAjusteComprimentoValor = 'Ajuste do comprimento é obrigatório quando marcado';
+                }
+                break;
+                
+            case 4: // Acessórios
+                if (inputValues.suspensorio && !inputValues.suspensorioCor.trim()) {
+                    errors.suspensorioCor = 'Cor do suspensório é obrigatória quando marcado';
+                }
+                if (inputValues.passante && !inputValues.passanteCor.trim()) {
+                    errors.passanteCor = 'Cor do passante é obrigatória quando marcado';
+                }
+                if (inputValues.lenco && !inputValues.lencoCor.trim()) {
+                    errors.lencoCor = 'Cor do lenço é obrigatória quando marcado';
+                }
+                if (inputValues.gravata) {
+                    if (!inputValues.gravataNumero.trim()) errors.gravataNumero = 'Número da gravata é obrigatório';
+                    if (!inputValues.gravataCor.trim()) errors.gravataCor = 'Cor da gravata é obrigatória';
+                }
+                if (inputValues.cinto) {
+                    if (!inputValues.cintoNumero.trim()) errors.cintoNumero = 'Número do cinto é obrigatório';
+                    if (!inputValues.cintoCor.trim()) errors.cintoCor = 'Cor do cinto é obrigatória';
+                }
+                if (inputValues.sapato) {
+                    if (!inputValues.sapatoNumero.trim()) errors.sapatoNumero = 'Número do sapato é obrigatório';
+                    if (!inputValues.sapatoCor.trim()) errors.sapatoCor = 'Cor do sapato é obrigatória';
+                }
+                if (inputValues.colete) {
+                    if (!inputValues.coleteNumero.trim()) errors.coleteNumero = 'Número do colete é obrigatório';
+                    if (!inputValues.coleteCor.trim()) errors.coleteCor = 'Cor do colete é obrigatória';
+                }
+                break;
+                
+            case 5: // Pagamento
+                if (!inputValues.dataPedido.trim()) errors.dataPedido = 'Data do pedido é obrigatória';
+                if (!inputValues.dataEvento.trim()) errors.dataEvento = 'Data do evento é obrigatória';
+                if (!inputValues.total.trim() || parseFloat(inputValues.total) <= 0) errors.total = 'Total deve ser maior que zero';
+                if (!inputValues.sinal.trim()) errors.sinal = 'Sinal é obrigatório';
+                break;
+        }
+        
+        return errors;
+    };
+
     const nextStep = () => {
         if (currentStep < steps.length - 1) {
-            if (validateCurrentStep()) {
+            const errors = validateFields();
+            if (Object.keys(errors).length === 0) {
+                setValidationErrors({});
                 setCurrentStep(currentStep + 1);
             } else {
-                alert('Por favor, preencha todos os campos obrigatórios antes de continuar.');
+                setValidationErrors(errors);
             }
         }
     };
 
     const prevStep = () => {
         if (currentStep > 0) {
+            setValidationErrors({});
             setCurrentStep(currentStep - 1);
         }
     };
@@ -531,7 +831,11 @@ const OrdemServico = () => {
                                     onChange={(e) => handleInputChange('nome', e.target.value)}
                                     onBlur={(e) => handleInputBlur('nome', e.target.value)}
                                     placeholder="Digite o nome completo"
+                                    className={validationErrors.nome ? 'error' : ''}
                                 />
+                                {validationErrors.nome && (
+                                    <div className="error-message">{validationErrors.nome}</div>
+                                )}
                             </div>
                             <div className="form-group">
                                 <label>Telefone <span style={{ color: 'red' }}>*</span></label>
@@ -542,7 +846,11 @@ const OrdemServico = () => {
                                     onChange={(value) => handleInputChange('telefone', value)}
                                     onBlur={(e) => handleInputBlur('telefone', inputValues.telefone)}
                                     placeholder="Digite o telefone"
+                                    className={validationErrors.telefone ? 'error' : ''}
                                 />
+                                {validationErrors.telefone && (
+                                    <div className="error-message">{validationErrors.telefone}</div>
+                                )}
                             </div>
                             <div className="form-group">
                                 <label>CPF <span style={{ color: 'red' }}>*</span></label>
@@ -552,7 +860,11 @@ const OrdemServico = () => {
                                     onChange={(e) => handleInputChange('cpf', e.target.value)}
                                     onBlur={(e) => handleInputBlur('cpf', e.target.value)}
                                     placeholder="000.000.000-00"
+                                    className={validationErrors.cpf ? 'error' : ''}
                                 />
+                                {validationErrors.cpf && (
+                                    <div className="error-message">{validationErrors.cpf}</div>
+                                )}
                             </div>
                             <div className="form-group">
                                 <label>CEP <span style={{ color: 'red' }}>*</span></label>
@@ -562,7 +874,11 @@ const OrdemServico = () => {
                                     onChange={(e) => handleInputChange('cep', e.target.value)}
                                     onBlur={(e) => handleInputBlur('cep', e.target.value)}
                                     placeholder="00000-000"
+                                    className={validationErrors.cep ? 'error' : ''}
                                 />
+                                {validationErrors.cep && (
+                                    <div className="error-message">{validationErrors.cep}</div>
+                                )}
                             </div>
                             <div className="form-group">
                                 <label>Endereço <span style={{ color: 'red' }}>*</span></label>
@@ -572,7 +888,11 @@ const OrdemServico = () => {
                                     onChange={(e) => handleInputChange('rua', e.target.value)}
                                     onBlur={(e) => handleInputBlur('rua', e.target.value)}
                                     placeholder="Nome da rua"
+                                    className={validationErrors.rua ? 'error' : ''}
                                 />
+                                {validationErrors.rua && (
+                                    <div className="error-message">{validationErrors.rua}</div>
+                                )}
                             </div>
                             <div className="form-group">
                                 <label>Número <span style={{ color: 'red' }}>*</span></label>
@@ -582,7 +902,11 @@ const OrdemServico = () => {
                                     onChange={(e) => handleInputChange('numero', e.target.value)}
                                     onBlur={(e) => handleInputBlur('numero', e.target.value)}
                                     placeholder="Número"
+                                    className={validationErrors.numero ? 'error' : ''}
                                 />
+                                {validationErrors.numero && (
+                                    <div className="error-message">{validationErrors.numero}</div>
+                                )}
                             </div>
                             <div className="form-group">
                                 <label>Bairro <span style={{ color: 'red' }}>*</span></label>
@@ -592,7 +916,11 @@ const OrdemServico = () => {
                                     onChange={(e) => handleInputChange('bairro', e.target.value)}
                                     onBlur={(e) => handleInputBlur('bairro', e.target.value)}
                                     placeholder="Nome do bairro"
+                                    className={validationErrors.bairro ? 'error' : ''}
                                 />
+                                {validationErrors.bairro && (
+                                    <div className="error-message">{validationErrors.bairro}</div>
+                                )}
                             </div>
                             <div className="form-group">
                                 <label>Cidade <span style={{ color: 'red' }}>*</span></label>
@@ -602,7 +930,11 @@ const OrdemServico = () => {
                                     onChange={(e) => handleInputChange('cidade', e.target.value)}
                                     onBlur={(e) => handleInputBlur('cidade', e.target.value)}
                                     placeholder="Nome da cidade"
+                                    className={validationErrors.cidade ? 'error' : ''}
                                 />
+                                {validationErrors.cidade && (
+                                    <div className="error-message">{validationErrors.cidade}</div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -621,7 +953,11 @@ const OrdemServico = () => {
                                     onChange={(e) => handleInputChange('paletoNumero', e.target.value)}
                                     onBlur={(e) => handleInputBlur('paletoNumero', e.target.value)}
                                     placeholder="Número"
+                                    className={validationErrors.paletoNumero ? 'error' : ''}
                                 />
+                                {validationErrors.paletoNumero && (
+                                    <div className="error-message">{validationErrors.paletoNumero}</div>
+                                )}
                             </div>
                             <div className="form-group">
                                 <label>Cor <span style={{ color: 'red' }}>*</span></label>
@@ -631,7 +967,11 @@ const OrdemServico = () => {
                                     onChange={(e) => handleInputChange('paletoCor', e.target.value)}
                                     onBlur={(e) => handleInputBlur('paletoCor', e.target.value)}
                                     placeholder="Cor do paletó"
+                                    className={validationErrors.paletoCor ? 'error' : ''}
                                 />
+                                {validationErrors.paletoCor && (
+                                    <div className="error-message">{validationErrors.paletoCor}</div>
+                                )}
                             </div>
                             <div className="form-group">
                                 <label>Manga <span style={{ color: 'red' }}>*</span></label>
@@ -641,17 +981,34 @@ const OrdemServico = () => {
                                     onChange={(e) => handleInputChange('paletoManga', e.target.value)}
                                     onBlur={(e) => handleInputBlur('paletoManga', e.target.value)}
                                     placeholder="Medida da manga"
+                                    className={validationErrors.paletoManga ? 'error' : ''}
                                 />
+                                {validationErrors.paletoManga && (
+                                    <div className="error-message">{validationErrors.paletoManga}</div>
+                                )}
                             </div>
                             <div className="form-group">
-                                <label>Ajuste <span style={{ color: 'red' }}>*</span></label>
+                                <label style={{ display: 'flex', alignItems: 'center' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={inputValues.paletoAjuste}
+                                        onChange={(e) => handleCheckboxChange('paletoAjuste', e.target.checked)}
+                                        style={{ marginRight: '8px' }}
+                                    />
+                                    Ajuste (cm)
+                                </label>
                                 <input
-                                    type="text"
-                                    value={inputValues.paletoAjuste}
-                                    onChange={(e) => handleInputChange('paletoAjuste', e.target.value)}
-                                    onBlur={(e) => handleInputBlur('paletoAjuste', e.target.value)}
-                                    placeholder="Ajuste"
+                                    type="number"
+                                    value={inputValues.paletoAjusteValor}
+                                    onChange={(e) => handleInputChange('paletoAjusteValor', e.target.value)}
+                                    onBlur={(e) => handleInputBlur('paletoAjusteValor', e.target.value)}
+                                    placeholder="Ajuste em centímetros"
+                                    disabled={!inputValues.paletoAjuste}
+                                    className={validationErrors.paletoAjusteValor ? 'error' : ''}
                                 />
+                                {validationErrors.paletoAjusteValor && (
+                                    <div className="error-message">{validationErrors.paletoAjusteValor}</div>
+                                )}
                             </div>
                             <div className="form-group full-width">
                                 <label>Extras</label>
@@ -680,7 +1037,11 @@ const OrdemServico = () => {
                                     onChange={(e) => handleInputChange('camisaNumero', e.target.value)}
                                     onBlur={(e) => handleInputBlur('camisaNumero', e.target.value)}
                                     placeholder="Número"
+                                    className={validationErrors.camisaNumero ? 'error' : ''}
                                 />
+                                {validationErrors.camisaNumero && (
+                                    <div className="error-message">{validationErrors.camisaNumero}</div>
+                                )}
                             </div>
                             <div className="form-group">
                                 <label>Cor <span style={{ color: 'red' }}>*</span></label>
@@ -690,7 +1051,11 @@ const OrdemServico = () => {
                                     onChange={(e) => handleInputChange('camisaCor', e.target.value)}
                                     onBlur={(e) => handleInputBlur('camisaCor', e.target.value)}
                                     placeholder="Cor da camisa"
+                                    className={validationErrors.camisaCor ? 'error' : ''}
                                 />
+                                {validationErrors.camisaCor && (
+                                    <div className="error-message">{validationErrors.camisaCor}</div>
+                                )}
                             </div>
                             <div className="form-group">
                                 <label>Manga <span style={{ color: 'red' }}>*</span></label>
@@ -700,17 +1065,34 @@ const OrdemServico = () => {
                                     onChange={(e) => handleInputChange('camisaManga', e.target.value)}
                                     onBlur={(e) => handleInputBlur('camisaManga', e.target.value)}
                                     placeholder="Medida da manga"
+                                    className={validationErrors.camisaManga ? 'error' : ''}
                                 />
+                                {validationErrors.camisaManga && (
+                                    <div className="error-message">{validationErrors.camisaManga}</div>
+                                )}
                             </div>
                             <div className="form-group">
-                                <label>Ajuste <span style={{ color: 'red' }}>*</span></label>
+                                <label style={{ display: 'flex', alignItems: 'center' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={inputValues.camisaAjuste}
+                                        onChange={(e) => handleCheckboxChange('camisaAjuste', e.target.checked)}
+                                        style={{ marginRight: '8px' }}
+                                    />
+                                    Ajuste (cm)
+                                </label>
                                 <input
-                                    type="text"
-                                    value={inputValues.camisaAjuste}
-                                    onChange={(e) => handleInputChange('camisaAjuste', e.target.value)}
-                                    onBlur={(e) => handleInputBlur('camisaAjuste', e.target.value)}
-                                    placeholder="Ajuste"
+                                    type="number"
+                                    value={inputValues.camisaAjusteValor}
+                                    onChange={(e) => handleInputChange('camisaAjusteValor', e.target.value)}
+                                    onBlur={(e) => handleInputBlur('camisaAjusteValor', e.target.value)}
+                                    placeholder="Ajuste em centímetros"
+                                    disabled={!inputValues.camisaAjuste}
+                                    className={validationErrors.camisaAjusteValor ? 'error' : ''}
                                 />
+                                {validationErrors.camisaAjusteValor && (
+                                    <div className="error-message">{validationErrors.camisaAjusteValor}</div>
+                                )}
                             </div>
                             <div className="form-group full-width">
                                 <label>Extras</label>
@@ -739,7 +1121,11 @@ const OrdemServico = () => {
                                     onChange={(e) => handleInputChange('calcaNumero', e.target.value)}
                                     onBlur={(e) => handleInputBlur('calcaNumero', e.target.value)}
                                     placeholder="Número"
+                                    className={validationErrors.calcaNumero ? 'error' : ''}
                                 />
+                                {validationErrors.calcaNumero && (
+                                    <div className="error-message">{validationErrors.calcaNumero}</div>
+                                )}
                             </div>
                             <div className="form-group">
                                 <label>Cor <span style={{ color: 'red' }}>*</span></label>
@@ -749,37 +1135,85 @@ const OrdemServico = () => {
                                     onChange={(e) => handleInputChange('calcaCor', e.target.value)}
                                     onBlur={(e) => handleInputBlur('calcaCor', e.target.value)}
                                     placeholder="Cor da calça"
+                                    className={validationErrors.calcaCor ? 'error' : ''}
                                 />
+                                {validationErrors.calcaCor && (
+                                    <div className="error-message">{validationErrors.calcaCor}</div>
+                                )}
                             </div>
                             <div className="form-group">
-                                <label>Cintura <span style={{ color: 'red' }}>*</span></label>
+                                <label>Cós <span style={{ color: 'red' }}>*</span></label>
                                 <input
                                     type="text"
                                     value={inputValues.calcaCintura}
                                     onChange={(e) => handleInputChange('calcaCintura', e.target.value)}
                                     onBlur={(e) => handleInputBlur('calcaCintura', e.target.value)}
-                                    placeholder="Medida da cintura"
+                                    placeholder="Medida do cós"
+                                    className={validationErrors.calcaCintura ? 'error' : ''}
                                 />
+                                {validationErrors.calcaCintura && (
+                                    <div className="error-message">{validationErrors.calcaCintura}</div>
+                                )}
                             </div>
                             <div className="form-group">
-                                <label>Perna <span style={{ color: 'red' }}>*</span></label>
+                                <label style={{ display: 'flex', alignItems: 'center' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={inputValues.calcaAjusteCos}
+                                        onChange={(e) => handleCheckboxChange('calcaAjusteCos', e.target.checked)}
+                                        style={{ marginRight: '8px' }}
+                                    />
+                                    Ajuste do Cós (cm)
+                                </label>
+                                <input
+                                    type="number"
+                                    value={inputValues.calcaAjusteCosValor}
+                                    onChange={(e) => handleInputChange('calcaAjusteCosValor', e.target.value)}
+                                    onBlur={(e) => handleInputBlur('calcaAjusteCosValor', e.target.value)}
+                                    placeholder="Ajuste do cós em centímetros"
+                                    disabled={!inputValues.calcaAjusteCos}
+                                    className={validationErrors.calcaAjusteCosValor ? 'error' : ''}
+                                />
+                                {validationErrors.calcaAjusteCosValor && (
+                                    <div className="error-message">{validationErrors.calcaAjusteCosValor}</div>
+                                )}
+                            </div>
+                            <div className="form-group">
+                                <label>Comprimento <span style={{ color: 'red' }}>*</span></label>
                                 <input
                                     type="text"
                                     value={inputValues.calcaPerna}
                                     onChange={(e) => handleInputChange('calcaPerna', e.target.value)}
                                     onBlur={(e) => handleInputBlur('calcaPerna', e.target.value)}
-                                    placeholder="Medida da perna"
+                                    placeholder="Medida do comprimento"
+                                    className={validationErrors.calcaPerna ? 'error' : ''}
                                 />
+                                {validationErrors.calcaPerna && (
+                                    <div className="error-message">{validationErrors.calcaPerna}</div>
+                                )}
                             </div>
                             <div className="form-group">
-                                <label>Ajuste <span style={{ color: 'red' }}>*</span></label>
+                                <label style={{ display: 'flex', alignItems: 'center' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={inputValues.calcaAjusteComprimento}
+                                        onChange={(e) => handleCheckboxChange('calcaAjusteComprimento', e.target.checked)}
+                                        style={{ marginRight: '8px' }}
+                                    />
+                                    Ajuste do Comprimento (cm)
+                                </label>
                                 <input
-                                    type="text"
-                                    value={inputValues.calcaAjuste}
-                                    onChange={(e) => handleInputChange('calcaAjuste', e.target.value)}
-                                    onBlur={(e) => handleInputBlur('calcaAjuste', e.target.value)}
-                                    placeholder="Ajuste"
+                                    type="number"
+                                    value={inputValues.calcaAjusteComprimentoValor}
+                                    onChange={(e) => handleInputChange('calcaAjusteComprimentoValor', e.target.value)}
+                                    onBlur={(e) => handleInputBlur('calcaAjusteComprimentoValor', e.target.value)}
+                                    placeholder="Ajuste do comprimento em centímetros"
+                                    disabled={!inputValues.calcaAjusteComprimento}
+                                    className={validationErrors.calcaAjusteComprimentoValor ? 'error' : ''}
                                 />
+                                {validationErrors.calcaAjusteComprimentoValor && (
+                                    <div className="error-message">{validationErrors.calcaAjusteComprimentoValor}</div>
+                                )}
                             </div>
                             <div className="form-group full-width">
                                 <label>Extras</label>
@@ -800,55 +1234,255 @@ const OrdemServico = () => {
                     <div className="step-content">
                         <h3>Acessórios</h3>
                         <div className="form-grid">
-                            <div className="form-group checkbox-group">
-                                <label>
+                            {/* Suspensório */}
+                            <div className="form-group">
+                                <label style={{ display: 'flex', alignItems: 'center' }}>
                                     <input
                                         type="checkbox"
                                         checked={inputValues.suspensorio}
                                         onChange={(e) => handleCheckboxChange('suspensorio', e.target.checked)}
+                                        style={{ marginRight: '8px' }}
                                     />
                                     Suspensório
                                 </label>
+                                <input
+                                    type="text"
+                                    value={inputValues.suspensorioCor}
+                                    onChange={(e) => handleInputChange('suspensorioCor', e.target.value)}
+                                    onBlur={(e) => handleInputBlur('suspensorioCor', e.target.value)}
+                                    placeholder="Cor do suspensório"
+                                    disabled={!inputValues.suspensorio}
+                                    className={validationErrors.suspensorioCor ? 'error' : ''}
+                                />
+                                {validationErrors.suspensorioCor && (
+                                    <div className="error-message">{validationErrors.suspensorioCor}</div>
+                                )}
                             </div>
-                            <div className="form-group checkbox-group">
-                                <label>
+
+                            {/* Passante */}
+                            <div className="form-group">
+                                <div>
+                                <label style={{ display: 'flex', alignItems: 'center' }}>
                                     <input
                                         type="checkbox"
                                         checked={inputValues.passante}
                                         onChange={(e) => handleCheckboxChange('passante', e.target.checked)}
+                                        style={{ marginRight: '8px' }}
                                     />
                                     Passante
                                 </label>
-                            </div>
-                            <div className="form-group">
-                                <label>Cor dos Acessórios <span style={{ color: 'red' }}>*</span></label>
+
+                                <label style={{ display: 'flex', alignItems: 'center' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={inputValues.passanteExtensor}
+                                            onChange={(e) => handleCheckboxChange('passanteExtensor', e.target.checked)}
+                                            style={{ marginRight: '8px' }}
+                                            disabled={!inputValues.passante}
+                                        />
+                                        Extensor
+                                    </label>
+                                    </div>
                                 <input
                                     type="text"
-                                    value={inputValues.corAcessorios}
-                                    onChange={(e) => handleInputChange('corAcessorios', e.target.value)}
-                                    onBlur={(e) => handleInputBlur('corAcessorios', e.target.value)}
-                                    placeholder="Cor dos acessórios"
+                                    value={inputValues.passanteCor}
+                                    onChange={(e) => handleInputChange('passanteCor', e.target.value)}
+                                    onBlur={(e) => handleInputBlur('passanteCor', e.target.value)}
+                                    placeholder="Cor do passante"
+                                    disabled={!inputValues.passante}
+                                    className={validationErrors.passanteCor ? 'error' : ''}
                                 />
+                                {validationErrors.passanteCor && (
+                                    <div className="error-message">{validationErrors.passanteCor}</div>
+                                )}
+                                <div style={{ marginTop: '8px' }}>
+                           
+                                </div>
                             </div>
-                            <div className="form-group checkbox-group">
-                                <label>
+
+                            {/* Lenço */}
+                            <div className="form-group">
+                                <label style={{ display: 'flex', alignItems: 'center' }}>
                                     <input
                                         type="checkbox"
                                         checked={inputValues.lenco}
                                         onChange={(e) => handleCheckboxChange('lenco', e.target.checked)}
+                                        style={{ marginRight: '8px' }}
                                     />
                                     Lenço
                                 </label>
+                                <input
+                                    type="text"
+                                    value={inputValues.lencoCor}
+                                    onChange={(e) => handleInputChange('lencoCor', e.target.value)}
+                                    onBlur={(e) => handleInputBlur('lencoCor', e.target.value)}
+                                    placeholder="Cor do lenço"
+                                    disabled={!inputValues.lenco}
+                                    className={validationErrors.lencoCor ? 'error' : ''}
+                                />
+                                {validationErrors.lencoCor && (
+                                    <div className="error-message">{validationErrors.lencoCor}</div>
+                                )}
                             </div>
-                            <div className="form-group checkbox-group">
-                                <label>
+
+                            {/* Gravata */}
+                            <div className="form-group">
+                                <label style={{ display: 'flex', alignItems: 'center' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={inputValues.gravata}
+                                        onChange={(e) => handleCheckboxChange('gravata', e.target.checked)}
+                                        style={{ marginRight: '8px' }}
+                                    />
+                                    Gravata
+                                </label>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <input
+                                        type="text"
+                                        value={inputValues.gravataNumero}
+                                        onChange={(e) => handleInputChange('gravataNumero', e.target.value)}
+                                        onBlur={(e) => handleInputBlur('gravataNumero', e.target.value)}
+                                        placeholder="Número"
+                                        disabled={!inputValues.gravata}
+                                        style={{ flex: 1 }}
+                                        className={validationErrors.gravataNumero ? 'error' : ''}
+                                    />
+                                    <input
+                                        type="text"
+                                        value={inputValues.gravataCor}
+                                        onChange={(e) => handleInputChange('gravataCor', e.target.value)}
+                                        onBlur={(e) => handleInputBlur('gravataCor', e.target.value)}
+                                        placeholder="Cor"
+                                        disabled={!inputValues.gravata}
+                                        style={{ flex: 1 }}
+                                        className={validationErrors.gravataCor ? 'error' : ''}
+                                    />
+                                </div>
+                                {(validationErrors.gravataNumero || validationErrors.gravataCor) && (
+                                    <div className="error-message">
+                                        {validationErrors.gravataNumero || validationErrors.gravataCor}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Cinto */}
+                            <div className="form-group">
+                                <label style={{ display: 'flex', alignItems: 'center' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={inputValues.cinto}
+                                        onChange={(e) => handleCheckboxChange('cinto', e.target.checked)}
+                                        style={{ marginRight: '8px' }}
+                                    />
+                                    Cinto
+                                </label>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <input
+                                        type="text"
+                                        value={inputValues.cintoNumero}
+                                        onChange={(e) => handleInputChange('cintoNumero', e.target.value)}
+                                        onBlur={(e) => handleInputBlur('cintoNumero', e.target.value)}
+                                        placeholder="Número"
+                                        disabled={!inputValues.cinto}
+                                        style={{ flex: 1 }}
+                                        className={validationErrors.cintoNumero ? 'error' : ''}
+                                    />
+                                    <input
+                                        type="text"
+                                        value={inputValues.cintoCor}
+                                        onChange={(e) => handleInputChange('cintoCor', e.target.value)}
+                                        onBlur={(e) => handleInputBlur('cintoCor', e.target.value)}
+                                        placeholder="Cor"
+                                        disabled={!inputValues.cinto}
+                                        style={{ flex: 1 }}
+                                        className={validationErrors.cintoCor ? 'error' : ''}
+                                    />
+                                </div>
+                                {(validationErrors.cintoNumero || validationErrors.cintoCor) && (
+                                    <div className="error-message">
+                                        {validationErrors.cintoNumero || validationErrors.cintoCor}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Sapato */}
+                            <div className="form-group">
+                                <label style={{ display: 'flex', alignItems: 'center' }}>
                                     <input
                                         type="checkbox"
                                         checked={inputValues.sapato}
                                         onChange={(e) => handleCheckboxChange('sapato', e.target.checked)}
+                                        style={{ marginRight: '8px' }}
                                     />
                                     Sapato
                                 </label>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <input
+                                        type="text"
+                                        value={inputValues.sapatoNumero}
+                                        onChange={(e) => handleInputChange('sapatoNumero', e.target.value)}
+                                        onBlur={(e) => handleInputBlur('sapatoNumero', e.target.value)}
+                                        placeholder="Número"
+                                        disabled={!inputValues.sapato}
+                                        style={{ flex: 1 }}
+                                        className={validationErrors.sapatoNumero ? 'error' : ''}
+                                    />
+                                    <input
+                                        type="text"
+                                        value={inputValues.sapatoCor}
+                                        onChange={(e) => handleInputChange('sapatoCor', e.target.value)}
+                                        onBlur={(e) => handleInputBlur('sapatoCor', e.target.value)}
+                                        placeholder="Cor"
+                                        disabled={!inputValues.sapato}
+                                        style={{ flex: 1 }}
+                                        className={validationErrors.sapatoCor ? 'error' : ''}
+                                    />
+                                </div>
+                                {(validationErrors.sapatoNumero || validationErrors.sapatoCor) && (
+                                    <div className="error-message">
+                                        {validationErrors.sapatoNumero || validationErrors.sapatoCor}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Colete */}
+                            <div className="form-group">
+                                <label style={{ display: 'flex', alignItems: 'center' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={inputValues.colete}
+                                        onChange={(e) => handleCheckboxChange('colete', e.target.checked)}
+                                        style={{ marginRight: '8px' }}
+                                    />
+                                    Colete
+                                </label>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <input
+                                        type="text"
+                                        value={inputValues.coleteNumero}
+                                        onChange={(e) => handleInputChange('coleteNumero', e.target.value)}
+                                        onBlur={(e) => handleInputBlur('coleteNumero', e.target.value)}
+                                        placeholder="Número"
+                                        disabled={!inputValues.colete}
+                                        style={{ flex: 1 }}
+                                        className={validationErrors.coleteNumero ? 'error' : ''}
+                                    />
+                                    <input
+                                        type="text"
+                                        value={inputValues.coleteCor}
+                                        onChange={(e) => handleInputChange('coleteCor', e.target.value)}
+                                        onBlur={(e) => handleInputBlur('coleteCor', e.target.value)}
+                                        placeholder="Cor"
+                                        disabled={!inputValues.colete}
+                                        style={{ flex: 1 }}
+                                        className={validationErrors.coleteCor ? 'error' : ''}
+                                    />
+                                </div>
+                                {(validationErrors.coleteNumero || validationErrors.coleteCor) && (
+                                    <div className="error-message">
+                                        {validationErrors.coleteNumero || validationErrors.coleteCor}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -869,7 +1503,11 @@ const OrdemServico = () => {
                                         handleInputBlur('dataPedido', isoDate);
                                     }}
                                     placeholderText="Selecione a data do pedido"
+                                    className={validationErrors.dataPedido ? 'error' : ''}
                                 />
+                                {validationErrors.dataPedido && (
+                                    <div className="error-message">{validationErrors.dataPedido}</div>
+                                )}
                             </div>
                             <div className="form-group">
                                 <label>Data do Evento <span style={{ color: 'red' }}>*</span></label>
@@ -889,7 +1527,11 @@ const OrdemServico = () => {
                                         }
                                     }}
                                     placeholderText="Selecione a data do evento"
+                                    className={validationErrors.dataEvento ? 'error' : ''}
                                 />
+                                {validationErrors.dataEvento && (
+                                    <div className="error-message">{validationErrors.dataEvento}</div>
+                                )}
                             </div>
                             <div className="form-group">
                                 <label>Data da Retirada</label>
@@ -903,23 +1545,9 @@ const OrdemServico = () => {
                                     placeholderText="Selecione a data da retirada"
                                 />
                             </div>
+
                             <div className="form-group">
-                                <label>Ocasião <span style={{ color: 'red' }}>*</span></label>
-                                <select
-                                    value={inputValues.ocasiao}
-                                    onChange={(e) => handleSelectChange('ocasiao', e.target.value)}
-                                    onBlur={(e) => handleInputBlur('ocasiao', e.target.value)}
-                                >
-                                    <option value="">Selecione uma ocasião</option>
-                                    <option value="Casamento">Casamento</option>
-                                    <option value="Formatura">Formatura</option>
-                                    <option value="Aniversário">Aniversário</option>
-                                    <option value="Evento Social">Evento Social</option>
-                                    <option value="Outro">Outro</option>
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label>Tipo de Pagamento <span style={{ color: 'red' }}>*</span></label>
+                                <label>Modalidade <span style={{ color: 'red' }}>*</span></label>
                                 <select
                                     value={inputValues.tipoPagamento}
                                     onChange={(e) => handleSelectChange('tipoPagamento', e.target.value)}
@@ -937,7 +1565,11 @@ const OrdemServico = () => {
                                     onChange={(e) => handleInputChange('total', e.target.value)}
                                     onBlur={(e) => handleInputBlur('total', inputValues.total)}
                                     placeholder="Valor total"
+                                    className={validationErrors.total ? 'error' : ''}
                                 />
+                                {validationErrors.total && (
+                                    <div className="error-message">{validationErrors.total}</div>
+                                )}
                             </div>
                             <div className="form-group">
                                 <label>Sinal <span style={{ color: 'red' }}>*</span></label>
@@ -947,7 +1579,11 @@ const OrdemServico = () => {
                                     onChange={(e) => handleInputChange('sinal', e.target.value)}
                                     onBlur={(e) => handleInputBlur('sinal', inputValues.sinal)}
                                     placeholder="Valor do sinal"
+                                    className={validationErrors.sinal ? 'error' : ''}
                                 />
+                                {validationErrors.sinal && (
+                                    <div className="error-message">{validationErrors.sinal}</div>
+                                )}
                             </div>
                             <div className="form-group">
                                 <label>Restante</label>
@@ -965,6 +1601,33 @@ const OrdemServico = () => {
             default:
                 return null;
         }
+    };
+
+    // Função para limpar erro de um campo específico
+    const clearFieldError = (field) => {
+        if (validationErrors[field]) {
+            const newErrors = { ...validationErrors };
+            delete newErrors[field];
+            setValidationErrors(newErrors);
+        }
+    };
+
+    // Componente para exibir mensagens de erro
+    const ValidationError = ({ errors }) => {
+        if (Object.keys(errors).length === 0) return null;
+        
+        const errorMessages = Object.values(errors);
+        
+        return (
+            <div className="validation-error">
+                <strong>Por favor, corrija os seguintes campos:</strong>
+                <ul style={{ margin: '8px 0 0 0', paddingLeft: '20px' }}>
+                    {errorMessages.map((message, index) => (
+                        <li key={index}>{message}</li>
+                    ))}
+                </ul>
+            </div>
+        );
     };
 
     return (
@@ -995,6 +1658,7 @@ const OrdemServico = () => {
                             {/* Form Content */}
                             <div className="form-content">
                                 {renderStepContent()}
+                                <ValidationError errors={validationErrors} />
 
                                 <div className="form-actions">
                                     {currentStep > 0 && (
@@ -1051,7 +1715,7 @@ const OrdemServico = () => {
                                     </div>
                                     <div className="info-item">
                                         <span className="label">Telefone:</span>
-                                        <span className="value">{formData.telefone}</span>
+                                        <span className="value">{formatarTelefoneParaExibicao(formData.telefone)}</span>
                                     </div>
                                     <div className="info-item">
                                         <span className="label">CPF:</span>
@@ -1084,7 +1748,7 @@ const OrdemServico = () => {
                                             <span><strong>Nº:</strong> {formData.paletoNumero}</span>
                                             <span><strong>Cor:</strong> {formData.paletoCor}</span>
                                             <span><strong>Manga:</strong> {formData.paletoManga}</span>
-                                            <span><strong>Ajuste:</strong> {formData.paletoAjuste}</span>
+                                            <span><strong>Ajuste:</strong> {formData.paletoAjuste ? formData.paletoAjusteValor : 'Não'}</span>
                                             <span><strong>Extras:</strong> {formData.paletoExtras}</span>
                                         </div>
                                     </div>
@@ -1097,7 +1761,7 @@ const OrdemServico = () => {
                                             <span><strong>Nº:</strong> {formData.camisaNumero}</span>
                                             <span><strong>Cor:</strong> {formData.camisaCor}</span>
                                             <span><strong>Manga:</strong> {formData.camisaManga}</span>
-                                            <span><strong>Ajuste:</strong> {formData.camisaAjuste}</span>
+                                            <span><strong>Ajuste:</strong> {formData.camisaAjuste ? formData.camisaAjusteValor : 'Não'}</span>
                                             <span><strong>Extras:</strong> {formData.camisaExtras}</span>
                                         </div>
                                     </div>
@@ -1109,42 +1773,16 @@ const OrdemServico = () => {
                                         <div className="item-details">
                                             <span><strong>Nº:</strong> {formData.calcaNumero}</span>
                                             <span><strong>Cor:</strong> {formData.calcaCor}</span>
-                                            <span><strong>Cintura:</strong> {formData.calcaCintura}</span>
-                                            <span><strong>Perna:</strong> {formData.calcaPerna}</span>
-                                            <span><strong>Ajuste:</strong> {formData.calcaAjuste}</span>
+                                            <span><strong>Cós:</strong> {formData.calcaCintura}</span>
+                                            <span><strong>Comprimento:</strong> {formData.calcaPerna}</span>
+                                            {formData.calcaAjusteCos && (
+                                                <span><strong>Ajuste Cós:</strong> {formData.calcaAjusteCosValor} cm</span>
+                                            )}
+                                            {formData.calcaAjusteComprimento && (
+                                                <span><strong>Ajuste Comprimento:</strong> {formData.calcaAjusteComprimentoValor} cm</span>
+                                            )}
                                             <span><strong>Extras:</strong> {formData.calcaExtras}</span>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="preview-section-group">
-                                <h4 style={{ display: 'flex', alignItems: 'center' }}>
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: '8px', verticalAlign: 'middle' }}>
-                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                    </svg>
-                                    ACESSÓRIOS
-                                </h4>
-                                <div className="accessories-grid">
-                                    <div className="accessory-item">
-                                        <span className="accessory-label">Suspensório:</span>
-                                        <span className="accessory-value">{formData.suspensorio ? 'Sim' : 'Não'}</span>
-                                    </div>
-                                    <div className="accessory-item">
-                                        <span className="accessory-label">Passante:</span>
-                                        <span className="accessory-value">{formData.passante ? 'Sim' : 'Não'}</span>
-                                    </div>
-                                    <div className="accessory-item">
-                                        <span className="accessory-label">Lenço:</span>
-                                        <span className="accessory-value">{formData.lenco ? 'Sim' : 'Não'}</span>
-                                    </div>
-                                    <div className="accessory-item">
-                                        <span className="accessory-label">Sapato:</span>
-                                        <span className="accessory-value">{formData.sapato ? 'Sim' : 'Não'}</span>
-                                    </div>
-                                    <div className="accessory-item full-width">
-                                        <span className="accessory-label">Cor:</span>
-                                        <span className="accessory-value">{formData.corAcessorios}</span>
                                     </div>
                                 </div>
                             </div>
@@ -1169,10 +1807,7 @@ const OrdemServico = () => {
                                         <span className="payment-label">Data da Retirada:</span>
                                         <span className="payment-value">{formData.dataRetirada ? new Date(formData.dataRetirada).toLocaleDateString('pt-BR') : ''}</span>
                                     </div>
-                                    <div className="payment-item">
-                                        <span className="payment-label">Ocasião:</span>
-                                        <span className="payment-value">{capitalizeText(formData.ocasiao)}</span>
-                                    </div>
+
                                     <div className="payment-item">
                                         <span className="payment-label">Tipo:</span>
                                         <span className="payment-value">{formData.tipoPagamento}</span>

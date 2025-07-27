@@ -42,8 +42,11 @@
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .form-group {
@@ -70,6 +73,10 @@
   color: var(--color-text-primary);
   font-size: 14px;
   transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .form-group input:focus,
@@ -81,6 +88,69 @@
 
 .form-group input::placeholder {
   color: var(--color-text-placeholder);
+}
+
+.form-group input:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  background-color: var(--color-bg-disabled, #f5f5f5);
+}
+
+/* Estilos para campos com erro */
+.form-group input.error,
+.form-group select.error {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
+}
+
+.form-group .error-message {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* Mensagem de erro geral */
+.validation-error {
+  background-color: rgba(220, 53, 69, 0.1);
+  border: 1px solid #dc3545;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 20px;
+  color: #dc3545;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Estilos para containers de inputs lado a lado */
+.form-group > div {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.form-group > div input {
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Estilos específicos para labels com checkbox */
+.form-group label[style*="display: flex"] {
+  align-items: center;
+  flex-direction: row;
+}
+
+.form-group label[style*="display: flex"] input[type="checkbox"] {
+  margin-left: 8px;
+  width: auto;
+  height: auto;
+  order: 2;
+}
+
+.form-group label[style*="display: flex"] span {
+  order: 1;
 }
 
 /* Checkbox Groups */
@@ -143,7 +213,8 @@
   color: var(--color-text-primary);
   padding: 20px 25px;
   text-align: center;
-  position: relative;
+  position: sticky;
+  top: 0;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -572,3 +643,5 @@
   align-items: center;
   gap: 4px;
 }
+
+

@@ -404,7 +404,7 @@ const Clientes = () => {
                 </div>
               </div>
               <div className="form-group">
-                <label htmlFor="rua">Rua</label>
+                <label htmlFor="rua">Logradouro</label>
                 <input
                   type="text"
                   id="rua"
@@ -414,7 +414,7 @@ const Clientes = () => {
                     ...prev,
                     rua: e.target.value
                   }))}
-                  placeholder="Digite a rua"
+                  placeholder="Digite o logradouro"
                   style={{ height: '35px' }}
                   disabled={isLoading || isLoadingCep}
                 />
