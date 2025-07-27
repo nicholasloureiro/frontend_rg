@@ -82,4 +82,29 @@ const removerMascara = (value) => {
     return value.replace(/\D/g, "");
 };
 
-export { mascaraCPF, mascaraCNPJ, mascaraTelefone, removerMascara, mascaraTelefoneInternacional, mascaraNumeroDecimal, mascaraCEP, formatarParaExibicaoDecimal };
+const formatarTelefoneParaExibicao = (telefone) => {
+    if (!telefone) return '';
+    
+    // Remove todos os caracteres não numéricos
+    const numeroLimpo = telefone.replace(/\D/g, '');
+    
+    // Se o número tem 13 dígitos (55 + DDD + número), formata como brasileiro
+    if (numeroLimpo.length === 13 && numeroLimpo.startsWith('55')) {
+        return numeroLimpo.replace(/(\d{2})(\d{2})(\d{5})(\d{4})/, '($2) $3-$4');
+    }
+    
+    // Se o número tem 11 dígitos (DDD + número), formata como brasileiro
+    if (numeroLimpo.length === 11) {
+        return numeroLimpo.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    }
+    
+    // Se o número tem 10 dígitos (DDD + número antigo), formata como brasileiro
+    if (numeroLimpo.length === 10) {
+        return numeroLimpo.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+    }
+    
+    // Se não conseguir formatar, retorna o número original
+    return telefone;
+};
+
+export { mascaraCPF, mascaraCNPJ, mascaraTelefone, removerMascara, mascaraTelefoneInternacional, mascaraNumeroDecimal, mascaraCEP, formatarParaExibicaoDecimal, formatarTelefoneParaExibicao };

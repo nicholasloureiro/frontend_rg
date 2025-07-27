@@ -9,10 +9,7 @@
     padding: 20px;
 }
 
-/* Card principal */
-.triagem-card {
-    padding: 24px;
-}
+
 
 /* Título */
 .triagem-title {
@@ -171,6 +168,24 @@
 }
 
 .cep-loading i {
+    font-size: 14px;
+}
+
+/* Container do CPF */
+.cpf-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.cpf-loading {
+    position: absolute;
+    right: 10px;
+    color: var(--color-accent);
+    animation: spin 1s linear infinite;
+}
+
+.cpf-loading i {
     font-size: 14px;
 }
 

@@ -8,6 +8,7 @@ import { mascaraCPF, mascaraCEP, removerMascara } from '../utils/Mascaras';
 import validarCPF from '../utils/ValidarCPF';
 import { triagemService } from '../services/triagemService';
 import { getEmployees } from '../services/employeeService';
+import { clientService } from '../services/clientService';
 import { capitalizeText } from '../utils/capitalizeText';
 import Swal from 'sweetalert2';
 import '../styles/Triagem.css';
@@ -35,24 +36,21 @@ const Triagem = () => {
     const [atendentes, setAtendentes] = useState([]);
     const [loadingAtendentes, setLoadingAtendentes] = useState(false);
     const [cpfValido, setCpfValido] = useState(true);
+    const [buscandoCliente, setBuscandoCliente] = useState(false);
 
     // Função para carregar atendentes da API
     const carregarAtendentes = async () => {
         setLoadingAtendentes(true);
         try {
             const funcionarios = await getEmployees();
+            // Garante que funcionarios sempre será um array
+            const listaFuncionarios = Array.isArray(funcionarios) ? funcionarios : [];
             // Filtrar apenas funcionários com role ATENDENTE
-            const atendentesFiltrados = funcionarios.filter(func => func.role === 'ATENDENTE');
+            const atendentesFiltrados = listaFuncionarios.filter(func => func.role === 'ATENDENTE');
             setAtendentes(atendentesFiltrados);
         } catch (error) {
             console.error('Erro ao carregar atendentes:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Erro!',
-                text: 'Erro ao carregar lista de atendentes',
-                confirmButtonText: 'OK',
-                confirmButtonColor: '#d33'
-            });
+          
         } finally {
             setLoadingAtendentes(false);
         }
@@ -161,7 +159,7 @@ const Triagem = () => {
     const prepararDadosParaAPI = () => {
         return {
             cliente_nome: formData.nomeCliente.toUpperCase(),
-            telefone: formData.telefone,
+            telefone: formData.telefone ? formData.telefone.replace(/\D/g, '') : '',
             cpf: removerMascara(formData.cpf),
             atendente_id: formData.atendenteResponsavel ? parseInt(formData.atendenteResponsavel) : null,
             origem: formData.origem.toUpperCase(),
@@ -254,6 +252,56 @@ const Triagem = () => {
         }
     };
 
+    // Função para buscar dados do cliente por CPF
+    const buscarClientePorCPF = async (cpf) => {
+        setBuscandoCliente(true);
+        try {
+            const cliente = await clientService.buscarPorCPF(cpf);
+            
+            if (cliente) {
+                // Formatar o telefone para o componente PhoneInput
+                let telefoneFormatado = '';
+                if (cliente.phone) {
+                    telefoneFormatado = cliente.phone.startsWith('+') ? cliente.phone : `+55${cliente.phone.substring(2)}`;
+                }
+
+                // Preencher os dados do formulário com os dados do cliente encontrado
+                setFormData(prev => ({
+                    ...prev,
+                    nomeCliente: cliente.name || '',
+                    telefone: telefoneFormatado,
+                    cep: cliente.address?.cep || '',
+                    rua: cliente.address?.street || '',
+                    bairro: cliente.address?.neighborhood || '',
+                    cidade: cliente.address?.city || '',
+                    numero: cliente.address?.number || ''
+                }));
+
+                // Se o CEP foi preenchido, buscar dados do endereço
+                if (cliente.address?.cep) {
+                    const cepFormatado = mascaraCEP(cliente.address.cep);
+                    buscarCEP(cepFormatado);
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao buscar cliente:', error);
+            // Não mostrar erro se o cliente não for encontrado (404)
+            if (error.response?.status !== 404) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro!',
+                    text: 'Erro ao buscar dados do cliente.',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            }
+        } finally {
+            setBuscandoCliente(false);
+        }
+    };
+
     // Função para aplicar máscara de CPF e validar
     const handleCPFChange = (e) => {
         const value = e.target.value;
@@ -265,6 +313,11 @@ const Triagem = () => {
         if (cpfLimpo.length === 11) {
             const ehValido = validarCPF(cpfLimpo);
             setCpfValido(ehValido);
+            
+            // Se o CPF for válido, buscar dados do cliente
+            if (ehValido) {
+                buscarClientePorCPF(cpfLimpo);
+            }
         } else {
             setCpfValido(true); // Reset quando não tem 11 dígitos
         }
@@ -340,9 +393,42 @@ const Triagem = () => {
                             <h3 className="section-title">Dados do Cliente</h3>
 
                             <div className="form-row">
+                                <div className="form-group">
+                                    <label htmlFor="cpf" className="form-label">
+                                        CPF
+                                    </label>
+                                    <div className="cpf-container">
+                                        <input
+                                            type="text"
+                                            id="cpf"
+                                            className={`form-input ${errors.cpf ? 'error' : ''}`}
+                                            value={formData.cpf}
+                                            onChange={handleCPFChange}
+                                            placeholder="000.000.000-00"
+                                            maxLength="14"
+                                            disabled={buscandoCliente}
+                                        />
+                                        {buscandoCliente && (
+                                            <div className="cpf-loading">
+                                                <i className="bi bi-arrow-clockwise"></i>
+                                            </div>
+                                        )}
+                                    </div>
+                                    {errors.cpf && (
+                                        <span className="error-message">{errors.cpf}</span>
+                                    )}
+                                    {formData.cpf && !cpfValido && (
+                                        <small className="error-message">CPF inválido</small>
+                                    )}
+                                </div>
+
                                 {renderInput('nomeCliente', 'Nome do Cliente', 'text', 'Digite o nome completo', true)}
 
-                                <div className="form-group">
+                               
+                            </div>
+
+                            <div className="form-row">
+                            <div className="form-group">
                                     <label htmlFor="telefone" className="form-label">
                                         Telefone *
                                     </label>
@@ -358,30 +444,6 @@ const Triagem = () => {
                                         <span className="error-message">{errors.telefone}</span>
                                     )}
                                 </div>
-                            </div>
-
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label htmlFor="cpf" className="form-label">
-                                        CPF
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="cpf"
-                                        className={`form-input ${errors.cpf ? 'error' : ''}`}
-                                        value={formData.cpf}
-                                        onChange={handleCPFChange}
-                                        placeholder="000.000.000-00"
-                                        maxLength="14"
-                                    />
-                                    {errors.cpf && (
-                                        <span className="error-message">{errors.cpf}</span>
-                                    )}
-                                    {formData.cpf && !cpfValido && (
-                                        <small className="error-message">CPF inválido</small>
-                                    )}
-                                </div>
-
                                 <div className="form-group">
                                     <label htmlFor="cep" className="form-label">
                                         CEP*

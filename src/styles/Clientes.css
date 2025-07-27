@@ -1,0 +1,583 @@
+.clientes-container {
+  padding: 24px;
+  margin: 0 auto;
+}
+
+.clientes-header {
+  text-align: left;
+  margin-bottom: 32px;
+}
+
+.clientes-header h1 {
+  font-size: 40px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+}
+
+.clientes-header p {
+  font-size: 17.6px;
+  color: var(--color-text-secondary);
+}
+
+/* Seção do Formulário */
+.form-section {
+  background: var(--color-bg-card);
+  border-radius: 8px;
+  padding: 32px;
+  border: 1px solid var(--color-border);
+}
+
+.form-section h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 24px;
+}
+
+.cliente-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-weight: 500;
+  color: var(--color-text-primary);
+  font-size: 12px;
+}
+
+.form-group input,
+.form-group select {
+  padding: 5px 10px !important;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-bg-input);
+  color: var(--color-text-primary);
+  font-size: 12px;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+/* Estilos para o PhoneInput */
+.phone-input {
+  background-color: var(--color-bg-input);
+  border: 1px solid var(--color-border) !important;
+  padding: 5px 10px !important;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  border-radius: 6px;
+  color: var(--color-text-primary) !important;
+  transition: border-color 0.2s ease;
+}
+
+.phone-input input {
+  border: none !important;
+  color: var(--color-text-primary) !important;
+  padding: 0 !important;
+}
+
+.phone-input--focus {
+  border-color: var(--color-accent) !important;
+}
+
+.phone-input--focus input {
+  outline: none !important;
+}
+
+.form-group input::placeholder {
+  color: var(--color-text-placeholder);
+  font-size: 12px !important;
+}
+
+/* Container do CEP */
+.cep-input-container {
+  position: relative;
+}
+
+.cep-loading {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+}
+
+.cep-loading .spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-border);
+  border-top: 2px solid var(--color-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.form-actions-clientes {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  min-width: 120px;
+}
+
+.btn-primary {
+  background: var(--color-accent-dark);
+  color: var(--color-primary);
+}
+
+.btn-primary:hover {
+  background: var(--color-accent-hover);
+}
+
+.btn-secondary {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover {
+  background: var(--color-border);
+}
+
+/* Seção da Listagem */
+.list-section {
+  background: var(--color-bg-card);
+  border-radius: 8px;
+  padding: 32px;
+  box-shadow: 0 4px 20px var(--color-shadow-card);
+  border: 1px solid var(--border-color-modal);
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.list-header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.search-container {
+  position: relative;
+  min-width: 300px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 16px 12px 44px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-bg-input);
+  color: var(--color-text-primary);
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+  height: 35px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.search-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--color-bg-disabled);
+}
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-placeholder);
+  font-size: 17.6px;
+}
+
+/* Tabela de Clientes */
+.clientes-table {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--color-bg-secondary);
+}
+
+.table-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.5fr 3fr 0.5fr;
+  gap: 16px;
+  padding: 16px;
+  background: var(--color-bg-card);
+  border-bottom: 1px solid var(--color-border);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: 14px;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.5fr 3fr 0.5fr;
+  gap: 16px;
+  padding: 16px;
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color 0.2s ease;
+  align-items: center;
+}
+
+.table-row:hover {
+  background: var(--color-bg-hover);
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.table-cell {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.header-cell {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+/* Informações do Cliente */
+.cliente-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cliente-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--color-primary);
+  font-size: 16px;
+}
+
+.cliente-nome {
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Ações */
+.cliente-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.btn-edit {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  background: transparent;
+  color: var(--color-accent);
+}
+
+.btn-edit:hover {
+  background: var(--color-accent);
+  color: var(--color-primary);
+}
+
+/* Skeletons */
+.cliente-skeleton {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.skeleton-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, var(--color-border) 25%, var(--color-bg-hover) 50%, var(--color-border) 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+.skeleton-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeleton-name {
+  height: 16px;
+  width: 60%;
+  background: linear-gradient(90deg, var(--color-border) 25%, var(--color-bg-hover) 50%, var(--color-border) 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+.skeleton-details {
+  display: flex;
+  gap: 16px;
+}
+
+.skeleton-detail {
+  height: 12px;
+  width: 80px;
+  background: linear-gradient(90deg, var(--color-border) 25%, var(--color-bg-hover) 50%, var(--color-border) 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Estado vazio */
+.no-results {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--color-text-secondary);
+}
+
+.no-results i {
+  font-size: 48px;
+  margin-bottom: 16px;
+  color: var(--color-text-muted);
+}
+
+.no-results p {
+  font-size: 17.6px;
+}
+
+/* Estado de erro */
+.error-state {
+  text-align: center;
+  padding: 0px 20px;
+  color: var(--color-text-secondary);
+}
+
+.error-state i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-state .bi-exclamation-triangle {
+  font-size: 48px;
+  margin-bottom: 16px;
+  color: var(--color-error);
+}
+
+.error-state h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+}
+
+.error-state p {
+  font-size: 16px;
+  margin-bottom: 24px;
+  color: var(--color-text-secondary);
+}
+
+/* Loading indicator */
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-accent);
+  font-size: 14px;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-border);
+  border-top: 2px solid var(--color-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsividade */
+@media (max-width: 1200px) {
+  .table-header,
+  .table-row {
+    grid-template-columns: 2fr 1fr 1fr 1.5fr 2fr 0.5fr;
+  }
+}
+
+@media (max-width: 992px) {
+  .table-header,
+  .table-row {
+    grid-template-columns: 2fr 1fr 1fr 1fr 0.5fr;
+  }
+  
+  .header-cell:nth-child(4),
+  .table-cell:nth-child(4) {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .clientes-container {
+    padding: 16px;
+  }
+
+  .clientes-header h1 {
+    font-size: 32px;
+  }
+
+  .form-section,
+  .list-section {
+    padding: 20px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .list-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-container {
+    min-width: auto;
+  }
+
+  .table-header,
+  .table-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .header-cell,
+  .table-cell {
+    padding: 4px 0;
+  }
+
+  .header-cell:not(:first-child) {
+    display: none;
+  }
+
+  .table-cell:not(:first-child) {
+    display: none;
+  }
+
+  .cliente-info {
+    justify-content: center;
+  }
+
+  .form-actions-clientes {
+    flex-direction: column;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .clientes-header h1 {
+    font-size: 28px;
+  }
+
+  .clientes-header p {
+    font-size: 16px;
+  }
+
+  .form-section h2,
+  .list-header h2 {
+    font-size: 20px;
+  }
+
+  .cliente-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .cliente-nome {
+    font-size: 14px;
+  }
+
+  .error-state {
+    padding: 40px 20px;
+  }
+
+  .error-state h3 {
+    font-size: 18px;
+  }
+
+  .error-state p {
+    font-size: 14px;
+  }
+} 

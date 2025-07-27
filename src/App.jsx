@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import Login from './pages/Login'
 import Home from './pages/Home'
 import Funcionarios from './pages/Funcionarios'
+import Clientes from './pages/Clientes'
 import Sidebar from './components/Sidebar'
 import ProtectedRoute from './components/ProtectedRoute'
 import { useTheme } from './hooks/useTheme'
@@ -98,6 +99,12 @@ function AppContent() {
           <Route path="/funcionarios" element={
             <ProtectedRoute>
               <Funcionarios />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/clientes" element={
+            <ProtectedRoute>
+              <Clientes />
             </ProtectedRoute>
           } />
           

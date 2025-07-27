@@ -23,7 +23,8 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
         setInternalError(null);
         try {
             const data = await serviceOrderService.getServiceOrdersByPhase(phase);
-            setOrders(data);
+            // Garante que orders sempre será um array
+            setOrders(Array.isArray(data) ? data : []);
         } catch (err) {
             setInternalError('Erro ao carregar ordens de serviço');
             console.error('Erro:', err);

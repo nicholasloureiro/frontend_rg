@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { mascaraCPF, mascaraTelefone, removerMascara } from '../utils/Mascaras';
+import { mascaraCPF, mascaraTelefone, removerMascara, formatarTelefoneParaExibicao } from '../utils/Mascaras';
 import { capitalizeText } from '../utils/capitalizeText';
 import PhoneInput from 'react-phone-number-input';
 import ptBR from 'react-phone-number-input/locale/pt-BR';
@@ -35,7 +35,8 @@ const Funcionarios = () => {
     setError(null);
     try {
       const data = await getEmployees();
-      setFuncionarios(data);
+      // Garante que funcionarios sempre será um array
+      setFuncionarios(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Erro ao carregar funcionários:', error);
       setError('Não foi possível carregar a lista de funcionários. Tente novamente.');
@@ -99,22 +100,13 @@ const Funcionarios = () => {
     try {
       if (editingId) {
         // Editar funcionário existente
-        // Enviar apenas os campos necessários para atualização (sem CPF)
-        // Formatar o telefone para o formato esperado pela API
-        let formattedPhone = formData.phone;
-        if (formData.phone) {
-          // Remove o código do país (+55) se presente
-          formattedPhone = formData.phone.replace('+55', '');
-          // Aplica a máscara brasileira se não estiver formatado
-          if (!formattedPhone.includes('(')) {
-            formattedPhone = formattedPhone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-          }
-        }
+        // Remover máscaras do CPF e telefone
+        const cpfSemMascara = removerMascara(formData.cpf);
 
         const updateData = {
           name: formData.name,
           email: formData.email,
-          phone: formattedPhone,
+          phone: formData.phone ? formData.phone.replace(/\D/g, '') : '',
           role: formData.role
         };
         await updateEmployee(editingId, updateData);
@@ -129,7 +121,18 @@ const Funcionarios = () => {
         });
       } else {
         // Adicionar novo funcionário
-        const response = await registerEmployee(formData);
+        // Remover máscaras do CPF e telefone
+        const cpfSemMascara = removerMascara(formData.cpf);
+        
+        const createData = {
+          name: formData.name,
+          cpf: cpfSemMascara,
+          email: formData.email,
+          phone: formData.phone ? formData.phone.replace(/\D/g, '') : '',
+          role: formData.role
+        };
+        
+        const response = await registerEmployee(createData);
 
         Swal.fire({
           icon: 'success',
@@ -187,7 +190,15 @@ const Funcionarios = () => {
 
   const handleEdit = (funcionario) => {
     window.scrollTo(0, 0);
-    setFormData(funcionario);
+    // Mapear os dados do funcionário para o formato do formulário
+    const funcionarioData = {
+      name: funcionario.name || '',
+      cpf: funcionario.cpf || '',
+      phone: funcionario.phone ? (funcionario.phone.startsWith('+') ? funcionario.phone : `+55${funcionario.phone.substring(2)}`) : '', // Remover 55 do início e adicionar +55
+      email: funcionario.email || '',
+      role: funcionario.role || ''
+    };
+    setFormData(funcionarioData);
     // Usar person_id se disponível, senão usar id
     setEditingId(funcionario.person_id || funcionario.id);
   };
@@ -475,7 +486,7 @@ const Funcionarios = () => {
                     </div>
                     <div className="detail-item">
                       <i className="bi bi-telephone"></i>
-                      <span>{funcionario.phone ? funcionario.phone.replace('+55', '').replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3') : ''}</span>
+                      <span>{formatarTelefoneParaExibicao(funcionario.phone)}</span>
                     </div>
                     <div className="detail-item">
                       <i className="bi bi-envelope"></i>

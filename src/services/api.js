@@ -10,6 +10,7 @@ const api = axios.create({
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
+    'ngrok-skip-browser-warning': 'true',
   },
 });
 
@@ -36,6 +37,8 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // Adiciona header para pular aviso do ngrok
+    config.headers['ngrok-skip-browser-warning'] = 'true';
     return config;
   },
   (error) => {
