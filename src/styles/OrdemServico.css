@@ -380,6 +380,42 @@
   border-color: var(--color-accent);
 }
 
+.payment-item.highlight .payment-label {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.payment-item.highlight .payment-value {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+/* Cores específicas para campos de pagamento */
+.payment-item.highlight.total {
+  border-color: #28a745;
+}
+
+.payment-item.highlight.total .payment-label {
+  color: #28a745;
+}
+
+.payment-item.highlight.sinal {
+  border-color: #ffc107;
+}
+
+.payment-item.highlight.sinal .payment-label {
+  color: #ffc107;
+}
+
+.payment-item.highlight.restante {
+  border-color: #dc3545;
+}
+
+.payment-item.highlight.restante .payment-label {
+  color: #dc3545;
+}
+
+/* Definições base para payment-label e payment-value */
 .payment-label {
   color: var(--color-text-secondary);
   font-size: 12px;
@@ -590,6 +626,136 @@
   .preview-section-group {
     break-inside: avoid;
   }
+}
+
+/* Estilos específicos para geração de PDF */
+#os-preview[data-pdf-target="true"] {
+  background: white !important;
+  color: black !important;
+  box-shadow: none !important;
+  border: 1px solid #ddd !important;
+  max-height: none !important;
+  overflow: visible !important;
+  height: auto !important;
+  position: relative !important;
+  transform: none !important;
+}
+
+/* Forçar cores claras para PDF */
+#os-preview[data-pdf-target="true"] * {
+  background-color: white !important;
+  color: black !important;
+}
+
+#os-preview[data-pdf-target="true"] .preview-card {
+  max-height: none !important;
+  overflow: visible !important;
+  height: auto !important;
+  position: relative !important;
+  transform: none !important;
+  background: white !important;
+}
+
+#os-preview[data-pdf-target="true"] .preview-header {
+  background: #f8f9fa !important;
+  color: #000 !important;
+  border-bottom: 2px solid #000 !important;
+}
+
+#os-preview[data-pdf-target="true"] .preview-section-group {
+  border-bottom: 1px solid #ddd !important;
+  color: #000 !important;
+  page-break-inside: avoid !important;
+}
+
+#os-preview[data-pdf-target="true"] .info-item .label,
+#os-preview[data-pdf-target="true"] .accessory-label,
+#os-preview[data-pdf-target="true"] .payment-label {
+  color: #666 !important;
+  font-weight: bold !important;
+}
+
+#os-preview[data-pdf-target="true"] .info-item .value,
+#os-preview[data-pdf-target="true"] .accessory-value,
+#os-preview[data-pdf-target="true"] .payment-value {
+  color: #000 !important;
+  font-weight: 500 !important;
+}
+
+#os-preview[data-pdf-target="true"] .item-card {
+  background: white !important;
+  border: 1px solid #ddd !important;
+}
+
+#os-preview[data-pdf-target="true"] .accessory-item,
+#os-preview[data-pdf-target="true"] .payment-item {
+  background: white !important;
+  border: 1px solid #ddd !important;
+}
+
+#os-preview[data-pdf-target="true"] .payment-item.highlight {
+  background: transparent !important;
+  border-color: #007bff !important;
+}
+
+#os-preview[data-pdf-target="true"] .payment-item.highlight .payment-label {
+  color: #007bff !important;
+  font-weight: 600 !important;
+}
+
+#os-preview[data-pdf-target="true"] .payment-item.highlight .payment-value {
+  color: #000 !important;
+  font-weight: 600 !important;
+}
+
+/* Cores específicas para campos de pagamento no PDF */
+#os-preview[data-pdf-target="true"] .payment-item.highlight.total {
+  border-color: #28a745 !important;
+}
+
+#os-preview[data-pdf-target="true"] .payment-item.highlight.total .payment-label {
+  color: #28a745 !important;
+}
+
+#os-preview[data-pdf-target="true"] .payment-item.highlight.sinal {
+  border-color: #ffc107 !important;
+}
+
+#os-preview[data-pdf-target="true"] .payment-item.highlight.sinal .payment-label {
+  color: #ffc107 !important;
+}
+
+#os-preview[data-pdf-target="true"] .payment-item.highlight.restante {
+  border-color: #dc3545 !important;
+}
+
+#os-preview[data-pdf-target="true"] .payment-item.highlight.restante .payment-label {
+  color: #dc3545 !important;
+}
+
+/* Ajustes específicos para evitar overflow */
+#os-preview[data-pdf-target="true"] .d-flex {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+}
+
+#os-preview[data-pdf-target="true"] .item-card {
+  flex: 1 !important;
+  min-width: 200px !important;
+  max-width: none !important;
+}
+
+#os-preview[data-pdf-target="true"] .accessories-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+  gap: 10px !important;
+}
+
+#os-preview[data-pdf-target="true"] .payment-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+  gap: 10px !important;
 }
 
 

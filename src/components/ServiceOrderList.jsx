@@ -85,14 +85,6 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
                         </span>
                     )}
                 </h2>
-                <Button 
-                    text="Nova Ordem" 
-                    onClick={onCreateNew} 
-                    variant="primary" 
-                    iconName="plus" 
-                    iconPosition="left"
-                    style={{ width: 'fit-content' }}
-                />
             </div>
 
             {/* Tabs */}
