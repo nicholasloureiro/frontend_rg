@@ -3,7 +3,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../styles/InputDate.css';
 
-const InputDate = ({ selectedDate, onDateChange, placeholderText, locale = "pt-BR", disabled = false }) => {
+const InputDate = ({ selectedDate, onDateChange, placeholderText, locale = "pt-BR", disabled = false, className = "" }) => {
   return (
     <div className="date-picker-container">
       <DatePicker
@@ -21,6 +21,7 @@ const InputDate = ({ selectedDate, onDateChange, placeholderText, locale = "pt-B
         placeholderText={placeholderText}
         disabled={disabled}
         style={{ width: '100%' }}
+        className={className}
       />
     </div>
   );

@@ -42,19 +42,49 @@
   box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
 }
 
+/* Estilos para multi-select */
+.custom-select-multi-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 100%;
+}
+
+.custom-select-multi-tag {
+  background-color: var(--color-accent-hover);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.custom-select-multi-tag:last-child {
+  margin-right: 0;
+}
+
+/* Ajuste para o valor do multi-select */
 .custom-select-value {
   flex-grow: 1;
   border-right: 1px solid var(--borderColor-input);
   margin-right: 8px !important;
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+}
+
+/* Estilo para placeholder do multi-select */
+.custom-select-control .custom-select-value:empty::before {
+  content: attr(placeholder);
+  color: #999;
 }
 
 .custom-select-arrow {
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-top: 5px solid var(--font-color);
-  transition: transform 0.2s ease-in-out;
+color: var(--color-text-primary);
+  
 }
 
 .custom-select-arrow.open {

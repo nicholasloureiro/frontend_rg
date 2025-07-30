@@ -37,7 +37,7 @@ export const serviceOrderService = {
     // Atualizar ordem de serviço
     updateServiceOrder: async (id, orderData) => {
         try {
-            const response = await api.put(`/api/v1/service-orders/${id}/`, orderData);
+            const response = await api.put(`/api/v1/service-orders/${id}/update/`, orderData);
             return response.data;
         } catch (error) {
             console.error('Erro ao atualizar ordem de serviço:', error);

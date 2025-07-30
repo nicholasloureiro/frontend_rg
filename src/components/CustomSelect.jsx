@@ -3,19 +3,31 @@ import { createPortal } from 'react-dom';
 import '../styles/CustomSelect.css';
 import { capitalizeText } from '../utils/capitalizeText';
 
-const CustomSelect = ({ options, value, onChange, placeholder, label, disabled, error }) => {
+const CustomSelect = ({ options, value, onChange, placeholder, label, disabled, error, isMulti = false }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const selectRef = useRef(null);
   const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
   const [showSearchInput, setShowSearchInput] = useState(false);
 
-  const selectedOption = value ? options.find(option => option.value === value) : null;
+  const selectedOptions = isMulti && Array.isArray(value) 
+    ? options.filter(option => value.includes(option.value))
+    : [];
+  const selectedOption = !isMulti && value ? options.find(option => option.value === value) : null;
 
   const handleSelect = (option) => {
     if (disabled) return;
-    onChange(option.value);
-    setIsOpen(false);
+    
+    if (isMulti) {
+      const currentValues = Array.isArray(value) ? value : [];
+      const newValues = currentValues.includes(option.value)
+        ? currentValues.filter(v => v !== option.value)
+        : [...currentValues, option.value];
+      onChange(newValues);
+    } else {
+      onChange(option.value);
+      setIsOpen(false);
+    }
   };
 
   const handleSearchChange = (e) => {
@@ -40,12 +52,41 @@ const CustomSelect = ({ options, value, onChange, placeholder, label, disabled, 
     }
   }, [isOpen, options]);
 
+  // Focar no input de busca quando abrir, mas sem causar scroll
+  useEffect(() => {
+    if (isOpen && showSearchInput) {
+      const searchInput = document.querySelector('.custom-select-search');
+      if (searchInput) {
+        // Pequeno delay para garantir que o input está renderizado
+        setTimeout(() => {
+          searchInput.focus();
+        }, 10);
+      }
+    }
+  }, [isOpen, showSearchInput]);
+
   useEffect(() => {
     const calculatePosition = () => {
       if (selectRef.current) {
         const rect = selectRef.current.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const dropdownHeight = Math.min(options.length * 40 + (showSearchInput ? 50 : 0), 300); // Altura estimada do dropdown
+        
+        // Verificar se há espaço suficiente abaixo
+        const spaceBelow = viewportHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        
+        let top;
+        if (spaceBelow >= dropdownHeight || spaceBelow > spaceAbove) {
+          // Posicionar abaixo
+          top = rect.bottom + window.scrollY;
+        } else {
+          // Posicionar acima
+          top = rect.top + window.scrollY - dropdownHeight;
+        }
+        
         setPosition({
-          top: rect.bottom + window.scrollY,
+          top: top,
           left: rect.left + window.scrollX,
           width: rect.width,
         });
@@ -66,7 +107,7 @@ const CustomSelect = ({ options, value, onChange, placeholder, label, disabled, 
       window.removeEventListener('resize', calculatePosition);
       window.removeEventListener('scroll', calculatePosition);
     };
-  }, [isOpen]);
+  }, [isOpen, options.length, showSearchInput]);
   
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -91,9 +132,22 @@ const CustomSelect = ({ options, value, onChange, placeholder, label, disabled, 
         onClick={() => { !disabled && setIsOpen(!isOpen) }}
       >
         <div className="custom-select-value">
-          {selectedOption ? capitalizeText(selectedOption.label) : (placeholder || 'Selecione uma opção')}
+          {isMulti ? (
+            selectedOptions.length > 0 ? (
+              <div className="custom-select-multi-values">
+                {selectedOptions.map((option, index) => (
+                  <span key={option.value} className="custom-select-multi-tag">
+                    {capitalizeText(option.label)}
+                    {index < selectedOptions.length - 1 && ', '}
+                  </span>
+                ))}
+              </div>
+            ) : (placeholder || 'Selecione opções')
+          ) : (
+            selectedOption ? capitalizeText(selectedOption.label) : (placeholder || 'Selecione uma opção')
+          )}
         </div>
-        <div className={`custom-select-arrow ${isOpen ? 'open' : ''}`}></div>
+        <div className={`custom-select-arrow ${isOpen ? 'open' : ''}`}><i className={`bi ${isOpen ? 'bi-chevron-up' : 'bi-chevron-down'}`}></i></div>
       </div>
 
       {isOpen && createPortal(
@@ -116,7 +170,6 @@ const CustomSelect = ({ options, value, onChange, placeholder, label, disabled, 
                   placeholder="Buscar..."
                   value={searchTerm}
                   onChange={handleSearchChange}
-                  autoFocus
                   disabled={disabled}
                 />
               </div>
@@ -126,12 +179,16 @@ const CustomSelect = ({ options, value, onChange, placeholder, label, disabled, 
               filteredOptions.map(option => (
                 <div
                   key={option.value}
-                  className={`custom-select-option ${option.value === value ? 'selected' : ''} ${disabled ? 'disabled' : ''}`}
+                  className={`custom-select-option ${isMulti ? (Array.isArray(value) && value.includes(option.value) ? 'selected' : '') : (option.value === value ? 'selected' : '')} ${disabled ? 'disabled' : ''}`}
                   onClick={() => handleSelect(option)}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
                 >
                  <span className="custom-select-option-value">{capitalizeText(option.label)}</span> 
-                 {option.value === value && <span className="custom-select-option-value-selected"><i className="bi bi-check-lg"></i></span>}
+                 {isMulti ? (
+                   Array.isArray(value) && value.includes(option.value) && <span className="custom-select-option-value-selected"><i className="bi bi-check-lg"></i></span>
+                 ) : (
+                   option.value === value && <span className="custom-select-option-value-selected"><i className="bi bi-check-lg"></i></span>
+                 )}
                 </div>
               ))
             ) : (
