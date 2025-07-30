@@ -257,7 +257,7 @@ const OrdemServico = () => {
             }
             
             // Para campos de acessórios com número e cor
-            if (['gravataNumero', 'gravataCor', 'cintoNumero', 'cintoCor', 'sapatoNumero', 'sapatoCor', 'coleteNumero', 'coleteCor'].includes(field)) {
+            if (['gravataCor', 'gravataDescricao', 'cintoCor', 'sapatoCor', 'sapatoDescricao', 'coleteCor', 'coleteDescricao'].includes(field)) {
                 const baseField = field.replace(/Numero|Cor/, '');
                 shouldClear = inputValues[baseField] && value.trim() !== '';
             }
@@ -345,10 +345,10 @@ const OrdemServico = () => {
                 suspensorio: ['suspensorioCor'],
                 passante: ['passanteCor'],
                 lenco: ['lencoCor'],
-                gravata: ['gravataNumero', 'gravataCor'],
-                cinto: ['cintoNumero', 'cintoCor'],
-                sapato: ['sapatoNumero', 'sapatoCor'],
-                colete: ['coleteNumero', 'coleteCor']
+                gravata: ['gravataCor', 'gravataDescricao'],
+                cinto: ['cintoCor'],
+                sapato: ['sapatoCor', 'sapatoDescricao'],
+                colete: ['coleteCor', 'coleteDescricao']
             };
             
             if (relatedFields[field]) {
@@ -519,19 +519,19 @@ const OrdemServico = () => {
             lenco: false,
             lencoCor: '',
             gravata: false,
-            gravataNumero: '',
+            gravataDescricao: '',
             gravataCor: '',
             gravataMarca: '',
             cinto: false,
-            cintoNumero: '',
+
             cintoCor: '',
             cintoMarca: '',
             sapato: false,
-            sapatoNumero: '',
+            sapatoDescricao: '',
             sapatoCor: '',
             sapatoMarca: '',
             colete: false,
-            coleteNumero: '',
+            coleteDescricao: '',
             coleteCor: '',
 
             // Pagamento
@@ -568,80 +568,114 @@ const OrdemServico = () => {
 
         setLoading(true);
         try {
-            const orderData = {
-                event_date: formData.dataEvento,
-                total_value: parseFloat(formData.total) || 0,
-                advance_payment: parseFloat(formData.sinal) || 0,
-                remaining_payment: parseFloat(formData.restante) || 0,
-                order_date: formData.dataPedido,
-                pickup_date: formData.dataRetirada,
-                client: {
-                    name: formData.nome,
-                    cpf: formData.cpf,
-                    contacts: [
+            // Estrutura organizada em português
+            const payload = {
+                ordem_servico: {
+                    data_pedido: formData.dataPedido,
+                    data_evento: formData.dataEvento,
+                    data_retirada: formData.dataRetirada,
+                    ocasiao: formData.ocasiao,
+                    modalidade: formData.tipoPagamento,
+                    itens: [
                         {
-                            phone: formData.telefone ? formData.telefone.replace(/\D/g, '') : ''
+                            tipo: "paleto",
+                            numero: formData.paletoNumero,
+                            cor: formData.paletoCor,
+                            manga: formData.paletoManga,
+                            marca: formData.paletoMarca,
+                            ajuste: formData.paletoAjuste ? formData.paletoAjusteValor : "",
+                            extras: formData.paletoExtras
+                        },
+                        {
+                            tipo: "camisa",
+                            numero: formData.camisaNumero,
+                            cor: formData.camisaCor,
+                            manga: formData.camisaManga,
+                            marca: formData.camisaMarca,
+                            ajuste: formData.camisaAjuste ? formData.camisaAjusteValor : "",
+                            extras: formData.camisaExtras
+                        },
+                        {
+                            tipo: "calca",
+                            numero: formData.calcaNumero,
+                            cor: formData.calcaCor,
+                            cintura: formData.calcaCintura,
+                            perna: formData.calcaPerna,
+                            marca: formData.calcaMarca,
+                            ajuste_cintura: formData.calcaAjusteCos ? formData.calcaAjusteCosValor : "",
+                            ajuste_comprimento: formData.calcaAjusteComprimento ? formData.calcaAjusteComprimentoValor : "",
+                            extras: formData.calcaExtras
                         }
                     ],
-                    addresses: [
+                    acessorios: [
+                        ...(formData.suspensorio ? [{
+                            tipo: "suspensorio",
+                            cor: formData.suspensorioCor
+                        }] : []),
+                        ...(formData.passante ? [{
+                            tipo: "passante",
+                            cor: formData.passanteCor,
+                            extensor: formData.passanteExtensor
+                        }] : []),
+                        ...(formData.lenco ? [{
+                            tipo: "lenco",
+                            cor: formData.lencoCor
+                        }] : []),
+                        ...(formData.gravata ? [{
+                            tipo: "gravata",
+                            cor: formData.gravataCor,
+                            descricao: formData.gravataDescricao,
+                            marca: formData.gravataMarca
+                        }] : []),
+                        ...(formData.cinto ? [{
+                            tipo: "cinto",
+                            cor: formData.cintoCor,
+                            marca: formData.cintoMarca
+                        }] : []),
+                        ...(formData.sapato ? [{
+                            tipo: "sapato",
+                            cor: formData.sapatoCor,
+                            descricao: formData.sapatoDescricao,
+                            marca: formData.sapatoMarca
+                        }] : []),
+                        ...(formData.colete ? [{
+                            tipo: "colete",
+                            cor: formData.coleteCor,
+                            descricao: formData.coleteDescricao
+                        }] : [])
+                    ],
+                    pagamento: {
+                        total: parseFloat(formData.total) || 0,
+                        sinal: parseFloat(formData.sinal) || 0,
+                        restante: parseFloat(formData.restante) || 0
+                    }
+                },
+                cliente: {
+                    nome: formData.nome,
+                    cpf: formData.cpf ? formData.cpf.replace(/\D/g, '') : '',
+                    contatos: [
+                        {
+                            tipo: "telefone",
+                            valor: formData.telefone ? formData.telefone.replace(/\D/g, '') : ''
+                        }
+                    ],
+                    enderecos: [
                         {
                             cep: formData.cep,
                             rua: formData.rua,
                             numero: formData.numero,
                             bairro: formData.bairro,
-                            cidade: {
-                                name: formData.cidade
-                            }
+                            cidade: formData.cidade
                         }
                     ]
-                },
-                // Dados dos itens (se a API aceitar)
-                jacket_number: formData.paletoNumero,
-                jacket_color: formData.paletoCor,
-                jacket_sleeve: formData.paletoManga,
-                jacket_brand: formData.paletoMarca,
-                jacket_adjustment: formData.paletoAjuste ? formData.paletoAjusteValor : '',
-                jacket_extras: formData.paletoExtras,
-                shirt_number: formData.camisaNumero,
-                shirt_color: formData.camisaCor,
-                shirt_sleeve: formData.camisaManga,
-                shirt_brand: formData.camisaMarca,
-                shirt_adjustment: formData.camisaAjuste ? formData.camisaAjusteValor : '',
-                shirt_extras: formData.camisaExtras,
-                pants_number: formData.calcaNumero,
-                pants_color: formData.calcaCor,
-                pants_waist: formData.calcaCintura,
-                pants_leg: formData.calcaPerna,
-                pants_brand: formData.calcaMarca,
-                pants_adjustment_cos: formData.calcaAjusteCos ? formData.calcaAjusteCosValor : '',
-                pants_adjustment_comprimento: formData.calcaAjusteComprimento ? formData.calcaAjusteComprimentoValor : '',
-                pants_extras: formData.calcaExtras,
-                suspenders: formData.suspensorio,
-                suspenders_color: formData.suspensorioCor,
-                belt_loop: formData.passante,
-                belt_loop_color: formData.passanteCor,
-                belt_loop_extensor: formData.passanteExtensor,
-                tie: formData.lenco,
-                tie_color: formData.lencoCor,
-                tie_accessory: formData.gravata,
-                tie_number: formData.gravataNumero,
-                tie_color_accessory: formData.gravataCor,
-                tie_brand: formData.gravataMarca,
-                belt: formData.cinto,
-                belt_number: formData.cintoNumero,
-                belt_color: formData.cintoCor,
-                belt_brand: formData.cintoMarca,
-                shoes: formData.sapato,
-                shoes_number: formData.sapatoNumero,
-                shoes_color: formData.sapatoCor,
-                shoes_brand: formData.sapatoMarca,
-                vest: formData.colete,
-                vest_number: formData.coleteNumero,
-                vest_color: formData.coleteCor
+                }
             };
 
+            // Log do payload para debug
+            console.log('📦 Payload sendo enviado:', JSON.stringify(payload, null, 2));
+
             if (selectedOrder) {
-                await serviceOrderService.updateServiceOrder(selectedOrder.id, orderData);
+                await serviceOrderService.updateServiceOrder(selectedOrder.id, payload);
                 Swal.fire({
                     icon: 'success',
                     title: 'Sucesso!',
@@ -657,7 +691,7 @@ const OrdemServico = () => {
                     }
                 });
             } else {
-                await serviceOrderService.createServiceOrder(orderData);
+                await serviceOrderService.createServiceOrder(payload);
                 Swal.fire({
                     icon: 'success',
                     title: 'Sucesso!',
@@ -743,10 +777,10 @@ const OrdemServico = () => {
                 const suspensorioValid = !inputValues.suspensorio || inputValues.suspensorioCor.trim() !== '';
                 const passanteValid = !inputValues.passante || inputValues.passanteCor.trim() !== '';
                 const lencoValid = !inputValues.lenco || inputValues.lencoCor.trim() !== '';
-                const gravataValid = !inputValues.gravata || (inputValues.gravataNumero.trim() !== '' && inputValues.gravataCor.trim() !== '');
-                const cintoValid = !inputValues.cinto || (inputValues.cintoNumero.trim() !== '' && inputValues.cintoCor.trim() !== '');
-                const sapatoValid = !inputValues.sapato || (inputValues.sapatoNumero.trim() !== '' && inputValues.sapatoCor.trim() !== '');
-                const coleteValid = !inputValues.colete || (inputValues.coleteNumero.trim() !== '' && inputValues.coleteCor.trim() !== '');
+                const gravataValid = !inputValues.gravata || (inputValues.gravataCor.trim() !== '' && inputValues.gravataDescricao.trim() !== '');
+                const cintoValid = !inputValues.cinto || (inputValues.cintoCor.trim() !== '');
+                const sapatoValid = !inputValues.sapato || (inputValues.sapatoCor.trim() !== '' && inputValues.sapatoDescricao.trim() !== '');
+                const coleteValid = !inputValues.colete || (inputValues.coleteCor.trim() !== '' && inputValues.coleteDescricao.trim() !== '');
                 
                 const acessoriosValid = suspensorioValid && passanteValid && lencoValid && gravataValid && cintoValid && sapatoValid && coleteValid;
                 
@@ -756,10 +790,10 @@ const OrdemServico = () => {
                     console.log('Suspensorio:', inputValues.suspensorio, 'Cor:', inputValues.suspensorioCor, 'Valid:', suspensorioValid);
                     console.log('Passante:', inputValues.passante, 'Cor:', inputValues.passanteCor, 'Valid:', passanteValid);
                     console.log('Lenço:', inputValues.lenco, 'Cor:', inputValues.lencoCor, 'Valid:', lencoValid);
-                    console.log('Gravata:', inputValues.gravata, 'Número:', inputValues.gravataNumero, 'Cor:', inputValues.gravataCor, 'Valid:', gravataValid);
-                    console.log('Cinto:', inputValues.cinto, 'Número:', inputValues.cintoNumero, 'Cor:', inputValues.cintoCor, 'Valid:', cintoValid);
-                    console.log('Sapato:', inputValues.sapato, 'Número:', inputValues.sapatoNumero, 'Cor:', inputValues.sapatoCor, 'Valid:', sapatoValid);
-                    console.log('Colete:', inputValues.colete, 'Número:', inputValues.coleteNumero, 'Cor:', inputValues.coleteCor, 'Valid:', coleteValid);
+                                    console.log('Gravata:', inputValues.gravata, 'Cor:', inputValues.gravataCor, 'Descrição:', inputValues.gravataDescricao, 'Valid:', gravataValid);
+                console.log('Cinto:', inputValues.cinto, 'Cor:', inputValues.cintoCor, 'Valid:', cintoValid);
+                console.log('Sapato:', inputValues.sapato, 'Cor:', inputValues.sapatoCor, 'Descrição:', inputValues.sapatoDescricao, 'Valid:', sapatoValid);
+                console.log('Colete:', inputValues.colete, 'Cor:', inputValues.coleteCor, 'Descrição:', inputValues.coleteDescricao, 'Valid:', coleteValid);
                 }
                 
                 return acessoriosValid;
@@ -836,24 +870,23 @@ const OrdemServico = () => {
                     errors.lencoCor = 'Cor do lenço é obrigatória quando marcado';
                 }
                 if (inputValues.gravata) {
-                    if (!inputValues.gravataNumero.trim()) errors.gravataNumero = 'Número da gravata é obrigatório';
                     if (!inputValues.gravataCor.trim()) errors.gravataCor = 'Cor da gravata é obrigatória';
+                    if (!inputValues.gravataDescricao.trim()) errors.gravataDescricao = 'Descrição da gravata é obrigatória';
                 }
                 if (inputValues.cinto) {
-                    if (!inputValues.cintoNumero.trim()) errors.cintoNumero = 'Número do cinto é obrigatório';
                     if (!inputValues.cintoCor.trim()) errors.cintoCor = 'Cor do cinto é obrigatória';
                 }
                 if (inputValues.sapato) {
-                    if (!inputValues.sapatoNumero.trim()) errors.sapatoNumero = 'Número do sapato é obrigatório';
                     if (!inputValues.sapatoCor.trim()) errors.sapatoCor = 'Cor do sapato é obrigatória';
+                    if (!inputValues.sapatoDescricao.trim()) errors.sapatoDescricao = 'Descrição do sapato é obrigatória';
                 }
                 if (inputValues.colete) {
-                    if (!inputValues.coleteNumero.trim()) errors.coleteNumero = 'Número do colete é obrigatório';
                     if (!inputValues.coleteCor.trim()) errors.coleteCor = 'Cor do colete é obrigatória';
+                    if (!inputValues.coleteDescricao.trim()) errors.coleteDescricao = 'Descrição do colete é obrigatória';
                 }
-                if (!inputValues.gravataMarca.trim()) errors.gravataMarca = 'Marca da gravata é obrigatória';
-                if (!inputValues.cintoMarca.trim()) errors.cintoMarca = 'Marca do cinto é obrigatória';
-                if (!inputValues.sapatoMarca.trim()) errors.sapatoMarca = 'Marca do sapato é obrigatória';
+                if (inputValues.gravata && !inputValues.gravataMarca.trim()) errors.gravataMarca = 'Marca da gravata é obrigatória';
+                if (inputValues.cinto && !inputValues.cintoMarca.trim()) errors.cintoMarca = 'Marca do cinto é obrigatória';
+                if (inputValues.sapato && !inputValues.sapatoMarca.trim()) errors.sapatoMarca = 'Marca do sapato é obrigatória';
                 break;
                 
             case 5: // Pagamento
@@ -1017,13 +1050,54 @@ const OrdemServico = () => {
                         <div className="form-grid">
                             <div className="form-group">
                                 <label>Número <span style={{ color: 'red' }}>*</span></label>
-                                <input
-                                    type="text"
+                                <CustomSelect
                                     value={inputValues.paletoNumero}
-                                    onChange={(e) => handleInputChange('paletoNumero', e.target.value)}
-                                    onBlur={(e) => handleInputBlur('paletoNumero', e.target.value)}
-                                    placeholder="Número"
-                                    className={validationErrors.paletoNumero ? 'error' : ''}
+                                    onChange={(value) => handleSelectChange('paletoNumero', value)}
+                                    options={[
+                                        { value: '', label: 'Selecione o número' },
+                                        { value: '1', label: '1' },
+                                        { value: '2', label: '2' },
+                                        { value: '4', label: '4' },
+                                        { value: '6', label: '6' },
+                                        { value: '8', label: '8' },
+                                        { value: '10', label: '10' },
+                                        { value: '12', label: '12' },
+                                        { value: '14', label: '14' },
+                                        { value: '16', label: '16' },
+                                        { value: '40', label: '40' },
+                                        { value: '42', label: '42' },
+                                        { value: '44', label: '44' },
+                                        { value: '46', label: '46' },
+                                        { value: '48', label: '48' },
+                                        { value: '50', label: '50' },
+                                        { value: '52', label: '52' },
+                                        { value: '54', label: '54' },
+                                        { value: '56', label: '56' },
+                                        { value: '58', label: '58' },
+                                        { value: '60', label: '60' },
+                                        { value: '62', label: '62' },
+                                        { value: '64', label: '64' },
+                                        { value: '66', label: '66' },
+                                        { value: '68', label: '68' },
+                                        { value: '70', label: '70' },
+                                        { value: '72', label: '72' },
+                                        { value: '74', label: '74' },
+                                        { value: '76', label: '76' },
+                                        { value: '78', label: '78' },
+                                        { value: '80', label: '80' },
+                                        { value: '82', label: '82' },
+                                        { value: '84', label: '84' },
+                                        { value: '86', label: '86' },
+                                        { value: '88', label: '88' },
+                                        { value: '90', label: '90' },
+                                        { value: '92', label: '92' },
+                                        { value: '94', label: '94' },
+                                        { value: '96', label: '96' },
+                                        { value: '98', label: '98' },
+                                        { value: '100', label: '100' }
+                                    ]}
+                                    placeholder="Selecione o número"
+                                    error={!!validationErrors.paletoNumero}
                                 />
                                 {validationErrors.paletoNumero && (
                                     <div className="error-message">{validationErrors.paletoNumero}</div>
@@ -1051,38 +1125,80 @@ const OrdemServico = () => {
                             </div>
                             <div className="form-group">
                                 <label>Manga <span style={{ color: 'red' }}>*</span></label>
-                                <input
-                                    type="text"
+                                <CustomSelect
                                     value={inputValues.paletoManga}
-                                    onChange={(e) => handleInputChange('paletoManga', e.target.value)}
-                                    onBlur={(e) => handleInputBlur('paletoManga', e.target.value)}
-                                    placeholder="Medida da manga"
-                                    className={validationErrors.paletoManga ? 'error' : ''}
+                                    onChange={(value) => handleSelectChange('paletoManga', value)}
+                                    options={[
+                                        { value: '', label: 'Selecione a medida da manga' },
+                                        { value: '20', label: '20' },
+                                        { value: '21', label: '21' },
+                                        { value: '22', label: '22' },
+                                        { value: '23', label: '23' },
+                                        { value: '24', label: '24' },
+                                        { value: '25', label: '25' },
+                                        { value: '26', label: '26' },
+                                        { value: '27', label: '27' },
+                                        { value: '28', label: '28' },
+                                        { value: '29', label: '29' },
+                                        { value: '30', label: '30' },
+                                        { value: '31', label: '31' },
+                                        { value: '32', label: '32' },
+                                        { value: '33', label: '33' },
+                                        { value: '34', label: '34' },
+                                        { value: '35', label: '35' },
+                                        { value: '36', label: '36' },
+                                        { value: '37', label: '37' },
+                                        { value: '38', label: '38' },
+                                        { value: '39', label: '39' },
+                                        { value: '40', label: '40' },
+                                        { value: '41', label: '41' },
+                                        { value: '42', label: '42' },
+                                        { value: '43', label: '43' },
+                                        { value: '44', label: '44' },
+                                        { value: '45', label: '45' },
+                                        { value: '46', label: '46' },
+                                        { value: '47', label: '47' },
+                                        { value: '48', label: '48' },
+                                        { value: '49', label: '49' },
+                                        { value: '50', label: '50' },
+                                        { value: '51', label: '51' },
+                                        { value: '52', label: '52' },
+                                        { value: '53', label: '53' },
+                                        { value: '54', label: '54' },
+                                        { value: '55', label: '55' },
+                                        { value: '56', label: '56' },
+                                        { value: '57', label: '57' },
+                                        { value: '58', label: '58' },
+                                        { value: '59', label: '59' },
+                                        { value: '60', label: '60' },
+                                        { value: '61', label: '61' },
+                                        { value: '62', label: '62' },
+                                        { value: '63', label: '63' },
+                                        { value: '64', label: '64' },
+                                        { value: '65', label: '65' },
+                                        { value: '66', label: '66' },
+                                        { value: '67', label: '67' },
+                                        { value: '68', label: '68' },
+                                        { value: '69', label: '69' },
+                                        { value: '70', label: '70' },
+                                        { value: '71', label: '71' },
+                                        { value: '72', label: '72' },
+                                        { value: '73', label: '73' },
+                                        { value: '74', label: '74' },
+                                        { value: '75', label: '75' },
+                                        { value: '76', label: '76' },
+                                        { value: '77', label: '77' },
+                                        { value: '78', label: '78' },
+                                        { value: '79', label: '79' },
+                                        { value: '80', label: '80' }
+                                    ]}
+                                    placeholder="Selecione a medida da manga"
+                                    error={!!validationErrors.paletoManga}
                                 />
                                 {validationErrors.paletoManga && (
                                     <div className="error-message">{validationErrors.paletoManga}</div>
                                 )}
-                            </div>
-                            <div className="form-group">
-                                <label>Marca <span style={{ color: 'red' }}>*</span></label>
-                                <CustomSelect
-                                    value={inputValues.paletoMarca}
-                                    onChange={(value) => handleSelectChange('paletoMarca', value)}
-                                    options={[
-                                        { value: '', label: 'Selecione uma marca' },
-                                        ...brands.map((brand) => ({
-                                            value: brand.id.toString(),
-                                            label: brand.description
-                                        }))
-                                    ]}
-                                    placeholder="Selecione uma marca"
-                                    disabled={loadingBrands}
-                                    error={!!validationErrors.paletoMarca}
-                                />
-                                {validationErrors.paletoMarca && (
-                                    <div className="error-message">{validationErrors.paletoMarca}</div>
-                                )}
-                            </div>
+                            </div>                           
                             <div className="form-group">
                                 <label style={{ display: 'flex', alignItems: 'center' }}>
                                     <input
@@ -1106,6 +1222,26 @@ const OrdemServico = () => {
                                     <div className="error-message">{validationErrors.paletoAjusteValor}</div>
                                 )}
                             </div>
+                            <div className="form-group">
+                                <label>Marca <span style={{ color: 'red' }}>*</span></label>
+                                <CustomSelect
+                                    value={inputValues.paletoMarca}
+                                    onChange={(value) => handleSelectChange('paletoMarca', value)}
+                                    options={[
+                                        { value: '', label: 'Selecione uma marca' },
+                                        ...brands.map((brand) => ({
+                                            value: brand.id.toString(),
+                                            label: brand.description
+                                        }))
+                                    ]}
+                                    placeholder="Selecione uma marca"
+                                    disabled={loadingBrands}
+                                    error={!!validationErrors.paletoMarca}
+                                />
+                                {validationErrors.paletoMarca && (
+                                    <div className="error-message">{validationErrors.paletoMarca}</div>
+                                )}
+                            </div>
                             <div className="form-group full-width">
                                 <label>Extras</label>
                                 <input
@@ -1127,13 +1263,47 @@ const OrdemServico = () => {
                         <div className="form-grid">
                             <div className="form-group">
                                 <label>Número <span style={{ color: 'red' }}>*</span></label>
-                                <input
-                                    type="text"
+                                <CustomSelect
                                     value={inputValues.camisaNumero}
-                                    onChange={(e) => handleInputChange('camisaNumero', e.target.value)}
-                                    onBlur={(e) => handleInputBlur('camisaNumero', e.target.value)}
-                                    placeholder="Número"
-                                    className={validationErrors.camisaNumero ? 'error' : ''}
+                                    onChange={(value) => handleSelectChange('camisaNumero', value)}
+                                    options={[
+                                        { value: '', label: 'Selecione o número' },
+                                        // Números de 1 ao 20
+                                        { value: '1', label: '1' },
+                                        { value: '2', label: '2' },
+                                        { value: '3', label: '3' },
+                                        { value: '4', label: '4' },
+                                        { value: '5', label: '5' },
+                                        { value: '6', label: '6' },
+                                        { value: '7', label: '7' },
+                                        { value: '8', label: '8' },
+                                        { value: '9', label: '9' },
+                                        { value: '10', label: '10' },
+                                        { value: '11', label: '11' },
+                                        { value: '12', label: '12' },
+                                        { value: '13', label: '13' },
+                                        { value: '14', label: '14' },
+                                        { value: '15', label: '15' },
+                                        { value: '16', label: '16' },
+                                        { value: '17', label: '17' },
+                                        { value: '18', label: '18' },
+                                        { value: '19', label: '19' },
+                                        { value: '20', label: '20' },
+                                        // Letras
+                                        { value: 'S', label: 'S' },
+                                        { value: 'M', label: 'M' },
+                                        { value: 'L', label: 'L' },
+                                        { value: 'XL', label: 'XL' },
+                                        { value: 'XXL', label: 'XXL' },
+                                        { value: '3XL', label: '3XL' },
+                                        { value: 'P', label: 'P' },
+                                        { value: 'G', label: 'G' },
+                                        { value: 'XG', label: 'XG' },
+                                        { value: 'XXG', label: 'XXG' },
+                                        { value: 'EXG', label: 'EXG' }
+                                    ]}
+                                    placeholder="Selecione o número"
+                                    error={!!validationErrors.camisaNumero}
                                 />
                                 {validationErrors.camisaNumero && (
                                     <div className="error-message">{validationErrors.camisaNumero}</div>
@@ -1162,38 +1332,80 @@ const OrdemServico = () => {
                             </div>
                             <div className="form-group">
                                 <label>Manga <span style={{ color: 'red' }}>*</span></label>
-                                <input
-                                    type="text"
+                                <CustomSelect
                                     value={inputValues.camisaManga}
-                                    onChange={(e) => handleInputChange('camisaManga', e.target.value)}
-                                    onBlur={(e) => handleInputBlur('camisaManga', e.target.value)}
-                                    placeholder="Medida da manga"
-                                    className={validationErrors.camisaManga ? 'error' : ''}
+                                    onChange={(value) => handleSelectChange('camisaManga', value)}
+                                    options={[
+                                        { value: '', label: 'Selecione a medida da manga' },
+                                        { value: '20', label: '20' },
+                                        { value: '21', label: '21' },
+                                        { value: '22', label: '22' },
+                                        { value: '23', label: '23' },
+                                        { value: '24', label: '24' },
+                                        { value: '25', label: '25' },
+                                        { value: '26', label: '26' },
+                                        { value: '27', label: '27' },
+                                        { value: '28', label: '28' },
+                                        { value: '29', label: '29' },
+                                        { value: '30', label: '30' },
+                                        { value: '31', label: '31' },
+                                        { value: '32', label: '32' },
+                                        { value: '33', label: '33' },
+                                        { value: '34', label: '34' },
+                                        { value: '35', label: '35' },
+                                        { value: '36', label: '36' },
+                                        { value: '37', label: '37' },
+                                        { value: '38', label: '38' },
+                                        { value: '39', label: '39' },
+                                        { value: '40', label: '40' },
+                                        { value: '41', label: '41' },
+                                        { value: '42', label: '42' },
+                                        { value: '43', label: '43' },
+                                        { value: '44', label: '44' },
+                                        { value: '45', label: '45' },
+                                        { value: '46', label: '46' },
+                                        { value: '47', label: '47' },
+                                        { value: '48', label: '48' },
+                                        { value: '49', label: '49' },
+                                        { value: '50', label: '50' },
+                                        { value: '51', label: '51' },
+                                        { value: '52', label: '52' },
+                                        { value: '53', label: '53' },
+                                        { value: '54', label: '54' },
+                                        { value: '55', label: '55' },
+                                        { value: '56', label: '56' },
+                                        { value: '57', label: '57' },
+                                        { value: '58', label: '58' },
+                                        { value: '59', label: '59' },
+                                        { value: '60', label: '60' },
+                                        { value: '61', label: '61' },
+                                        { value: '62', label: '62' },
+                                        { value: '63', label: '63' },
+                                        { value: '64', label: '64' },
+                                        { value: '65', label: '65' },
+                                        { value: '66', label: '66' },
+                                        { value: '67', label: '67' },
+                                        { value: '68', label: '68' },
+                                        { value: '69', label: '69' },
+                                        { value: '70', label: '70' },
+                                        { value: '71', label: '71' },
+                                        { value: '72', label: '72' },
+                                        { value: '73', label: '73' },
+                                        { value: '74', label: '74' },
+                                        { value: '75', label: '75' },
+                                        { value: '76', label: '76' },
+                                        { value: '77', label: '77' },
+                                        { value: '78', label: '78' },
+                                        { value: '79', label: '79' },
+                                        { value: '80', label: '80' }
+                                    ]}
+                                    placeholder="Selecione a medida da manga"
+                                    error={!!validationErrors.camisaManga}
                                 />
                                 {validationErrors.camisaManga && (
                                     <div className="error-message">{validationErrors.camisaManga}</div>
                                 )}
-                            </div>
-                            <div className="form-group">
-                                <label>Marca <span style={{ color: 'red' }}>*</span></label>
-                                <CustomSelect
-                                    value={inputValues.camisaMarca}
-                                    onChange={(value) => handleSelectChange('camisaMarca', value)}
-                                    options={[
-                                        { value: '', label: 'Selecione uma marca' },
-                                        ...brands.map((brand) => ({
-                                            value: brand.id.toString(),
-                                            label: brand.description
-                                        }))
-                                    ]}
-                                    placeholder="Selecione uma marca"
-                                    disabled={loadingBrands}
-                                    error={!!validationErrors.camisaMarca}
-                                />
-                                {validationErrors.camisaMarca && (
-                                    <div className="error-message">{validationErrors.camisaMarca}</div>
-                                )}
-                            </div>
+                            </div>              
                             <div className="form-group">
                                 <label style={{ display: 'flex', alignItems: 'center' }}>
                                     <input
@@ -1217,6 +1429,26 @@ const OrdemServico = () => {
                                     <div className="error-message">{validationErrors.camisaAjusteValor}</div>
                                 )}
                             </div>
+                            <div className="form-group">
+                                <label>Marca <span style={{ color: 'red' }}>*</span></label>
+                                <CustomSelect
+                                    value={inputValues.camisaMarca}
+                                    onChange={(value) => handleSelectChange('camisaMarca', value)}
+                                    options={[
+                                        { value: '', label: 'Selecione uma marca' },
+                                        ...brands.map((brand) => ({
+                                            value: brand.id.toString(),
+                                            label: brand.description
+                                        }))
+                                    ]}
+                                    placeholder="Selecione uma marca"
+                                    disabled={loadingBrands}
+                                    error={!!validationErrors.camisaMarca}
+                                />
+                                {validationErrors.camisaMarca && (
+                                    <div className="error-message">{validationErrors.camisaMarca}</div>
+                                )}
+                            </div>
                             <div className="form-group full-width">
                                 <label>Extras</label>
                                 <input
@@ -1238,13 +1470,51 @@ const OrdemServico = () => {
                         <div className="form-grid">
                             <div className="form-group">
                                 <label>Número <span style={{ color: 'red' }}>*</span></label>
-                                <input
-                                    type="text"
+                                <CustomSelect
                                     value={inputValues.calcaNumero}
-                                    onChange={(e) => handleInputChange('calcaNumero', e.target.value)}
-                                    onBlur={(e) => handleInputBlur('calcaNumero', e.target.value)}
-                                    placeholder="Número"
-                                    className={validationErrors.calcaNumero ? 'error' : ''}
+                                    onChange={(value) => handleSelectChange('calcaNumero', value)}
+                                    options={[
+                                        { value: '', label: 'Selecione o número' },
+                                        // Números de 1 ao 16 (de 2 em 2, com exceção do 1)
+                                        { value: '1', label: '1' },
+                                        { value: '2', label: '2' },
+                                        { value: '4', label: '4' },
+                                        { value: '6', label: '6' },
+                                        { value: '8', label: '8' },
+                                        { value: '10', label: '10' },
+                                        { value: '12', label: '12' },
+                                        { value: '14', label: '14' },
+                                        { value: '16', label: '16' },
+                                        // Números de 30 ao 80 (de 2 em 2)
+                                        { value: '30', label: '30' },
+                                        { value: '32', label: '32' },
+                                        { value: '34', label: '34' },
+                                        { value: '36', label: '36' },
+                                        { value: '38', label: '38' },
+                                        { value: '40', label: '40' },
+                                        { value: '42', label: '42' },
+                                        { value: '44', label: '44' },
+                                        { value: '46', label: '46' },
+                                        { value: '48', label: '48' },
+                                        { value: '50', label: '50' },
+                                        { value: '52', label: '52' },
+                                        { value: '54', label: '54' },
+                                        { value: '56', label: '56' },
+                                        { value: '58', label: '58' },
+                                        { value: '60', label: '60' },
+                                        { value: '62', label: '62' },
+                                        { value: '64', label: '64' },
+                                        { value: '66', label: '66' },
+                                        { value: '68', label: '68' },
+                                        { value: '70', label: '70' },
+                                        { value: '72', label: '72' },
+                                        { value: '74', label: '74' },
+                                        { value: '76', label: '76' },
+                                        { value: '78', label: '78' },
+                                        { value: '80', label: '80' }
+                                    ]}
+                                    placeholder="Selecione o número"
+                                    error={!!validationErrors.calcaNumero}
                                 />
                                 {validationErrors.calcaNumero && (
                                     <div className="error-message">{validationErrors.calcaNumero}</div>
@@ -1274,16 +1544,101 @@ const OrdemServico = () => {
                             </div>
                             <div className="form-group">
                                 <label>Cós <span style={{ color: 'red' }}>*</span></label>
-                                <input
-                                    type="text"
+                                <CustomSelect
                                     value={inputValues.calcaCintura}
-                                    onChange={(e) => handleInputChange('calcaCintura', e.target.value)}
-                                    onBlur={(e) => handleInputBlur('calcaCintura', e.target.value)}
-                                    placeholder="Medida do cós"
-                                    className={validationErrors.calcaCintura ? 'error' : ''}
+                                    onChange={(value) => handleSelectChange('calcaCintura', value)}
+                                    onBlur={(value) => handleInputBlur('calcaCintura', value)}
+                                    options={[
+                                        { value: '', label: 'Selecione o cós' },
+                                        ...Array.from({ length: 71 }, (_, i) => i + 10).map(num => ({
+                                            value: num.toString(),
+                                            label: num.toString()
+                                        }))
+                                    ]}
+                                    placeholder="Selecione o cós"
+                                    error={!!validationErrors.calcaCintura}
                                 />
                                 {validationErrors.calcaCintura && (
                                     <div className="error-message">{validationErrors.calcaCintura}</div>
+                                )}
+                            </div>
+                            
+                            <div className="form-group">
+                                <label style={{ display: 'flex', alignItems: 'center' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={inputValues.calcaAjusteCos}
+                                        onChange={(e) => handleCheckboxChange('calcaAjusteCos', e.target.checked)}
+                                        style={{ marginRight: '8px' }}
+                                    />
+                                    Ajuste do Cós
+                                </label>
+                                <CustomSelect
+                                    value={inputValues.calcaAjusteCosValor}
+                                    onChange={(value) => handleSelectChange('calcaAjusteCosValor', value)}
+                                    onBlur={(value) => handleInputBlur('calcaAjusteCosValor', value)}
+                                    options={[
+                                        { value: '', label: 'Selecione o ajuste' },
+                                        ...Array.from({ length: 4 }, (_, i) => i + 1).map(num => ({
+                                            value: num.toString(),
+                                            label: num.toString()
+                                        }))
+                                    ]}
+                                    placeholder="Selecione o ajuste"
+                                    disabled={!inputValues.calcaAjusteCos}
+                                    error={!!validationErrors.calcaAjusteCosValor}
+                                />
+                                {validationErrors.calcaAjusteCosValor && (
+                                    <div className="error-message">{validationErrors.calcaAjusteCosValor}</div>
+                                )}
+                            </div>
+                            <div className="form-group">
+                                <label>Comprimento <span style={{ color: 'red' }}>*</span></label>
+                                <CustomSelect
+                                    value={inputValues.calcaPerna}
+                                    onChange={(value) => handleSelectChange('calcaPerna', value)}
+                                    onBlur={(value) => handleInputBlur('calcaPerna', value)}
+                                    options={[
+                                        { value: '', label: 'Selecione o comprimento' },
+                                        ...Array.from({ length: 111 }, (_, i) => i + 10).map(num => ({
+                                            value: num.toString(),
+                                            label: num.toString()
+                                        }))
+                                    ]}
+                                    placeholder="Selecione o comprimento"
+                                    error={!!validationErrors.calcaPerna}
+                                />
+                                {validationErrors.calcaPerna && (
+                                    <div className="error-message">{validationErrors.calcaPerna}</div>
+                                )}
+                            </div>
+                            <div className="form-group">
+                                <label style={{ display: 'flex', alignItems: 'center' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={inputValues.calcaAjusteComprimento}
+                                        onChange={(e) => handleCheckboxChange('calcaAjusteComprimento', e.target.checked)}
+                                        style={{ marginRight: '8px' }}
+                                    />
+                                    Ajuste do Comprimento
+                                </label>
+                                <CustomSelect
+                                    value={inputValues.calcaAjusteComprimentoValor}
+                                    onChange={(value) => handleSelectChange('calcaAjusteComprimentoValor', value)}
+                                    onBlur={(value) => handleInputBlur('calcaAjusteComprimentoValor', value)}
+                                    options={[
+                                        { value: '', label: 'Selecione o ajuste' },
+                                        ...Array.from({ length: 50 }, (_, i) => i + 1).map(num => ({
+                                            value: num.toString(),
+                                            label: num.toString()
+                                        }))
+                                    ]}
+                                    placeholder="Selecione o ajuste"
+                                    disabled={!inputValues.calcaAjusteComprimento}
+                                    error={!!validationErrors.calcaAjusteComprimentoValor}
+                                />
+                                {validationErrors.calcaAjusteComprimentoValor && (
+                                    <div className="error-message">{validationErrors.calcaAjusteComprimentoValor}</div>
                                 )}
                             </div>
                             <div className="form-group">
@@ -1304,66 +1659,6 @@ const OrdemServico = () => {
                                 />
                                 {validationErrors.calcaMarca && (
                                     <div className="error-message">{validationErrors.calcaMarca}</div>
-                                )}
-                            </div>
-                            <div className="form-group">
-                                <label style={{ display: 'flex', alignItems: 'center' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={inputValues.calcaAjusteCos}
-                                        onChange={(e) => handleCheckboxChange('calcaAjusteCos', e.target.checked)}
-                                        style={{ marginRight: '8px' }}
-                                    />
-                                    Ajuste do Cós (cm)
-                                </label>
-                                <input
-                                    type="number"
-                                    value={inputValues.calcaAjusteCosValor}
-                                    onChange={(e) => handleInputChange('calcaAjusteCosValor', e.target.value)}
-                                    onBlur={(e) => handleInputBlur('calcaAjusteCosValor', e.target.value)}
-                                    placeholder="Ajuste do cós em centímetros"
-                                    disabled={!inputValues.calcaAjusteCos}
-                                    className={validationErrors.calcaAjusteCosValor ? 'error' : ''}
-                                />
-                                {validationErrors.calcaAjusteCosValor && (
-                                    <div className="error-message">{validationErrors.calcaAjusteCosValor}</div>
-                                )}
-                            </div>
-                            <div className="form-group">
-                                <label>Comprimento <span style={{ color: 'red' }}>*</span></label>
-                                <input
-                                    type="text"
-                                    value={inputValues.calcaPerna}
-                                    onChange={(e) => handleInputChange('calcaPerna', e.target.value)}
-                                    onBlur={(e) => handleInputBlur('calcaPerna', e.target.value)}
-                                    placeholder="Medida do comprimento"
-                                    className={validationErrors.calcaPerna ? 'error' : ''}
-                                />
-                                {validationErrors.calcaPerna && (
-                                    <div className="error-message">{validationErrors.calcaPerna}</div>
-                                )}
-                            </div>
-                            <div className="form-group">
-                                <label style={{ display: 'flex', alignItems: 'center' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={inputValues.calcaAjusteComprimento}
-                                        onChange={(e) => handleCheckboxChange('calcaAjusteComprimento', e.target.checked)}
-                                        style={{ marginRight: '8px' }}
-                                    />
-                                    Ajuste do Comprimento (cm)
-                                </label>
-                                <input
-                                    type="number"
-                                    value={inputValues.calcaAjusteComprimentoValor}
-                                    onChange={(e) => handleInputChange('calcaAjusteComprimentoValor', e.target.value)}
-                                    onBlur={(e) => handleInputBlur('calcaAjusteComprimentoValor', e.target.value)}
-                                    placeholder="Ajuste do comprimento em centímetros"
-                                    disabled={!inputValues.calcaAjusteComprimento}
-                                    className={validationErrors.calcaAjusteComprimentoValor ? 'error' : ''}
-                                />
-                                {validationErrors.calcaAjusteComprimentoValor && (
-                                    <div className="error-message">{validationErrors.calcaAjusteComprimentoValor}</div>
                                 )}
                             </div>
                             <div className="form-group full-width">
@@ -1509,16 +1804,6 @@ const OrdemServico = () => {
                                     Gravata
                                 </label>
                                 <div style={{ display: 'flex', gap: '10px' }}>
-                                    <input
-                                        type="text"
-                                        value={inputValues.gravataNumero}
-                                        onChange={(e) => handleInputChange('gravataNumero', e.target.value)}
-                                        onBlur={(e) => handleInputBlur('gravataNumero', e.target.value)}
-                                        placeholder="Número"
-                                        disabled={!inputValues.gravata}
-                                        style={{ flex: 1 }}
-                                        className={validationErrors.gravataNumero ? 'error' : ''}
-                                    />
                                     <CustomSelect
                                         value={inputValues.gravataCor}
                                         onChange={(value) => handleSelectChange('gravataCor', value)}
@@ -1550,9 +1835,18 @@ const OrdemServico = () => {
                                     disabled={!inputValues.gravata || loadingBrands}
                                     error={!!validationErrors.gravataMarca}
                                 />
-                                {(validationErrors.gravataNumero || validationErrors.gravataCor || validationErrors.gravataMarca) && (
+                                <input
+                                    type="text"
+                                    value={inputValues.gravataDescricao}
+                                    onChange={(e) => handleInputChange('gravataDescricao', e.target.value)}
+                                    onBlur={(e) => handleInputBlur('gravataDescricao', e.target.value)}
+                                    placeholder="Descrição (lisa, riscada, etc.)"
+                                    disabled={!inputValues.gravata}
+                                    className={validationErrors.gravataDescricao ? 'error' : ''}
+                                />
+                                {(validationErrors.gravataCor || validationErrors.gravataMarca || validationErrors.gravataDescricao) && (
                                     <div className="error-message">
-                                        {validationErrors.gravataNumero || validationErrors.gravataCor || validationErrors.gravataMarca}
+                                        {validationErrors.gravataCor || validationErrors.gravataMarca || validationErrors.gravataDescricao}
                                     </div>
                                 )}
                             </div>
@@ -1569,16 +1863,7 @@ const OrdemServico = () => {
                                     Cinto
                                 </label>
                                 <div style={{ display: 'flex', gap: '10px' }}>
-                                    <input
-                                        type="text"
-                                        value={inputValues.cintoNumero}
-                                        onChange={(e) => handleInputChange('cintoNumero', e.target.value)}
-                                        onBlur={(e) => handleInputBlur('cintoNumero', e.target.value)}
-                                        placeholder="Número"
-                                        disabled={!inputValues.cinto}
-                                        style={{ flex: 1 }}
-                                        className={validationErrors.cintoNumero ? 'error' : ''}
-                                    />
+                                 
                                     <CustomSelect
                                         value={inputValues.cintoCor}
                                                                             onChange={(value) => handleSelectChange('cintoCor', value)}
@@ -1608,9 +1893,9 @@ const OrdemServico = () => {
                                     disabled={!inputValues.cinto || loadingBrands}
                                     error={!!validationErrors.cintoMarca}
                                 />
-                                {(validationErrors.cintoNumero || validationErrors.cintoCor || validationErrors.cintoMarca) && (
+                                {(validationErrors.cintoCor || validationErrors.cintoMarca) && (
                                     <div className="error-message">
-                                        {validationErrors.cintoNumero || validationErrors.cintoCor || validationErrors.cintoMarca}
+                                        {validationErrors.cintoCor || validationErrors.cintoMarca}
                                     </div>
                                 )}
                             </div>
@@ -1627,16 +1912,7 @@ const OrdemServico = () => {
                                     Sapato
                                 </label>
                                 <div style={{ display: 'flex', gap: '10px' }}>
-                                    <input
-                                        type="text"
-                                        value={inputValues.sapatoNumero}
-                                        onChange={(e) => handleInputChange('sapatoNumero', e.target.value)}
-                                        onBlur={(e) => handleInputBlur('sapatoNumero', e.target.value)}
-                                        placeholder="Número"
-                                        disabled={!inputValues.sapato}
-                                        style={{ flex: 1 }}
-                                        className={validationErrors.sapatoNumero ? 'error' : ''}
-                                    />
+
                                     <CustomSelect
                                         value={inputValues.sapatoCor}
                                         onChange={(value) => handleSelectChange('sapatoCor', value)}
@@ -1668,9 +1944,18 @@ const OrdemServico = () => {
                                     disabled={!inputValues.sapato || loadingBrands}
                                     error={!!validationErrors.sapatoMarca}
                                 />
-                                {(validationErrors.sapatoNumero || validationErrors.sapatoCor || validationErrors.sapatoMarca) && (
+                                <input
+                                    type="text"
+                                    value={inputValues.sapatoDescricao}
+                                    onChange={(e) => handleInputChange('sapatoDescricao', e.target.value)}
+                                    onBlur={(e) => handleInputBlur('sapatoDescricao', e.target.value)}
+                                    placeholder="Descrição do sapato"
+                                    disabled={!inputValues.sapato}
+                                    className={validationErrors.sapatoDescricao ? 'error' : ''}
+                                />
+                                {(validationErrors.sapatoCor || validationErrors.sapatoMarca || validationErrors.sapatoDescricao) && (
                                     <div className="error-message">
-                                        {validationErrors.sapatoNumero || validationErrors.sapatoCor || validationErrors.sapatoMarca}
+                                        {validationErrors.sapatoCor || validationErrors.sapatoMarca || validationErrors.sapatoDescricao}
                                     </div>
                                 )}
                             </div>
@@ -1687,16 +1972,7 @@ const OrdemServico = () => {
                                     Colete
                                 </label>
                                 <div style={{ display: 'flex', gap: '10px' }}>
-                                    <input
-                                        type="text"
-                                        value={inputValues.coleteNumero}
-                                        onChange={(e) => handleInputChange('coleteNumero', e.target.value)}
-                                        onBlur={(e) => handleInputBlur('coleteNumero', e.target.value)}
-                                        placeholder="Número"
-                                        disabled={!inputValues.colete}
-                                        style={{ flex: 1 }}
-                                        className={validationErrors.coleteNumero ? 'error' : ''}
-                                    />
+                                    
                                     <CustomSelect
                                         value={inputValues.coleteCor}
                                         onChange={(value) => handleSelectChange('coleteCor', value)}
@@ -1714,9 +1990,18 @@ const OrdemServico = () => {
                                         error={!!validationErrors.coleteCor}
                                     />
                                 </div>
-                                {(validationErrors.coleteNumero || validationErrors.coleteCor) && (
+                                <input
+                                    type="text"
+                                    value={inputValues.coleteDescricao}
+                                    onChange={(e) => handleInputChange('coleteDescricao', e.target.value)}
+                                    onBlur={(e) => handleInputBlur('coleteDescricao', e.target.value)}
+                                    placeholder="Descrição do colete"
+                                    disabled={!inputValues.colete}
+                                    className={validationErrors.coleteDescricao ? 'error' : ''}
+                                />
+                                {(validationErrors.coleteCor || validationErrors.coleteDescricao) && (
                                     <div className="error-message">
-                                        {validationErrors.coleteNumero || validationErrors.coleteCor}
+                                        {validationErrors.coleteCor || validationErrors.coleteDescricao}
                                     </div>
                                 )}
                             </div>
@@ -1853,29 +2138,72 @@ const OrdemServico = () => {
                 return;
             }
             
-            // Adicionar atributo para ativar estilos do PDF
-            previewElement.setAttribute('data-pdf-target', 'true');
+            // Criar um container temporário para o PDF com dimensões fixas
+            const tempContainer = document.createElement('div');
+            tempContainer.style.cssText = `
+                position: fixed;
+                top: -9999px;
+                left: -9999px;
+                width: 800px;
+                height: auto;
+                background: white;
+                color: black;
+                font-family: Arial, sans-serif;
+                z-index: -1;
+                transform: none !important;
+                overflow: visible !important;
+            `;
             
-            // Forçar reflow para aplicar os estilos CSS
-            previewElement.offsetHeight;
+            // Clonar o elemento do preview
+            const clonedPreview = previewElement.cloneNode(true);
+            clonedPreview.setAttribute('data-pdf-target', 'true');
+            clonedPreview.style.cssText = `
+                width: 800px !important;
+                max-width: 800px !important;
+                height: auto !important;
+                background: white !important;
+                color: black !important;
+                transform: none !important;
+                overflow: visible !important;
+                position: relative !important;
+                top: 0 !important;
+                left: 0 !important;
+                margin: 0 !important;
+                padding: 20px !important;
+                box-shadow: none !important;
+                border: 1px solid #ddd !important;
+                border-radius: 0 !important;
+            `;
             
-            // Delay maior para garantir que os estilos sejam aplicados
-            await new Promise(resolve => setTimeout(resolve, 300));
+            // Adicionar ao container temporário
+            tempContainer.appendChild(clonedPreview);
+            document.body.appendChild(tempContainer);
+            
+            // Forçar reflow
+            tempContainer.offsetHeight;
+            
+            // Delay para garantir que os estilos sejam aplicados
+            await new Promise(resolve => setTimeout(resolve, 500));
 
-            // Configurar o canvas
-            const canvas = await html2canvas(previewElement, {
+            // Configurar o canvas com dimensões fixas
+            const canvas = await html2canvas(clonedPreview, {
                 scale: 2,
                 useCORS: true,
                 allowTaint: true,
                 backgroundColor: '#ffffff',
                 logging: false,
-                removeContainer: true,
+                width: 800,
+                height: clonedPreview.scrollHeight,
                 onclone: (clonedDoc) => {
                     // Garantir que o elemento clonado tenha fundo branco
                     const clonedElement = clonedDoc.getElementById('os-preview');
                     if (clonedElement) {
                         clonedElement.style.background = 'white';
                         clonedElement.style.color = 'black';
+                        clonedElement.style.width = '800px';
+                        clonedElement.style.maxWidth = '800px';
+                        clonedElement.style.transform = 'none';
+                        clonedElement.style.overflow = 'visible';
                     }
                 }
             });
@@ -1935,8 +2263,10 @@ const OrdemServico = () => {
             const fileName = `OS_${selectedOrder?.id || 'Nova'}_${new Date().toISOString().split('T')[0]}.pdf`;
             pdf.save(fileName);
             
-            // Remover atributo após gerar PDF
-            previewElement.removeAttribute('data-pdf-target');
+            // Limpar container temporário
+            if (tempContainer && tempContainer.parentNode) {
+                tempContainer.parentNode.removeChild(tempContainer);
+            }
 
         } catch (error) {
             console.error('Erro ao gerar PDF:', error);
@@ -1948,9 +2278,9 @@ const OrdemServico = () => {
                 showConfirmButton: false
             });
             
-            // Remover atributo em caso de erro também
-            if (previewElement) {
-                previewElement.removeAttribute('data-pdf-target');
+            // Limpar container temporário em caso de erro também
+            if (tempContainer && tempContainer.parentNode) {
+                tempContainer.parentNode.removeChild(tempContainer);
             }
         }
     };
@@ -2098,7 +2428,7 @@ const OrdemServico = () => {
                                         </div>
                                         <div className="item-details">
                                             <span><strong>Nº:</strong> {formData.paletoNumero}</span>
-                                            <span><strong>Cor:</strong> {formData.paletoCor}</span>
+                                            <span><strong>Cor:</strong> {capitalizeText(formData.paletoCor)}</span>
                                             <span><strong>Manga:</strong> {formData.paletoManga}</span>
                                             <span><strong>Marca:</strong> {formData.paletoMarca || 'Não informada'}</span>
                                             <span><strong>Ajuste:</strong> {formData.paletoAjuste ? formData.paletoAjusteValor : 'Não'}</span>
@@ -2112,7 +2442,7 @@ const OrdemServico = () => {
                                         </div>
                                         <div className="item-details">
                                             <span><strong>Nº:</strong> {formData.camisaNumero}</span>
-                                            <span><strong>Cor:</strong> {formData.camisaCor}</span>
+                                            <span><strong>Cor:</strong> {capitalizeText(formData.camisaCor)}</span>
                                             <span><strong>Manga:</strong> {formData.camisaManga}</span>
                                             <span><strong>Marca:</strong> {formData.camisaMarca || 'Não informada'}</span>
                                             <span><strong>Ajuste:</strong> {formData.camisaAjuste ? formData.camisaAjusteValor : 'Não'}</span>
@@ -2126,7 +2456,7 @@ const OrdemServico = () => {
                                         </div>
                                         <div className="item-details">
                                             <span><strong>Nº:</strong> {formData.calcaNumero}</span>
-                                            <span><strong>Cor:</strong> {formData.calcaCor}</span>
+                                            <span><strong>Cor:</strong> {capitalizeText(formData.calcaCor)}</span>
                                             <span><strong>Cós:</strong> {formData.calcaCintura}</span>
                                             <span><strong>Comprimento:</strong> {formData.calcaPerna}</span>
                                             <span><strong>Marca:</strong> {formData.calcaMarca || 'Não informada'}</span>
@@ -2153,13 +2483,13 @@ const OrdemServico = () => {
                                     {formData.suspensorio && (
                                         <div className="accessory-item">
                                             <span className="accessory-label">Suspensório:</span>
-                                            <span className="accessory-value">{formData.suspensorioCor}</span>
+                                            <span className="accessory-value">{capitalizeText(formData.suspensorioCor)}</span>
                                         </div>
                                     )}
                                     {formData.passante && (
                                         <div className="accessory-item">
                                             <span className="accessory-label">Passante:</span>
-                                            <span className="accessory-value">{formData.passanteCor}</span>
+                                            <span className="accessory-value">{capitalizeText(formData.passanteCor)}</span>
                                         </div>
                                     )}
                                     {formData.passante && formData.passanteExtensor && (
@@ -2171,31 +2501,31 @@ const OrdemServico = () => {
                                     {formData.lenco && (
                                         <div className="accessory-item">
                                             <span className="accessory-label">Lenço:</span>
-                                            <span className="accessory-value">{formData.lencoCor}</span>
+                                            <span className="accessory-value">{capitalizeText(formData.lencoCor)}</span>
                                         </div>
                                     )}
                                     {formData.gravata && (
                                         <div className="accessory-item">
                                             <span className="accessory-label">Gravata:</span>
-                                            <span className="accessory-value">Nº {formData.gravataNumero} - {formData.gravataCor} {formData.gravataMarca && `(${formData.gravataMarca})`}</span>
+                                            <span className="accessory-value">{capitalizeText(formData.gravataCor)} - {formData.gravataDescricao} {formData.gravataMarca && `(${formData.gravataMarca})`}</span>
                                         </div>
                                     )}
                                     {formData.cinto && (
                                         <div className="accessory-item">
                                             <span className="accessory-label">Cinto:</span>
-                                            <span className="accessory-value">Nº {formData.cintoNumero} - {formData.cintoCor} {formData.cintoMarca && `(${formData.cintoMarca})`}</span>
+                                            <span className="accessory-value">{capitalizeText(formData.cintoCor)} {formData.cintoMarca && `(${formData.cintoMarca})`}</span>
                                         </div>
                                     )}
                                     {formData.sapato && (
                                         <div className="accessory-item">
                                             <span className="accessory-label">Sapato:</span>
-                                            <span className="accessory-value">Nº {formData.sapatoNumero} - {formData.sapatoCor} {formData.sapatoMarca && `(${formData.sapatoMarca})`}</span>
+                                            <span className="accessory-value">{capitalizeText(formData.sapatoCor)} - {formData.sapatoDescricao} {formData.sapatoMarca && `(${formData.sapatoMarca})`}</span>
                                         </div>
                                     )}
                                     {formData.colete && (
                                         <div className="accessory-item">
                                             <span className="accessory-label">Colete:</span>
-                                            <span className="accessory-value">Nº {formData.coleteNumero} - {formData.coleteCor}</span>
+                                            <span className="accessory-value">{capitalizeText(formData.coleteCor)} - {formData.coleteDescricao}</span>
                                         </div>
                                     )}
                                     

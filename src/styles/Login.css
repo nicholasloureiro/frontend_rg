@@ -238,6 +238,7 @@
 
 #input-login::placeholder{
   color: white !important;
+  font-size: 14px !important;
 }
 
 #main > div > div.login-card > form.login-form > div.input-group.mb-2 > div > button > svg{

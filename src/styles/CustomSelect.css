@@ -32,7 +32,7 @@
 
 
 .custom-select-control.disabled {
-  background-color: var(--background-inputs-disabled);
+  background-color: var(--background-inputs-disabled) !important;
   color: var(--font-color-disabled);
   cursor: not-allowed;
 }
