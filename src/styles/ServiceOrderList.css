@@ -63,7 +63,7 @@
     border-radius: 8px;
     transition: all 0.3s ease;
     border-bottom: 3px solid transparent;
-   margin: 0 10px;
+    margin: 0 10px;
 }
 
 .tab:hover {
@@ -269,10 +269,10 @@
 }
 
 .order-payment {
-    background: var(--color-bg-input);
+    background: var(--background-modal-body);
     padding: 16px;
     border-radius: 8px;
-    border-left: 4px solid #667eea;
+    border-left: 4px solid #6666ea;
 }
 
 .payment-row {
@@ -342,6 +342,42 @@
 
 .action-btn.edit:hover {
     background: var(--color-accent-hover);
+    transform: scale(1.1);
+    transition: all 0.3s ease !important;
+}
+
+.action-btn.return {
+    background: #4caf50;
+    color: white;
+    transition: all 0.3s ease !important;
+}
+
+.action-btn.return:hover {
+    background: #45a049;
+    transform: scale(1.1);
+    transition: all 0.3s ease !important;
+}
+
+.action-btn.pickup {
+    background: #CBA135;
+    color: white;
+    transition: all 0.3s ease !important;
+}
+
+.action-btn.pickup:hover {
+    background: #B8942A;
+    transform: scale(1.1);
+    transition: all 0.3s ease !important;
+}
+
+.action-btn.refuse {
+    background: #f44336;
+    color: white;
+    transition: all 0.3s ease !important;
+}
+
+.action-btn.refuse:hover {
+    background: #d32f2f;
     transform: scale(1.1);
     transition: all 0.3s ease !important;
 }

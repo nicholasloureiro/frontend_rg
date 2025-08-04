@@ -54,5 +54,42 @@ export const serviceOrderService = {
             console.error('Erro ao deletar ordem de serviço:', error);
             throw error;
         }
+    },
+
+    // Finalizar ordem de serviço (marcar como devolvida)
+    finishServiceOrder: async (id) => {
+        try {
+            const response = await api.post(`/api/v1/service-orders/${id}/finish/`);
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao finalizar ordem de serviço:', error);
+            throw error;
+        }
+    },
+
+    // Marcar ordem de serviço como retirada
+    pickUpServiceOrder: async (id, receivedAmount) => {
+        try {
+            const response = await api.post(`/api/v1/service-orders/${id}/pickup/`, {
+                received_amount: receivedAmount
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao marcar ordem como retirada:', error);
+            throw error;
+        }
+    },
+
+    // Cancelar ordem de serviço
+    refuseServiceOrder: async (id, justification) => {
+        try {
+            const response = await api.post(`/api/v1/service-orders/${id}/refuse/`, {
+                justification_refusal: justification
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao cancelar ordem de serviço:', error);
+            throw error;
+        }
     }
 }; 

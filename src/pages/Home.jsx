@@ -13,134 +13,171 @@ import setaEsquerdaGreen from '../assets/seta-esquerda-green.png';
 import setaDireitaRed from '../assets/seta-direita-red.png';
 import setaDireitaBlue from '../assets/seta-direita-blue.png';
 import setaDireitaGreen from '../assets/seta-direita-green.png';
-
-// Definição fixa dos cards por seção
-const dashboardSections = [
-  {
-    section: 'Em atraso',
-    color: 'var(--color-error)',
-    bg: 'rgba(239,68,68,0.12)',
-    cards: [
-      { key: 'provas', title: 'Provas', icon: <img src={hangerRed} alt="Provas" style={{ width: 20, height: 20 }} /> },
-      { key: 'retiradas', title: 'Retiradas', icon: <img src={setaDireitaRed} alt="Retiradas" style={{ width: 20, height: 20 }} /> },
-      { key: 'devolucoes', title: 'Devoluções', icon: <img src={setaEsquerdaRed} alt="Devoluções" style={{ width: 20, height: 20 }} /> },
-    ],
-  },
-  {
-    section: 'Hoje',
-    color: 'var(--color-info)',
-    bg: 'rgba(59,130,246,0.10)',
-    cards: [
-      { key: 'provas', title: 'Provas', icon: <img src={hangerBlue} alt="Provas" style={{ width: 20, height: 20 }} /> },
-      { key: 'retiradas', title: 'Retiradas', icon: <img src={setaDireitaBlue} alt="Retiradas" style={{ width: 20, height: 20 }} /> },
-      { key: 'devolucoes', title: 'Devoluções', icon: <img src={setaEsquerdaBlue} alt="Devoluções" style={{ width: 20, height: 20 }} /> },
-    ],
-  },
-  {
-    section: 'Próximos 10 dias',
-    color: 'var(--color-success)',
-    bg: 'rgba(16,185,129,0.10)',
-    cards: [
-      { key: 'provas', title: 'Provas', icon: <img src={hangerGreen} alt="Provas" style={{ width: 20, height: 20 }} /> },
-      { key: 'retiradas', title: 'Retiradas', icon: <img src={setaDireitaGreen} alt="Retiradas" style={{ width: 20, height: 20 }} /> },
-      { key: 'devolucoes', title: 'Devoluções', icon: <img src={setaEsquerdaGreen} alt="Devoluções" style={{ width: 20, height: 20 }} /> },
-    ],
-  },
-];
-
-const resumoSections = [
-  {
-    section: 'Resultados do dia',
-    cards: [
-      { key: 'totalPedidosDia', title: 'Total de pedidos', icon: <FontAwesomeIcon icon={faClipboardList} style={{color: '#1EC1BC'}} /> },
-      { key: 'totalRecebidoDia', title: 'Total recebido', icon: <FontAwesomeIcon icon={faMoneyBillWave} style={{color: '#1EC1BC'}} /> },
-      { key: 'numPedidosDia', title: 'Número de pedidos', icon: <FontAwesomeIcon icon={faCartShopping} style={{color: '#1EC1BC'}} /> },
-    ],
-  },
-  {
-    section: 'Resultados da semana',
-    cards: [
-      { key: 'totalPedidosSemana', title: 'Total de pedidos', icon: <FontAwesomeIcon icon={faClipboardList} style={{color: '#1EC1BC'}} /> },
-      { key: 'totalRecebidoSemana', title: 'Total recebido', icon: <FontAwesomeIcon icon={faMoneyBillWave} style={{color: '#1EC1BC'}} /> },
-      { key: 'numPedidosSemana', title: 'Número de pedidos', icon: <FontAwesomeIcon icon={faCartShopping} style={{color: '#1EC1BC'}} /> },
-    ],
-  },
-  {
-    section: 'Resultados do mês',
-    cards: [
-      { key: 'totalPedidosMes', title: 'Total de pedidos', icon: <FontAwesomeIcon icon={faClipboardList} style={{color: '#1EC1BC'}} /> },
-      { key: 'totalRecebidoMes', title: 'Total recebido', icon: <FontAwesomeIcon icon={faMoneyBillWave} style={{color: '#1EC1BC'}} /> },
-      { key: 'numPedidosMes', title: 'Número de pedidos', icon: <FontAwesomeIcon icon={faCartShopping} style={{color: '#1EC1BC'}} /> },
-    ],
-  },
-];
-
-// Mock de dados vindos do backend
-const dashboardValues = {
-  provas: { emAtraso: 2, hoje: 1, proximos10: 4 },
-  retiradas: { emAtraso: 1, hoje: 2, proximos10: 2 },
-  devolucoes: { emAtraso: 3, hoje: 0, proximos10: 1 },
-};
-const resumoValues = {
-  totalPedidosDia: 1200.0,
-  totalRecebidoDia: 950.0,
-  numPedidosDia: 8,
-  totalPedidosSemana: 8500.0,
-  totalRecebidoSemana: 7200.0,
-  numPedidosSemana: 42,
-  totalPedidosMes: 32000.0,
-  totalRecebidoMes: 28500.0,
-  numPedidosMes: 180,
-};
+import useDashboard from '../hooks/useDashboard';
 
 const Home = () => {
+  const { dashboardData, loading, error, refetch } = useDashboard();
+
+  // Função para formatar valores monetários
+  const formatCurrency = (value) => {
+    if (typeof value !== 'number') return 'R$ 0,00';
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
+
+  // Função para formatar valores baseado no tipo
+  const formatValue = (value, cardKey) => {
+    if (cardKey.includes('total')) {
+      return formatCurrency(value);
+    }
+    return value.toString();
+  };
+
+  if (loading) {
+    return (
+      <>
+        <Header nomeHeader="Home" />
+        <div className="home">
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+            <p>Carregando dashboard...</p>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <Header nomeHeader="Home" />
+        <div className="home">
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', flexDirection: 'column' }}>
+            <p style={{ color: 'red', marginBottom: '1rem' }}>Erro ao carregar dashboard: {error}</p>
+            <button onClick={refetch} style={{ padding: '0.5rem 1rem', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+              Tentar novamente
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // Dados do status (primeira linha)
+  const statusData = [
+    {
+      section: 'Em atraso',
+      color: 'var(--color-error)',
+      bg: 'rgba(239,68,68,0.12)',
+      iconBgColor: 'rgba(239,68,68,0.18)',
+      data: dashboardData?.status?.emAtraso || { provas: 0, retiradas: 0, devolucoes: 0 },
+      cards: [
+        { key: 'provas', title: 'Provas', icon: <img src={hangerRed} alt="Provas" style={{ width: 20, height: 20 }} /> },
+        { key: 'retiradas', title: 'Retiradas', icon: <img src={setaDireitaRed} alt="Retiradas" style={{ width: 20, height: 20 }} /> },
+        { key: 'devolucoes', title: 'Devoluções', icon: <img src={setaEsquerdaRed} alt="Devoluções" style={{ width: 20, height: 20 }} /> },
+      ],
+    },
+    {
+      section: 'Hoje',
+      color: 'var(--color-info)',
+      bg: 'rgba(59,130,246,0.10)',
+      iconBgColor: 'rgba(59,130,246,0.18)',
+      data: dashboardData?.status?.hoje || { provas: 0, retiradas: 0, devolucoes: 0 },
+      cards: [
+        { key: 'provas', title: 'Provas', icon: <img src={hangerBlue} alt="Provas" style={{ width: 20, height: 20 }} /> },
+        { key: 'retiradas', title: 'Retiradas', icon: <img src={setaDireitaBlue} alt="Retiradas" style={{ width: 20, height: 20 }} /> },
+        { key: 'devolucoes', title: 'Devoluções', icon: <img src={setaEsquerdaBlue} alt="Devoluções" style={{ width: 20, height: 20 }} /> },
+      ],
+    },
+    {
+      section: 'Próximos 10 dias',
+      color: 'var(--color-success)',
+      bg: 'rgba(16,185,129,0.10)',
+      iconBgColor: 'rgba(16,185,129,0.18)',
+      data: dashboardData?.status?.proximos10Dias || { provas: 0, retiradas: 0, devolucoes: 0 },
+      cards: [
+        { key: 'provas', title: 'Provas', icon: <img src={hangerGreen} alt="Provas" style={{ width: 20, height: 20 }} /> },
+        { key: 'retiradas', title: 'Retiradas', icon: <img src={setaDireitaGreen} alt="Retiradas" style={{ width: 20, height: 20 }} /> },
+        { key: 'devolucoes', title: 'Devoluções', icon: <img src={setaEsquerdaGreen} alt="Devoluções" style={{ width: 20, height: 20 }} /> },
+      ],
+    },
+  ];
+
+  // Dados dos resultados (segunda linha)
+  const resultadosData = [
+    {
+      section: 'Resultados do dia',
+      data: dashboardData?.resultados?.dia || { totalPedidos: 0, totalRecebido: 0, numeroPedidos: 0 },
+      cards: [
+        { key: 'totalPedidos', title: 'Total de pedidos', icon: <FontAwesomeIcon icon={faClipboardList} style={{color: '#1EC1BC'}} /> },
+        { key: 'totalRecebido', title: 'Total recebido', icon: <FontAwesomeIcon icon={faMoneyBillWave} style={{color: '#1EC1BC'}} /> },
+        { key: 'numeroPedidos', title: 'Número de pedidos', icon: <FontAwesomeIcon icon={faCartShopping} style={{color: '#1EC1BC'}} /> },
+      ],
+    },
+    {
+      section: 'Resultados da semana',
+      data: dashboardData?.resultados?.semana || { totalPedidos: 0, totalRecebido: 0, numeroPedidos: 0 },
+      cards: [
+        { key: 'totalPedidos', title: 'Total de pedidos', icon: <FontAwesomeIcon icon={faClipboardList} style={{color: '#1EC1BC'}} /> },
+        { key: 'totalRecebido', title: 'Total recebido', icon: <FontAwesomeIcon icon={faMoneyBillWave} style={{color: '#1EC1BC'}} /> },
+        { key: 'numeroPedidos', title: 'Número de pedidos', icon: <FontAwesomeIcon icon={faCartShopping} style={{color: '#1EC1BC'}} /> },
+      ],
+    },
+    {
+      section: 'Resultados do mês',
+      data: dashboardData?.resultados?.mes || { totalPedidos: 0, totalRecebido: 0, numeroPedidos: 0 },
+      cards: [
+        { key: 'totalPedidos', title: 'Total de pedidos', icon: <FontAwesomeIcon icon={faClipboardList} style={{color: '#1EC1BC'}} /> },
+        { key: 'totalRecebido', title: 'Total recebido', icon: <FontAwesomeIcon icon={faMoneyBillWave} style={{color: '#1EC1BC'}} /> },
+        { key: 'numeroPedidos', title: 'Número de pedidos', icon: <FontAwesomeIcon icon={faCartShopping} style={{color: '#1EC1BC'}} /> },
+      ],
+    },
+  ];
+
   return (
     <>
       <Header nomeHeader="Home" />
       <div className="home">
+        {/* Primeira linha - Status */}
         <div className="dashboard-grid">
-          {dashboardSections.map((section, idx) => (
+          {statusData.map((section) => (
             <div className="dashboard-section" key={section.section}>
               <h3 style={{marginBottom: 12, color: section.color}}>{section.section}</h3>
-              {section.cards.map((card) => {
-                // Seleciona o valor correto do mock para cada seção
-                let value = 0;
-                if (card.key === 'provas') value = dashboardValues.provas[Object.keys(dashboardValues.provas)[idx]] ?? 0;
-                if (card.key === 'retiradas') value = dashboardValues.retiradas[Object.keys(dashboardValues.retiradas)[idx]] ?? 0;
-                if (card.key === 'devolucoes') value = dashboardValues.devolucoes[Object.keys(dashboardValues.devolucoes)[idx]] ?? 0;
-                // Definir cor do fundo do ícone conforme a seção
-                let iconBgColor = '#b2f5ea';
-                if (section.section === 'Em atraso') iconBgColor = 'rgba(239,68,68,0.18)';
-                if (section.section === 'Hoje') iconBgColor = 'rgba(59,130,246,0.18)';
-                if (section.section === 'Próximos 10 dias') iconBgColor = 'rgba(16,185,129,0.18)';
-                return (
-                  <Card
-                    key={card.key}
-                    title={card.title}
-                    value={value}
-                    icon={card.icon}
-                    bgColor={section.bg}
-                    textColor={section.color}
-                    iconBgColor={iconBgColor}
-                  />
-                );
-              })}
-            </div>
-          ))}
-        </div>
-        <div className="dashboard-grid" >
-          {resumoSections.map((section) => (
-            <div className="dashboard-section" key={section.section}>
-              <h3 style={{marginBottom: 12}}>{section.section}</h3>
               {section.cards.map((card) => (
                 <Card
                   key={card.key}
                   title={card.title}
-                  value={resumoValues[card.key] ?? 0}
+                  value={section.data[card.key] || 0}
                   icon={card.icon}
-                  iconBgColor="#C3FAF3"
+                  bgColor={section.bg}
+                  textColor={section.color}
+                  iconBgColor={section.iconBgColor}
                 />
               ))}
+            </div>
+          ))}
+        </div>
+
+        {/* Segunda linha - Resultados */}
+        <div className="dashboard-grid">
+          {resultadosData.map((section) => (
+            <div className="dashboard-section" key={section.section}>
+              <h3 style={{marginBottom: 12}}>{section.section}</h3>
+              {section.cards.map((card) => {
+                const value = section.data[card.key] || 0;
+                const formattedValue = formatValue(value, card.key);
+                
+                return (
+                  <Card
+                    key={card.key}
+                    title={card.title}
+                    value={formattedValue}
+                    icon={card.icon}
+                    iconBgColor="#C3FAF3"
+                  />
+                );
+              })}
             </div>
           ))}
         </div>
