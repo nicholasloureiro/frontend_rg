@@ -68,11 +68,9 @@ export const serviceOrderService = {
     },
 
     // Marcar ordem de serviço como retirada
-    pickUpServiceOrder: async (id, receivedAmount) => {
+    pickUpServiceOrder: async (id) => {
         try {
-            const response = await api.post(`/api/v1/service-orders/${id}/pickup/`, {
-                received_amount: receivedAmount
-            });
+            const response = await api.post(`/api/v1/service-orders/${id}/mark-retrieved/`);
             return response.data;
         } catch (error) {
             console.error('Erro ao marcar ordem como retirada:', error);

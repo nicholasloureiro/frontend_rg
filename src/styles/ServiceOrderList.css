@@ -335,49 +335,49 @@
 }
 
 .action-btn.edit {
-    background: var(--color-accent-dark);
+    background: #0095e2;
     color: white;
     transition: all 0.3s ease !important;
 }
 
 .action-btn.edit:hover {
-    background: var(--color-accent-hover);
+    background: #008cd2;
     transform: scale(1.1);
     transition: all 0.3s ease !important;
 }
 
 .action-btn.return {
-    background: #4caf50;
+    background: #1F3B4D;
     color: white;
     transition: all 0.3s ease !important;
 }
 
 .action-btn.return:hover {
-    background: #45a049;
+    background: #1a3241;
     transform: scale(1.1);
     transition: all 0.3s ease !important;
 }
 
 .action-btn.pickup {
-    background: #CBA135;
+    background: #e2d502;
     color: white;
     transition: all 0.3s ease !important;
 }
 
 .action-btn.pickup:hover {
-    background: #B8942A;
+    background: #d0c601;
     transform: scale(1.1);
     transition: all 0.3s ease !important;
 }
 
 .action-btn.refuse {
-    background: #f44336;
+    background: #DC143C;
     color: white;
     transition: all 0.3s ease !important;
 }
 
 .action-btn.refuse:hover {
-    background: #d32f2f;
+    background: rgb(200, 43, 43);
     transform: scale(1.1);
     transition: all 0.3s ease !important;
 }

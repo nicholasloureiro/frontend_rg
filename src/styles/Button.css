@@ -9,7 +9,7 @@
 
 /* Primary button */
 .custom-btn-primary {
-  background-color: var(--color-accent-dark);
+  background-color: var(--color-accent);
   color: white;
 }
 
@@ -29,7 +29,7 @@
 }
 
 .custom-btn-primary:disabled {
-  background-color: #e5debc;
+  background-color: #6a6e7166;
   color: white;
   cursor: not-allowed !important;
 }

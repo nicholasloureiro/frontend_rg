@@ -3,6 +3,7 @@ import { serviceOrderService } from '../services/serviceOrderService';
 import '../styles/ServiceOrderList.css';
 import { capitalizeText } from '../utils/capitalizeText';
 import { mascaraTelefoneInternacional } from '../utils/Mascaras';
+import { parseCurrency } from '../utils/parseCurrency';
 import Button from './Button';
 import Swal from 'sweetalert2';
 
@@ -13,9 +14,9 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
     const [internalError, setInternalError] = useState(null);
 
     const tabs = [
-        { key: 'PENDENTE', label: 'PENDENTES', color: '#ff9800' },
-        { key: 'AGUARDANDO_RETIRADA', label: 'AGUARDANDO RETIRADA', color: '#CBA135' },
-        { key: 'AGUARDANDO_DEVOLUCAO', label: 'AGUARDANDO DEVOLUÇÃO', color: '#6666ea' },
+        { key: 'PENDENTE', label: 'PENDENTES', color: '#0095e2' },
+        { key: 'AGUARDANDO_RETIRADA', label: 'AGUARDANDO RETIRADA', color: '#e2d502' },
+        { key: 'AGUARDANDO_DEVOLUCAO', label: 'AGUARDANDO DEVOLUÇÃO', color: '#1c3b4d' },
         { key: 'ATRASADO', label: 'ATRASADAS', color: '#f44336' },
         { key: 'RECUSADA', label: 'RECUSADAS', color: '#9e9e9e' },
         { key: 'FINALIZADO', label: 'FINALIZADAS', color: '#4caf50' },
@@ -124,44 +125,27 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
         // Verifica se há valor restante para receber
         const hasRemainingPayment = order.remaining_payment > 0;
 
-        if (hasRemainingPayment) {
-            // Modal para editar valor restante
-            const { value: remainingValue, isConfirmed } = await Swal.fire({
+                if (hasRemainingPayment) {
+            // Modal informativo sobre valor restante
+            const result = await Swal.fire({
                 title: 'Valor restante para receber',
-                text: `A ordem #${order.id} possui R$ ${formatCurrency(order.remaining_payment)} restantes.`,
+                text: `A ordem #${order.id} possui ${formatCurrency(order.remaining_payment)} restantes. Deseja marcar como retirada mesmo assim?`,
                 icon: 'warning',
-                input: 'number',
-                inputLabel: 'Valor a receber agora:',
-                inputValue: order.remaining_payment,
-                inputPlaceholder: 'Digite o valor',
-                inputAttributes: {
-                    step: '0.01',
-                    min: '0',
-                    max: order.remaining_payment.toString()
-                },
                 showCancelButton: true,
                 confirmButtonColor: '#CBA135',
                 cancelButtonColor: '#ffff',
-                confirmButtonText: 'Confirmar retirada',
+                confirmButtonText: 'Sim, marcar como retirada',
                 cancelButtonText: 'Cancelar',
-                reverseButtons: true,
-                inputValidator: (value) => {
-                    if (!value || value <= 0) {
-                        return 'Digite um valor válido';
-                    }
-                    if (value > order.remaining_payment) {
-                        return `O valor não pode ser maior que R$ ${formatCurrency(order.remaining_payment)}`;
-                    }
-                }
+                reverseButtons: true
             });
 
-            if (isConfirmed && remainingValue) {
+            if (result.isConfirmed) {
                 try {
-                    await serviceOrderService.pickUpServiceOrder(order.id, remainingValue);
-
+                    await serviceOrderService.pickUpServiceOrder(order.id);
+                    
                     await Swal.fire({
                         title: 'Retirada confirmada!',
-                        text: `Ordem #${order.id} marcada como retirada. Valor recebido: R$ ${formatCurrency(remainingValue)}`,
+                        text: `Ordem #${order.id} marcada como retirada.}`,
                         icon: 'success',
                         confirmButtonColor: '#CBA135'
                     });
@@ -170,7 +154,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
                     fetchOrders(activeTab);
                 } catch (error) {
                     console.error('Erro ao marcar como retirada:', error);
-
+                    
                     await Swal.fire({
                         title: 'Erro!',
                         text: 'Não foi possível marcar a ordem como retirada. Tente novamente.',
@@ -195,7 +179,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
 
             if (result.isConfirmed) {
                 try {
-                    await serviceOrderService.pickUpServiceOrder(order.id, 0);
+                    await serviceOrderService.pickUpServiceOrder(order.id);
 
                     await Swal.fire({
                         title: 'Retirada confirmada!',

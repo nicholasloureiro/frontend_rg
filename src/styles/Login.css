@@ -45,7 +45,7 @@
 .login-highlight {
   font-size: 32px;
   font-weight: 700;
-  color: #FFD600;
+  color: #28526c;
   margin-bottom: 16px;
   line-height: 1.2;
 }
@@ -106,7 +106,7 @@
 .input-icon {
   position: absolute;
   left: 8px;
-  color: #CBA135;
+  color: #28526c;
   z-index: 1;
   transition: color 0.2s ease;
 }
@@ -135,7 +135,7 @@
 
 .form-input:focus {
   outline: none;
-  border-color: #FFD600;
+  border-color: #28526c;
   box-shadow: 0 0 0 3px rgba(255, 214, 0, 0.12);
 }
 
@@ -194,8 +194,8 @@
 }
 
 .checkbox-input:checked~.checkmark {
-  background-color: #CBA135;
-  border-color: #CBA135;
+  background-color: #28526c;
+  border-color: #28526c;
 }
 
 .checkmark:after {
@@ -218,7 +218,7 @@
 .forgot-password {
   background: none;
   border: none;
-  color: #CBA135;
+  color: #28526c;
   font-size: 14px;
   cursor: pointer;
   text-decoration: none;
@@ -226,7 +226,7 @@
 }
 
 .forgot-password:hover {
-  color: #CBA135;
+  color: #28526c;
   text-decoration: underline;
 }
 
@@ -247,7 +247,7 @@
 
 .login-button {
  width: 120px;
-  background: #CBA135;
+  background: #28526c;
   color: #F5F5F5 ;
   border: none;
   border-radius: 8px;

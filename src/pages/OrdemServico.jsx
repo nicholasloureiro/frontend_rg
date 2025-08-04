@@ -701,7 +701,8 @@ const OrdemServico = () => {
                     confirmButtonText: 'Imprimir OS',
                     cancelButtonText: 'Fechar',
                     confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#6c757d'
+                    cancelButtonColor: '#ffff',
+                    reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {
                         generatePDF();

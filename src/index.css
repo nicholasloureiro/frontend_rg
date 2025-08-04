@@ -5,9 +5,9 @@
   --color-secondary: #1E1E1E;
   
   /* Cores de destaque (mantidas em ambos os temas) */
-  --color-accent: #FFD600;
-  --color-accent-dark: #CBA135;
-  --color-accent-hover: #cba035e2;
+  --color-accent: #1F3B4D;
+  --color-accent-dark: #1c3b4d;
+  --color-accent-hover: #1a3241;
   
   /* Cores de texto - Tema Escuro */
   --color-text-primary: #F5F5F5;
@@ -24,7 +24,7 @@
   
   /* Cores de borda - Tema Escuro */
   --color-border: #404040;
-  --color-border-focus: #FFD600;
+  --color-border-focus: #1c3b4d;
   
   /* Cores de estado - Tema Escuro */
   --color-disabled: rgba(255, 255, 255, 0.7);
@@ -70,7 +70,7 @@
   
   /* Cores de borda - Tema Claro */
   --color-border: #d0d0d0;
-  --color-border-focus: #FFD600;
+  --color-border-focus: #1c3b4d;
   --color-border-header: #e2e8f0;
   --border-color-modal: #e6e6e6;
 
@@ -115,7 +115,7 @@
   
   /* Cores de borda */
   --color-border: #29292d;
-  --color-border-focus: #FFD600;
+  --color-border-focus: #1c3b4d;
   --border-color-modal: #5c5c5c;
   --color-border-header: #28211c;
 

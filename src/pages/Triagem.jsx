@@ -164,7 +164,6 @@ const Triagem = () => {
             atendente_id: formData.atendenteResponsavel ? parseInt(formData.atendenteResponsavel) : null,
             origem: formData.origem.toUpperCase(),
             data_evento: formatarDataParaAPI(formData.dataEvento),
-            tipo_servico: 'ALUGUEL',
             evento: formData.evento.toUpperCase(),
             papel_evento: formData.papelNoEvento.toUpperCase(),
             endereco: {
