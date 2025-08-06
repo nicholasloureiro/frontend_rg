@@ -15,6 +15,7 @@ import 'react-phone-number-input/style.css';
 import './App.css'
 import Triagem from './pages/Triagem'
 import OrdemServico from './pages/OrdemServico'
+import Produtos from './pages/Produtos'
 
 function AppContent() {
   const { theme } = useTheme();
@@ -117,6 +118,12 @@ function AppContent() {
           <Route path="/ordens" element={
             <ProtectedRoute>
               <OrdemServico />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/produtos" element={
+            <ProtectedRoute>
+              <Produtos />
             </ProtectedRoute>
           } />
           

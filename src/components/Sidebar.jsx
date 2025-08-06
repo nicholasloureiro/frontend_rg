@@ -193,6 +193,7 @@ const Sidebar = ({ setSideOpen }) => {
           <SidebarLink to="/ordens" iconBoot={'list-check'} label="Ordens de serviço" onClick={toggleSidebar} />
           <SidebarLink to="/clientes" iconBoot={'people'} label="Clientes" onClick={toggleSidebar} />
           <SidebarLink to="/funcionarios" iconBoot={'person-lines-fill'} label="Funcionários" onClick={toggleSidebar} />
+          <SidebarLink to="/produtos" iconBoot={'box'} label="Produtos" onClick={toggleSidebar} />
           
           <div className="mt-auto mb-3" style={{ width: '100%', justifyContent: 'center', display: 'flex' }}>
             <span className="version" style=

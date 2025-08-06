@@ -379,7 +379,7 @@ const OrdemServico = () => {
 
     useEffect(() => {
         if (inputValues.dataEvento) {
-            const devolucao = addBusinessDays(new Date(inputValues.dataEvento), 2);
+            const devolucao = addBusinessDays(new Date(inputValues.dataEvento + 'T00:00:00'), 2);
             const devolucaoIso = devolucao.toISOString().split('T')[0];
             setInputValues(prev => ({
                 ...prev,
@@ -2040,7 +2040,7 @@ const OrdemServico = () => {
                             <div className="form-group">
                                 <label>Data do Pedido <span style={{ color: 'red' }}>*</span></label>
                                 <InputDate
-                                    selectedDate={inputValues.dataPedido ? new Date(inputValues.dataPedido) : null}
+                                    selectedDate={inputValues.dataPedido ? new Date(inputValues.dataPedido + 'T00:00:00') : null}
                                     onDateChange={(date) => {
                                         const isoDate = date ? date.toISOString().split('T')[0] : '';
                                         handleInputChange('dataPedido', isoDate);
@@ -2056,7 +2056,7 @@ const OrdemServico = () => {
                             <div className="form-group">
                                 <label>Data do Evento <span style={{ color: 'red' }}>*</span></label>
                                 <InputDate
-                                    selectedDate={inputValues.dataEvento ? new Date(inputValues.dataEvento) : null}
+                                    selectedDate={inputValues.dataEvento ? new Date(inputValues.dataEvento + 'T00:00:00') : null}
                                     onDateChange={(date) => {
                                         const isoDate = date ? date.toISOString().split('T')[0] : '';
                                         handleInputChange('dataEvento', isoDate);
@@ -2080,7 +2080,7 @@ const OrdemServico = () => {
                             <div className="form-group">
                                 <label>Data da Retirada <span style={{ color: 'red' }}>*</span></label>
                                 <InputDate
-                                    selectedDate={inputValues.dataRetirada ? new Date(inputValues.dataRetirada) : null}
+                                    selectedDate={inputValues.dataRetirada ? new Date(inputValues.dataRetirada + 'T00:00:00') : null}
                                     onDateChange={(date) => {
                                         const isoDate = date ? date.toISOString().split('T')[0] : '';
                                         handleInputChange('dataRetirada', isoDate);
@@ -2096,7 +2096,7 @@ const OrdemServico = () => {
                             <div className="form-group">
                                 <label>Data da Devolução</label>
                                 <InputDate
-                                    selectedDate={inputValues.dataDevolucao ? new Date(inputValues.dataDevolucao) : null}
+                                    selectedDate={inputValues.dataDevolucao ? new Date(inputValues.dataDevolucao + 'T00:00:00') : null}
                                     onDateChange={(date) => {
                                         const isoDate = date ? date.toISOString().split('T')[0] : '';
                                         handleInputChange('dataDevolucao', isoDate);
@@ -2659,19 +2659,19 @@ const OrdemServico = () => {
                                 <div className="payment-grid">
                                     <div className="payment-item">
                                         <span className="payment-label">Data Pedido:</span>
-                                        <span className="payment-value">{formData.dataPedido ? new Date(formData.dataPedido).toLocaleDateString('pt-BR') : ''}</span>
+                                        <span className="payment-value">{formData.dataPedido ? new Date(formData.dataPedido + 'T00:00:00').toLocaleDateString('pt-BR') : ''}</span>
                                     </div>
                                     <div className="payment-item">
                                         <span className="payment-label">Data Evento:</span>
-                                        <span className="payment-value">{formData.dataEvento ? new Date(formData.dataEvento).toLocaleDateString('pt-BR') : ''}</span>
+                                        <span className="payment-value">{formData.dataEvento ? new Date(formData.dataEvento + 'T00:00:00').toLocaleDateString('pt-BR') : ''}</span>
                                     </div>
                                     <div className="payment-item">
                                         <span className="payment-label">Data da Retirada:</span>
-                                        <span className="payment-value">{formData.dataRetirada ? new Date(formData.dataRetirada).toLocaleDateString('pt-BR') : ''}</span>
+                                        <span className="payment-value">{formData.dataRetirada ? new Date(formData.dataRetirada + 'T00:00:00').toLocaleDateString('pt-BR') : ''}</span>
                                     </div>
                                     <div className="payment-item">
                                         <span className="payment-label">Data da Devolução:</span>
-                                        <span className="payment-value">{formData.dataDevolucao ? new Date(formData.dataDevolucao).toLocaleDateString('pt-BR') : ''}</span>
+                                        <span className="payment-value">{formData.dataDevolucao ? new Date(formData.dataDevolucao + 'T00:00:00').toLocaleDateString('pt-BR') : ''}</span>
                                     </div>
 
                                     <div className="payment-item">

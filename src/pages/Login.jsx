@@ -120,13 +120,17 @@ const Login = () => {
   return (
     <div className="login-main-container">
       <div className="login-left">
-        <div className="login-logo-row">
-          <img src={logo} alt="Logo" className="login-logo-img" />
-          <h1 className="login-company-name" >Roupa de Gala</h1>
+        <div className="login-header-section">
+          <div className="login-header-content">
+            <img src={logo} alt="Logo" className="login-header-logo" />
+            <h1 className="login-header-title">Roupa de Gala</h1>
+          </div>
         </div>
-        <h1 className="login-title">Bem-vindo de volta</h1>
-        <h2 className="login-highlight">Faça login para continuar</h2>
-        <p className="login-desc">Acesse a plataforma exclusiva de gerenciamento da Roupas de Gala. Organize clientes, pedidos e acervos com praticidade, segurança e sofisticação.</p>
+        <div className="login-left-content">
+          <h1 className="login-title">Bem-vindo de volta</h1>
+          <h2 className="login-highlight">Faça login para continuar</h2>
+          <p className="login-desc">Acesse a plataforma exclusiva de gerenciamento da Roupas de Gala. Organize clientes, pedidos e acervos com praticidade, segurança e sofisticação.</p>
+        </div>
       </div>
       <div className="login-card">
         <div className="login-header">
@@ -176,8 +180,6 @@ const Login = () => {
             </div>
           </div>
 
-
-
           <div className='login-button-container w-100 mb-2 mt-3' style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button
               type="submit"
@@ -192,9 +194,6 @@ const Login = () => {
               )}
             </button>
           </div>
-          {/* <div className='login-button-cadastrar w-100 text-center mt-3'>
-            <span style={{ textAlign: 'center', marginTop: 10, fontSize: 13 }}>Ainda não tem uma conta? <span type="button" className="register-toggle" onClick={() => setShowRegister(true)} style={{ fontSize: 13, textDecoration: 'underline', cursor: 'pointer', color: '#FFD600' }}>Cadastre-se</span></span>
-          </div> */}
           {errorMessage && (
             <div className="error-message-login mt-3">
               {errorMessage}

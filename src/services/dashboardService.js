@@ -7,7 +7,7 @@ export const dashboardService = {
    */
   async getDashboardData() {
     try {
-      const response = await api.get('/dashboard/home');
+      const response = await api.get('/api/v1/products/dashboard/');
       return response.data;
     } catch (error) {
       console.error('Erro ao buscar dados do dashboard:', error);
