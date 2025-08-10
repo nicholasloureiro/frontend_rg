@@ -79,7 +79,7 @@ const Home = () => {
       color: 'var(--color-error)',
       bg: 'rgba(239,68,68,0.12)',
       iconBgColor: 'rgba(239,68,68,0.18)',
-      data: dashboardData?.status?.emAtraso || { provas: 0, retiradas: 0, devolucoes: 0 },
+      data: dashboardData?.status?.em_atraso || { provas: 0, retiradas: 0, devolucoes: 0 },
       cards: [
         { key: 'provas', title: 'Provas', icon: <img src={hangerRed} alt="Provas" style={{ width: 20, height: 20 }} /> },
         { key: 'retiradas', title: 'Retiradas', icon: <img src={setaDireitaRed} alt="Retiradas" style={{ width: 20, height: 20 }} /> },
@@ -103,7 +103,7 @@ const Home = () => {
       color: 'var(--color-success)',
       bg: 'rgba(16,185,129,0.10)',
       iconBgColor: 'rgba(16,185,129,0.18)',
-      data: dashboardData?.status?.proximos10Dias || { provas: 0, retiradas: 0, devolucoes: 0 },
+      data: dashboardData?.status?.proximos_10_dias || { provas: 0, retiradas: 0, devolucoes: 0 },
       cards: [
         { key: 'provas', title: 'Provas', icon: <img src={hangerGreen} alt="Provas" style={{ width: 20, height: 20 }} /> },
         { key: 'retiradas', title: 'Retiradas', icon: <img src={setaDireitaGreen} alt="Retiradas" style={{ width: 20, height: 20 }} /> },
@@ -116,29 +116,29 @@ const Home = () => {
   const resultadosData = [
     {
       section: 'Resultados do dia',
-      data: dashboardData?.resultados?.dia || { totalPedidos: 0, totalRecebido: 0, numeroPedidos: 0 },
+      data: dashboardData?.resultados?.dia || { total_pedidos: 0, total_recebido: 0, numero_pedidos: 0 },
       cards: [
-        { key: 'totalPedidos', title: 'Total de pedidos', icon: <FontAwesomeIcon icon={faClipboardList} style={{color: '#1EC1BC'}} /> },
-        { key: 'totalRecebido', title: 'Total recebido', icon: <FontAwesomeIcon icon={faMoneyBillWave} style={{color: '#1EC1BC'}} /> },
-        { key: 'numeroPedidos', title: 'Número de pedidos', icon: <FontAwesomeIcon icon={faCartShopping} style={{color: '#1EC1BC'}} /> },
+        { key: 'total_pedidos', title: 'Total de pedidos', icon: <FontAwesomeIcon icon={faClipboardList} style={{color: '#1EC1BC'}} /> },
+        { key: 'total_recebido', title: 'Total recebido', icon: <FontAwesomeIcon icon={faMoneyBillWave} style={{color: '#1EC1BC'}} /> },
+        { key: 'numero_pedidos', title: 'Número de pedidos', icon: <FontAwesomeIcon icon={faCartShopping} style={{color: '#1EC1BC'}} /> },
       ],
     },
     {
       section: 'Resultados da semana',
-      data: dashboardData?.resultados?.semana || { totalPedidos: 0, totalRecebido: 0, numeroPedidos: 0 },
+      data: dashboardData?.resultados?.semana || { total_pedidos: 0, total_recebido: 0, numero_pedidos: 0 },
       cards: [
-        { key: 'totalPedidos', title: 'Total de pedidos', icon: <FontAwesomeIcon icon={faClipboardList} style={{color: '#1EC1BC'}} /> },
-        { key: 'totalRecebido', title: 'Total recebido', icon: <FontAwesomeIcon icon={faMoneyBillWave} style={{color: '#1EC1BC'}} /> },
-        { key: 'numeroPedidos', title: 'Número de pedidos', icon: <FontAwesomeIcon icon={faCartShopping} style={{color: '#1EC1BC'}} /> },
+        { key: 'total_pedidos', title: 'Total de pedidos', icon: <FontAwesomeIcon icon={faClipboardList} style={{color: '#1EC1BC'}} /> },
+        { key: 'total_recebido', title: 'Total recebido', icon: <FontAwesomeIcon icon={faMoneyBillWave} style={{color: '#1EC1BC'}} /> },
+        { key: 'numero_pedidos', title: 'Número de pedidos', icon: <FontAwesomeIcon icon={faCartShopping} style={{color: '#1EC1BC'}} /> },
       ],
     },
     {
       section: 'Resultados do mês',
-      data: dashboardData?.resultados?.mes || { totalPedidos: 0, totalRecebido: 0, numeroPedidos: 0 },
+      data: dashboardData?.resultados?.mes || { total_pedidos: 0, total_recebido: 0, numero_pedidos: 0 },
       cards: [
-        { key: 'totalPedidos', title: 'Total de pedidos', icon: <FontAwesomeIcon icon={faClipboardList} style={{color: '#1EC1BC'}} /> },
-        { key: 'totalRecebido', title: 'Total recebido', icon: <FontAwesomeIcon icon={faMoneyBillWave} style={{color: '#1EC1BC'}} /> },
-        { key: 'numeroPedidos', title: 'Número de pedidos', icon: <FontAwesomeIcon icon={faCartShopping} style={{color: '#1EC1BC'}} /> },
+        { key: 'total_pedidos', title: 'Total de pedidos', icon: <FontAwesomeIcon icon={faClipboardList} style={{color: '#1EC1BC'}} /> },
+        { key: 'total_recebido', title: 'Total recebido', icon: <FontAwesomeIcon icon={faMoneyBillWave} style={{color: '#1EC1BC'}} /> },
+        { key: 'numero_pedidos', title: 'Número de pedidos', icon: <FontAwesomeIcon icon={faCartShopping} style={{color: '#1EC1BC'}} /> },
       ],
     },
   ];
