@@ -67,6 +67,8 @@
   --backgroundTheme: #aac2e5;
   --background-inputs-disabled: #e9ecef;
   --background-inputs: #ffffff;
+  --color-bg-card-icon: #C3FAF3;
+  --color-bg-card-produto-img: #3f789b;
   
   /* Cores de borda - Tema Claro */
   --color-border: #d0d0d0;
@@ -112,12 +114,14 @@
   --backgroundTheme: #1d1d25;
   --background-inputs-disabled: #2121239f;
   --background-inputs: #1d1d20;
+  --color-bg-card-icon: #0f7769;
+  --color-bg-card-produto-img: #1F3B4D;
   
   /* Cores de borda */
   --color-border: #29292d;
   --color-border-focus: #1c3b4d;
   --border-color-modal: #5c5c5c;
-  --color-border-header: #333231;
+  --color-border-header: #1e1e1f;
 
   /* Cores de estado */
   --color-disabled: rgba(255, 255, 255, 0.7);

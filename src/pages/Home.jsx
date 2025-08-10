@@ -182,7 +182,7 @@ const Home = () => {
                     title={card.title}
                     value={formattedValue}
                     icon={card.icon}
-                    iconBgColor="#C3FAF3"
+                    iconBgColor="var(--color-bg-card-icon)"
                   />
                 );
               })}

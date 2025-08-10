@@ -155,6 +155,20 @@ const Produtos = () => {
       }
     };
 
+    // Função para obter a imagem padrão baseada no tipo do produto
+    const getDefaultImage = (tipo) => {
+      switch (tipo.toLowerCase()) {
+        case 'paletó':
+          return '/src/assets/paleto.png';
+        case 'calça':
+          return '/src/assets/calca.png';
+        case 'colete':
+          return '/src/assets/colete.png';
+        default:
+          return '/src/assets/calca.png'; // Imagem padrão para outros tipos
+      }
+    };
+
     return (
       <div className="produto-card">
         <div className="produto-imagem">
@@ -165,11 +179,12 @@ const Produtos = () => {
               className="produto-img"
             />
           ) : (
-            <div className="produto-placeholder">
-              <i className="bi bi-image"></i>
-            </div>
+            <img 
+              src={getDefaultImage(produto.tipo)}
+              alt={produto.nome_produto}
+              className="produto-img"
+            />
           )}
-
         </div>
         <div className="produto-info">
           <h6 className="produto-nome">{produto.nome_produto}</h6>
