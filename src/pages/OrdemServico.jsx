@@ -458,20 +458,64 @@ const OrdemServico = () => {
     // Função para selecionar uma ordem da lista
     const handleSelectOrder = (order) => {
         setSelectedOrder(order);
-        
+
         // Extrair dados diretamente da ordem selecionada
         const client = order.client || {};
         const contact = client.contacts?.[0] || {};
         const address = client.addresses?.[0] || {};
         const city = address.cidade || {};
-        
+
         // Formatar o telefone para o componente PhoneInput
         let telefoneFormatado = '';
         if (contact.phone) {
             telefoneFormatado = contact.phone.startsWith('+') ? contact.phone : `+55${contact.phone.substring(2)}`;
         }
 
-        // Mapear os dados para o formato do formulário
+        // Dados de OS detalhados
+        const os = order.ordem_servico || {};
+        const itens = Array.isArray(os.itens) ? os.itens : [];
+        const acessorios = Array.isArray(os.acessorios) ? os.acessorios : [];
+
+        const findItem = (tipo) => itens.find((i) => i.tipo === tipo) || {};
+        const findAcessorio = (tipo) => acessorios.find((a) => a.tipo === tipo) || {};
+
+        // Itens principais
+        const paleto = findItem('paleto');
+        const camisa = findItem('camisa');
+        const calca = findItem('calca');
+        const colete = findItem('colete');
+
+        // Acessórios
+        const suspensorio = findAcessorio('suspensorio');
+        const passante = findAcessorio('passante');
+        const lenco = findAcessorio('lenco');
+        const gravata = findAcessorio('gravata');
+        const cinto = findAcessorio('cinto');
+        const sapato = findAcessorio('sapato');
+
+        // Itens vendidos (quando modalidade for Aluguel + Venda)
+        const modalidade = os.modalidade || 'Aluguel';
+        const itensVendidos = modalidade === 'Aluguel + Venda'
+            ? [
+                ...itens.filter((i) => i.venda).map((i) => i.tipo),
+                ...acessorios.filter((a) => a.venda).map((a) => a.tipo)
+              ]
+            : modalidade === 'Venda'
+                ? [
+                    'paleto',
+                    'camisa',
+                    'calca',
+                    ...(suspensorio.tipo ? ['suspensorio'] : []),
+                    ...(passante.tipo ? ['passante'] : []),
+                    ...(lenco.tipo ? ['lenco'] : []),
+                    ...(gravata.tipo ? ['gravata'] : []),
+                    ...(cinto.tipo ? ['cinto'] : []),
+                    ...(sapato.tipo ? ['sapato'] : []),
+                    ...(colete.tipo ? ['colete'] : [])
+                  ]
+                : [];
+
+        // Mapear dados do cliente
         const clientData = {
             nome: client.name || '',
             telefone: telefoneFormatado,
@@ -482,73 +526,82 @@ const OrdemServico = () => {
             bairro: address.bairro || '',
             cidade: city.name || ''
         };
-        
+
+        // Pagamento e datas (prioriza dados dentro de ordem_servico)
+        const pagamento = os.pagamento || {};
+
         const mappedData = {
             // Cliente
             ...clientData,
 
+            // Controle de itens vendidos
+            itensVendidos,
+
             // Paletó
-            paletoNumero: '',
-            paletoCor: '',
-            paletoManga: '',
-            paletoMarca: '',
-            paletoAjuste: false,
-            paletoAjusteValor: '',
-            paletoExtras: '',
+            paletoNumero: paleto.numero || '',
+            paletoCor: paleto.cor || '',
+            paletoManga: paleto.manga || '',
+            paletoMarca: paleto.marca ? String(paleto.marca) : '',
+            paletoAjuste: !!(paleto.ajuste && String(paleto.ajuste).trim() !== ''),
+            paletoAjusteValor: paleto.ajuste ? String(paleto.ajuste) : '',
+            paletoExtras: paleto.extras || '',
 
             // Camisa
-            camisaNumero: '',
-            camisaCor: '',
-            camisaManga: '',
-            camisaMarca: '',
-            camisaAjuste: false,
-            camisaAjusteValor: '',
-            camisaExtras: '',
+            camisaNumero: camisa.numero || '',
+            camisaCor: camisa.cor || '',
+            camisaManga: camisa.manga || '',
+            camisaMarca: camisa.marca ? String(camisa.marca) : '',
+            camisaAjuste: !!(camisa.ajuste && String(camisa.ajuste).trim() !== ''),
+            camisaAjusteValor: camisa.ajuste ? String(camisa.ajuste) : '',
+            camisaExtras: camisa.extras || '',
 
             // Calça
-            calcaNumero: '',
-            calcaCor: '',
-            calcaCintura: '',
-            calcaPerna: '',
-            calcaMarca: '',
-            calcaAjusteCos: false,
-            calcaAjusteComprimento: false,
-            calcaAjusteCosValor: '',
-            calcaAjusteComprimentoValor: '',
-            calcaExtras: '',
+            calcaNumero: calca.numero || '',
+            calcaCor: calca.cor || '',
+            calcaCintura: calca.cintura || '',
+            calcaPerna: calca.perna || '',
+            calcaMarca: calca.marca ? String(calca.marca) : '',
+            calcaAjusteCos: !!(calca.ajuste_cintura && String(calca.ajuste_cintura).trim() !== ''),
+            calcaAjusteComprimento: !!(calca.ajuste_comprimento && String(calca.ajuste_comprimento).trim() !== ''),
+            calcaAjusteCosValor: calca.ajuste_cintura ? String(calca.ajuste_cintura) : '',
+            calcaAjusteComprimentoValor: calca.ajuste_comprimento ? String(calca.ajuste_comprimento) : '',
+            calcaExtras: calca.extras || '',
 
             // Acessórios
-            suspensorio: false,
-            suspensorioCor: '',
-            passante: false,
-            passanteCor: '',
-            lenco: false,
-            lencoCor: '',
-            gravata: false,
-            gravataDescricao: '',
-            gravataCor: '',
-            gravataMarca: '',
-            cinto: false,
-
-            cintoCor: '',
-            cintoMarca: '',
-            sapato: false,
-            sapatoDescricao: '',
-            sapatoCor: '',
-            sapatoMarca: '',
-            colete: false,
-            coleteDescricao: '',
-            coleteCor: '',
+            suspensorio: !!suspensorio.tipo,
+            suspensorioCor: suspensorio.cor || '',
+            passante: !!passante.tipo,
+            passanteCor: passante.cor || '',
+            passanteExtensor: !!passante.extensor,
+            lenco: !!lenco.tipo,
+            lencoCor: lenco.cor || '',
+            gravata: !!gravata.tipo,
+            gravataDescricao: gravata.descricao || '',
+            gravataCor: gravata.cor || '',
+            gravataMarca: gravata.marca ? String(gravata.marca) : '',
+            cinto: !!cinto.tipo,
+            cintoCor: cinto.cor || '',
+            cintoMarca: cinto.marca ? String(cinto.marca) : '',
+            sapato: !!sapato.tipo,
+            sapatoDescricao: sapato.descricao || '',
+            sapatoCor: sapato.cor || '',
+            sapatoNumero: sapato.numero || '',
+            sapatoMarca: sapato.marca ? String(sapato.marca) : '',
+            colete: !!colete.tipo,
+            coleteNumero: colete.numero || '',
+            coleteCor: colete.cor || '',
+            coleteDescricao: colete.extras || '',
 
             // Pagamento
-            dataPedido: order.order_date || '',
-            dataEvento: order.event_date || '',
-            ocasiao: order.occasion || '',
-            tipoPagamento: 'Aluguel',
-            total: order.total_value?.toString() || '',
-            sinal: order.advance_payment?.toString() || '',
-            restante: order.remaining_payment?.toString() || '',
-            dataRetirada: order.pickup_date || ''
+            dataPedido: order.order_date || os.data_pedido || '',
+            dataEvento: os.data_evento || order.event_date || '',
+            ocasiao: os.ocasiao || order.occasion || '',
+            tipoPagamento: modalidade,
+            total: (pagamento.total ?? order.total_value ?? '') !== '' ? String(pagamento.total ?? order.total_value) : '',
+            sinal: (pagamento.sinal ?? order.advance_payment ?? '') !== '' ? String(pagamento.sinal ?? order.advance_payment) : '',
+            restante: (pagamento.restante ?? order.remaining_payment ?? '') !== '' ? String(pagamento.restante ?? order.remaining_payment) : '',
+            dataRetirada: os.data_retirada || order.retirada_date || '',
+            dataDevolucao: os.data_devolucao || order.devolucao_date || ''
         };
 
         setFormData(mappedData);
@@ -652,6 +705,7 @@ const OrdemServico = () => {
                             cor: formData.sapatoCor,
                             descricao: formData.sapatoDescricao,
                             marca: formData.sapatoMarca,
+                            numero: formData.sapatoNumero,
                             venda: getItensVendidos().includes('sapato')
                         }] : []),
                         ...(formData.colete ? [{
@@ -788,7 +842,7 @@ const OrdemServico = () => {
                 const lencoValid = !inputValues.lenco || inputValues.lencoCor.trim() !== '';
                 const gravataValid = !inputValues.gravata || (inputValues.gravataCor.trim() !== '');
                 const cintoValid = !inputValues.cinto || (inputValues.cintoCor.trim() !== '');
-                const sapatoValid = !inputValues.sapato || (inputValues.sapatoCor.trim() !== '');
+                const sapatoValid = !inputValues.sapato || (inputValues.sapatoCor.trim() !== '' && inputValues.sapatoNumero.trim() !== '');
                 const coleteValid = !inputValues.colete || (inputValues.coleteCor.trim() !== '');
                 
                 const acessoriosValid = suspensorioValid && passanteValid && lencoValid && gravataValid && cintoValid && sapatoValid && coleteValid;
@@ -801,7 +855,7 @@ const OrdemServico = () => {
                     console.log('Lenço:', inputValues.lenco, 'Cor:', inputValues.lencoCor, 'Valid:', lencoValid);
                                     console.log('Gravata:', inputValues.gravata, 'Cor:', inputValues.gravataCor, 'Descrição:', inputValues.gravataDescricao, 'Valid:', gravataValid);
                 console.log('Cinto:', inputValues.cinto, 'Cor:', inputValues.cintoCor, 'Valid:', cintoValid);
-                console.log('Sapato:', inputValues.sapato, 'Cor:', inputValues.sapatoCor, 'Descrição:', inputValues.sapatoDescricao, 'Valid:', sapatoValid);
+                console.log('Sapato:', inputValues.sapato, 'Cor:', inputValues.sapatoCor, 'Número:', inputValues.sapatoNumero, 'Descrição:', inputValues.sapatoDescricao, 'Valid:', sapatoValid);
                 console.log('Colete:', inputValues.colete, 'Cor:', inputValues.coleteCor, 'Descrição:', inputValues.coleteDescricao, 'Valid:', coleteValid);
                 }
                 
@@ -894,6 +948,7 @@ const OrdemServico = () => {
                 }
                 if (inputValues.sapato) {
                     if (!inputValues.sapatoCor.trim()) errors.sapatoCor = 'Cor do sapato é obrigatória';
+                    if (!inputValues.sapatoNumero.trim()) errors.sapatoNumero = 'Número do sapato é obrigatório';
                 }
                 if (inputValues.colete) {
                     if (!inputValues.coleteCor.trim()) errors.coleteCor = 'Cor do colete é obrigatória';
@@ -1967,6 +2022,20 @@ const OrdemServico = () => {
                                     disabled={!inputValues.sapato || loadingBrands}
                                     error={!!validationErrors.sapatoMarca}
                                 />
+                                <CustomSelect
+                                    value={inputValues.sapatoNumero}
+                                    onChange={(value) => handleSelectChange('sapatoNumero', value)}
+                                    options={[
+                                        { value: '', label: 'Selecione o número' },
+                                        ...Array.from({ length: 50 }, (_, i) => ({
+                                            value: (i + 1).toString(),
+                                            label: (i + 1).toString()
+                                        }))
+                                    ]}
+                                    placeholder="Selecione o número"
+                                    disabled={!inputValues.sapato}
+                                    error={!!validationErrors.sapatoNumero}
+                                />
                                 <input
                                     type="text"
                                     value={inputValues.sapatoDescricao}
@@ -1976,9 +2045,9 @@ const OrdemServico = () => {
                                     disabled={!inputValues.sapato}
 
                                 />
-                                {(validationErrors.sapatoCor || validationErrors.sapatoMarca) && (
+                                {(validationErrors.sapatoCor || validationErrors.sapatoMarca || validationErrors.sapatoNumero) && (
                                     <div className="error-message">
-                                        {validationErrors.sapatoCor || validationErrors.sapatoMarca}
+                                        {validationErrors.sapatoCor || validationErrors.sapatoMarca || validationErrors.sapatoNumero}
                                     </div>
                                 )}
                             </div>
@@ -2626,7 +2695,7 @@ const OrdemServico = () => {
                                     {formData.sapato && (
                                         <div className="accessory-item">
                                             <span className="accessory-label">Sapato:</span>
-                                            <span className="accessory-value">{capitalizeText(formData.sapatoCor)} - {formData.sapatoDescricao} {formData.sapatoMarca && `(${getBrandName(formData.sapatoMarca)})`}</span>
+                                            <span className="accessory-value">{capitalizeText(formData.sapatoCor)} - Número {formData.sapatoNumero} - {formData.sapatoDescricao} {formData.sapatoMarca && `(${getBrandName(formData.sapatoMarca)})`}</span>
                                         </div>
                                     )}
                                     {formData.colete && (

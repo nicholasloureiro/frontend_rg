@@ -332,60 +332,33 @@
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
+    background: transparent; /* fundo neutro */
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
 }
 
-.action-btn.edit {
-    background: #0095e2;
-    color: white;
-    transition: all 0.3s ease !important;
-}
+.action-btn.edit { color: #0095e2; }
 
-.action-btn.edit:hover {
-    background: #008cd2;
-    transform: scale(1.1);
-    transition: all 0.3s ease !important;
-}
+.action-btn.edit:hover { background: rgba(0, 149, 226, 0.08); transform: scale(1.1); }
 
-.action-btn.return {
-    background: #1F3B4D;
-    color: white;
-    transition: all 0.3s ease !important;
-}
+.action-btn.return { color: #1F3B4D; }
 
-.action-btn.return:hover {
-    background: #1a3241;
-    transform: scale(1.1);
-    transition: all 0.3s ease !important;
-}
+.action-btn.return:hover { background: rgba(31, 59, 77, 0.08); transform: scale(1.1); }
 
-.action-btn.pickup {
-    background: #e2d502;
-    color: white;
-    transition: all 0.3s ease !important;
-}
+.action-btn.pickup { color: #e2d502; }
 
-.action-btn.pickup:hover {
-    background: #d0c601;
-    transform: scale(1.1);
-    transition: all 0.3s ease !important;
-}
+.action-btn.pickup:hover { background: rgba(226, 213, 2, 0.12); transform: scale(1.1); }
 
-.action-btn.refuse {
-    background: #DC143C;
-    color: white;
-    transition: all 0.3s ease !important;
-}
+.action-btn.refuse { color: #DC143C; }
 
-.action-btn.refuse:hover {
-    background: rgb(200, 43, 43);
-    transform: scale(1.1);
-    transition: all 0.3s ease !important;
-}
+.action-btn.refuse:hover { background: rgba(220, 20, 60, 0.12); transform: scale(1.1); }
 
 .action-btn svg {
     width: 14px;
     height: 14px;
 }
+
+.action-btn i { color: inherit; }
 
 /* Responsive */
 @media (max-width: 768px) {
