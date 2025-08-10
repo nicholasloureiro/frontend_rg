@@ -87,12 +87,13 @@
 .login-desc {
   font-size: 17.6px;
   color: #f3f3f3;
-  max-width: 400px;
+  max-width: 500px;
+  line-height: 1.5;
 }
 
 .login-card {
   flex: 1;
-  background: #1E1E1E;
+  background: #191d29;
   color: #F5F5F5 ;
   width: 30%;
   padding: 48px 36px 36px 36px;

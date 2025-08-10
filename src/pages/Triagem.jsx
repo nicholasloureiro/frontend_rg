@@ -347,6 +347,7 @@ const Triagem = () => {
                 onChange={(e) => handleInputChange(id, e.target.value)}
                 placeholder={placeholder}
                 maxLength={maxLength}
+                autoComplete="off"
             />
             {errors[id] && (
                 <span className="error-message">{errors[id]}</span>
@@ -404,6 +405,7 @@ const Triagem = () => {
                                             value={formData.cpf}
                                             onChange={handleCPFChange}
                                             placeholder="000.000.000-00"
+                                            autoComplete="off"
                                             maxLength="14"
                                             disabled={buscandoCliente}
                                         />
@@ -454,6 +456,7 @@ const Triagem = () => {
                                             className="form-input"
                                             value={formData.cep}
                                             onChange={handleCEPChange}
+                                            autoComplete="off"
                                             placeholder="00000-000"
                                             maxLength="9"
                                         />

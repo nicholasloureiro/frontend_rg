@@ -18,7 +18,7 @@
   /* Cores de fundo - Tema Escuro */
   --color-bg-primary: #3C342F;
   --color-bg-secondary: #1E1E1E;
-  --color-bg-header: #322b27;
+  --color-bg-header: #0f0f0f;
   --color-bg-input: #2a2a2a;
   --color-bg-card: #2d2d2d;
   
@@ -103,7 +103,7 @@
   --font-color-disabled: #6e6e6e;
   
   /* Cores de fundo */
-  --color-bg-primary: #3C342F;
+  --color-bg-primary: #121212 ;
   --color-bg-secondary: #1E1E1E;
   --color-bg-input: #2a2a2a;
   --color-bg-card: #2d2d2d;
@@ -117,7 +117,7 @@
   --color-border: #29292d;
   --color-border-focus: #1c3b4d;
   --border-color-modal: #5c5c5c;
-  --color-border-header: #28211c;
+  --color-border-header: #333231;
 
   /* Cores de estado */
   --color-disabled: rgba(255, 255, 255, 0.7);
