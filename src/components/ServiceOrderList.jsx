@@ -360,6 +360,12 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
                                                 <span className="value justification-refusal">{capitalizeText(order.justification_refusal)}</span>
                                             </div>
                                         )}
+                                        {activeTab === 'ATRASADO' && order.justificativa_atraso && (
+                                            <div className="info-row">
+                                                <span className="label">Motivo do Atraso:</span>
+                                                <span className="value justification-delay">{capitalizeText(order.justificativa_atraso)}</span>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="order-payment">
@@ -427,7 +433,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
                                                 </button>
                                             </>
                                         )}
-                                        {(activeTab === 'AGUARDANDO_DEVOLUCAO' || activeTab === 'ATRASADO') && (
+                                        {activeTab === 'AGUARDANDO_DEVOLUCAO' && (
                                             <button
                                                 className="action-btn return"
                                                 onClick={(e) => handleMarkAsReturned(order, e)}
@@ -437,6 +443,33 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
                                                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                                                 </svg>
                                             </button>
+                                        )}
+                                        {activeTab === 'ATRASADO' && (
+                                            <>
+                                                <button
+                                                    className="action-btn refuse"
+                                                    onClick={(e) => handleRefuseOrder(order, e)}
+                                                    title="Cancelar ordem"
+                                                >
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                                                    </svg>
+                                                </button>
+                                                <button className="action-btn edit" title="Editar ordem">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    className="action-btn return"
+                                                    onClick={(e) => handleMarkAsReturned(order, e)}
+                                                    title="Marcar como devolvida"
+                                                >
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                                                    </svg>
+                                                </button>
+                                            </>
                                         )}
                                     </div>
                                 </div>

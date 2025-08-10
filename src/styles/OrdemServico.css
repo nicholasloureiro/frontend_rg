@@ -191,7 +191,7 @@
 }
 
 .action-btn {
-  min-width: 50px;
+  min-width: max-content;
 }
 
 /* Seção de Preview */

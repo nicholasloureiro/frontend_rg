@@ -278,6 +278,16 @@
     word-wrap: break-word;
 }
 
+.info-row .value.justification-delay {
+    color: #fd7e14;
+    font-weight: 600;
+    font-style: italic;
+    max-width: 70%;
+    text-align: left;
+    white-space: normal;
+    word-wrap: break-word;
+}
+
 .order-payment {
     background: var(--background-modal-body);
     padding: 16px;
