@@ -89,5 +89,32 @@ export const serviceOrderService = {
             console.error('Erro ao cancelar ordem de serviço:', error);
             throw error;
         }
+    },
+
+    // Buscar ordens de serviço com filtros
+    searchServiceOrders: async (phase, filters = {}) => {
+        try {
+            const params = new URLSearchParams();
+            
+            // Adiciona filtros se fornecidos
+            if (filters.search) {
+                params.append('search', filters.search);
+            }
+            if (filters.initial_date) {
+                params.append('initial_date', filters.initial_date);
+            }
+            if (filters.end_date) {
+                params.append('end_date', filters.end_date);
+            }
+
+            const queryString = params.toString();
+            const url = `/api/v1/service-orders/phase/${phase}/${queryString ? `?${queryString}` : ''}`;
+            
+            const response = await api.get(url);
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao buscar ordens de serviço:', error);
+            throw error;
+        }
     }
 }; 

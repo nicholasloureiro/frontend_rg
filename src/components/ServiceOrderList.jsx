@@ -6,6 +6,7 @@ import { capitalizeText } from '../utils/capitalizeText';
 import { mascaraTelefoneInternacional } from '../utils/Mascaras';
 import { parseCurrency } from '../utils/parseCurrency';
 import Button from './Button';
+import InputDate from './InputDate';
 import Swal from 'sweetalert2';
 
 const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetry }) => {
@@ -14,6 +15,13 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(false);
     const [internalError, setInternalError] = useState(null);
+
+    // Estados para busca
+    const [showSearchPanel, setShowSearchPanel] = useState(false);
+    const [searchText, setSearchText] = useState('');
+    const [initialDate, setInitialDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
+    const [isSearching, setIsSearching] = useState(false);
 
     const tabs = [
         { key: 'PENDENTE', label: 'PENDENTES', color: '#0095e2' },
@@ -24,11 +32,11 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
         { key: 'FINALIZADO', label: 'FINALIZADAS', color: '#4caf50' },
     ];
 
-    const fetchOrders = async (phase) => {
+    const fetchOrders = async (phase, filters = {}) => {
         setLoading(true);
         setInternalError(null);
         try {
-            const data = await serviceOrderService.getServiceOrdersByPhase(phase);
+            const data = await serviceOrderService.searchServiceOrders(phase, filters);
             // Garante que orders sempre será um array
             setOrders(Array.isArray(data) ? data : []);
         } catch (err) {
@@ -72,6 +80,39 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
 
     const handleTabChange = (tabKey) => {
         setActiveTab(tabKey);
+        // Limpa os filtros quando muda de aba
+        setSearchText('');
+        setInitialDate(null);
+        setEndDate(null);
+    };
+
+    const handleSearch = async () => {
+        setIsSearching(true);
+        const filters = {};
+
+        if (searchText.trim()) {
+            filters.search = searchText.trim();
+        }
+        if (initialDate) {
+            filters.initial_date = initialDate.toISOString().split('T')[0];
+        }
+        if (endDate) {
+            filters.end_date = endDate.toISOString().split('T')[0];
+        }
+
+        await fetchOrders(activeTab, filters);
+        setIsSearching(false);
+    };
+
+    const handleClearSearch = async () => {
+        setSearchText('');
+        setInitialDate(null);
+        setEndDate(null);
+        await fetchOrders(activeTab);
+    };
+
+    const toggleSearchPanel = () => {
+        setShowSearchPanel(!showSearchPanel);
     };
 
     const handleOrderClick = (order) => {
@@ -128,7 +169,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
         // Verifica se há valor restante para receber
         const hasRemainingPayment = order.remaining_payment > 0;
 
-                if (hasRemainingPayment) {
+        if (hasRemainingPayment) {
             // Modal informativo sobre valor restante
             const result = await Swal.fire({
                 title: 'Valor restante para receber',
@@ -145,7 +186,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
             if (result.isConfirmed) {
                 try {
                     await serviceOrderService.pickUpServiceOrder(order.id);
-                    
+
                     await Swal.fire({
                         title: 'Retirada confirmada!',
                         text: `Ordem #${order.id} marcada como retirada.}`,
@@ -157,7 +198,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
                     fetchOrders(activeTab);
                 } catch (error) {
                     console.error('Erro ao marcar como retirada:', error);
-                    
+
                     await Swal.fire({
                         title: 'Erro!',
                         text: 'Não foi possível marcar a ordem como retirada. Tente novamente.',
@@ -207,9 +248,9 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
         }
     };
 
-        const handleRefuseOrder = async (order, event) => {
+    const handleRefuseOrder = async (order, event) => {
         event.stopPropagation(); // Previne que o clique propague para o card
-        
+
         const { value: justification, isConfirmed } = await Swal.fire({
             title: 'Cancelar ordem de serviço',
             text: `Deseja cancelar a ordem de serviço #${order.id}?`,
@@ -240,7 +281,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
         if (isConfirmed && justification) {
             try {
                 await serviceOrderService.refuseServiceOrder(order.id, justification);
-                
+
                 // Mostra mensagem de sucesso
                 await Swal.fire({
                     title: 'Ordem cancelada!',
@@ -253,7 +294,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
                 fetchOrders(activeTab);
             } catch (error) {
                 console.error('Erro ao cancelar ordem:', error);
-                
+
                 // Mostra mensagem de erro
                 await Swal.fire({
                     title: 'Erro!',
@@ -295,12 +336,74 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
                     </button>
                 ))}
             </div>
+            <div className="search-toggle-btn-container mb-3">
+                <div className="search-toggle-btn-container-content d-flex justify-content-end">
+                    <Button variant="primary" text={`${showSearchPanel ? 'Ocultar Busca' : 'Buscar'}`} iconName={`${showSearchPanel ? 'x-circle' : 'search'}`} iconPosition="left" onClick={toggleSearchPanel} style={{ width: 'fit-content' }} />
+                </div>
+                {/* Painel de Busca */}
+                {showSearchPanel && (
+                    <div className="search-panel mt-3">
+                        <div className="search-filters">
+                            <div className="search-field">
+                                <label htmlFor="search-text">Buscar por texto:</label>
+                                <input
+                                    id="search-text"
+                                    type="text"
+                                    placeholder="Digite nome do cliente, evento, recepcionista..."
+                                    value={searchText}
+                                    onChange={(e) => setSearchText(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                                />
+                            </div>
+
+                            <div className="date-filters">
+                                <div className="date-field">
+                                    <label htmlFor="initial-date">Data inicial:</label>
+                                    <InputDate
+                                        selectedDate={initialDate}
+                                        onDateChange={setInitialDate}
+                                        placeholderText="Selecione a data inicial"
+                                    />
+                                </div>
+
+                                <div className="date-field">
+                                    <label htmlFor="end-date">Data final:</label>
+                                    <InputDate
+                                        selectedDate={endDate}
+                                        onDateChange={setEndDate}
+                                        placeholderText="Selecione a data final"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="search-actions">
+                            <Button
+                                variant="outline"
+                                text="Limpar"
+                                iconName="x-circle"
+                                iconPosition="left"
+                                onClick={handleClearSearch}
+                                disabled={isSearching || loading}
+                            />
+                            <Button
+                                variant="primary"
+                                text="Buscar"
+                                iconName="search"
+                                iconPosition="left"
+                                onClick={handleSearch}
+                                disabled={isSearching || loading}
+                            />
+                        </div>
+                    </div>
+                )}
+            </div>
 
             {/* Content */}
             <div className="list-content">
                 {(isLoading || loading) ? (
                     <div className="loading-container">
-                        <div className="loading-spinner" style={{ color: 'var(--color-accent)'}}></div>
+                        <div className="loading-spinner" style={{ color: 'var(--color-accent)' }}></div>
                         <p>Carregando ordens de serviço...</p>
                     </div>
                 ) : (error || internalError) ? (
