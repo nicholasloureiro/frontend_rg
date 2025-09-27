@@ -4,6 +4,7 @@ import '../styles/EventoDetalhes.css';
 import Header from '../components/Header';
 import eventService from '../services/eventService';
 import { capitalizeText } from '../utils/capitalizeText';
+import Button from '../components/Button';
 
 const EventoDetalhes = () => {
     const { id } = useParams();
@@ -124,10 +125,7 @@ const EventoDetalhes = () => {
             <div className="evento-detalhes-container">
                 {/* Header com ações */}
                 <div className="evento-header">
-                    <button className="btn-back" onClick={handleVoltar}>
-                        <i className="bi bi-arrow-left"></i>
-                        Voltar para eventos
-                    </button>
+                <Button text="Voltar para eventos" onClick={handleVoltar} variant="primary" iconName="arrow-left" iconPosition="left" />
                 </div>
 
                 {/* Informações principais do evento */}
@@ -196,9 +194,10 @@ const EventoDetalhes = () => {
                                 {evento.service_orders.map((ordem, index) => (
                                     <div key={ordem.id || index} className="ordem-item" onClick={() => navigate(`/ordens/${ordem.id}`)}>
                                         <div className="ordem-header">
-                                            <div className="ordem-numero">
-                                                <h4>OS-{ordem.id}</h4>
-                                                <span className="ordem-cliente">Criado em: {formatDate(ordem.date_created)}</span>
+                                            <div className="ordem-numero d-flex flex-column">
+                                                <h4 className="ordem-numero-id mb-3">OS-{ordem.id}</h4>
+                                                <span className="ordem-cliente mb-2">Cliente: {capitalizeText(ordem.client_name)}</span>
+                                                <span className="ordem-cliente mb-2">Criado em: {formatDate(ordem.date_created)}</span>
                                             </div>
                                         </div>
 

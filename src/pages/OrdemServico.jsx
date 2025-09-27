@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import Button from '../components/Button';
 import StepProgressBar from '../components/StepProgressBar';
 import '../styles/OrdemServico.css';
@@ -20,6 +21,7 @@ import useBrands from '../hooks/useBrands';
 import CustomSelect from '../components/CustomSelect';
 
 const OrdemServico = () => {
+    const { id } = useParams();
     const [currentStep, setCurrentStep] = useState(0);
     const [showForm, setShowForm] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
@@ -415,10 +417,39 @@ const OrdemServico = () => {
         }
     };
 
+    // Função para carregar uma ordem específica por ID
+    const loadOrderById = async (orderId) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const order = await serviceOrderService.getServiceOrderById(orderId);
+            setSelectedOrder(order);
+            handleSelectOrder(order);
+        } catch (error) {
+            console.error('Erro ao carregar ordem de serviço:', error);
+            setError('Não foi possível carregar a ordem de serviço. Tente novamente.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro ao carregar ordem de serviço',
+                text: 'Não foi possível carregar a ordem de serviço.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Carregar ordens ao montar o componente
     useEffect(() => {
-        loadOrders();
-    }, []);
+        if (id) {
+            // Se há um ID na URL, carrega a ordem específica
+            loadOrderById(id);
+        } else {
+            // Caso contrário, carrega a lista de ordens
+            loadOrders();
+        }
+    }, [id]);
 
 
 

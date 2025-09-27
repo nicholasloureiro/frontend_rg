@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { serviceOrderService } from '../services/serviceOrderService';
 import '../styles/ServiceOrderList.css';
 import { capitalizeText } from '../utils/capitalizeText';
@@ -8,6 +9,7 @@ import Button from './Button';
 import Swal from 'sweetalert2';
 
 const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetry }) => {
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('PENDENTE');
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -73,7 +75,8 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
     };
 
     const handleOrderClick = (order) => {
-        onSelectOrder(order);
+        // Navega para a rota com o ID da ordem
+        navigate(`/ordens/${order.id}`);
     };
 
     const handleMarkAsReturned = async (order, event) => {

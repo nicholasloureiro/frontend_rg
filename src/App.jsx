@@ -122,6 +122,12 @@ function AppContent() {
               <OrdemServico />
             </ProtectedRoute>
           } />
+          
+          <Route path="/ordens/:id" element={
+            <ProtectedRoute>
+              <OrdemServico />
+            </ProtectedRoute>
+          } />
 
           <Route path="/eventos" element={
             <ProtectedRoute>
