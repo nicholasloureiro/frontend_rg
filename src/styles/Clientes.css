@@ -242,10 +242,9 @@
   grid-template-columns: 2fr 1fr 1fr 1.5fr 3fr 0.5fr;
   gap: 16px;
   padding: 16px;
-  background: var(--color-bg-card);
+  background: var(--color-accent);
   border-bottom: 1px solid var(--color-border);
   font-weight: 600;
-  color: var(--color-text-primary);
   font-size: 14px;
 }
 
@@ -276,7 +275,7 @@
 
 .header-cell {
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: white;
 }
 
 /* Informações do Cliente */
