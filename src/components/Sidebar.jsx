@@ -191,6 +191,7 @@ const Sidebar = ({ setSideOpen }) => {
           <SidebarLink to="/dashboard" iconBoot={'graph-up'} label="Dashboard" onClick={toggleSidebar} />
           <SidebarLink to="/triagem" iconBoot={'clipboard-check'} label="Triagem" onClick={toggleSidebar} />
           <SidebarLink to="/ordens" iconBoot={'list-check'} label="Ordens de serviço" onClick={toggleSidebar} />
+          <SidebarLink to="/eventos" iconBoot={'calendar2-event'} label="Eventos" onClick={toggleSidebar} />
           <SidebarLink to="/clientes" iconBoot={'people'} label="Clientes" onClick={toggleSidebar} />
           <SidebarLink to="/funcionarios" iconBoot={'person-lines-fill'} label="Funcionários" onClick={toggleSidebar} />
           <SidebarLink to="/produtos" iconBoot={'box'} label="Produtos" onClick={toggleSidebar} />

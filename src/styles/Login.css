@@ -281,7 +281,7 @@
 }
 
 #main > div > div.login-card > form.login-form > div.input-group.mb-2 > div > button > svg{
-  stroke: white !important;
+  stroke: #2c2c2c !important;
 }
 
 .login-button {

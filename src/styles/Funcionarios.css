@@ -406,11 +406,6 @@
   color: var(--color-text-secondary);
 }
 
-.error-state i {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
 .error-state .bi-exclamation-triangle {
   font-size: 48px;

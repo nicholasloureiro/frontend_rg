@@ -1,12 +1,7 @@
-@font-face {
-  font-family: 'GT-Eesti-Text-Regular-Trial'; /* Nome que você vai usar para referenciar a fonte */
-  src: url('./assets/fonts/GT-Eesti-Text-Regular-Trial.otf') format('opentype'); /* Caminho para o arquivo .otf */
-  font-weight: normal;
-  font-style: normal;
-}
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
 * {
-  font-family: 'GT-Eesti-Text-Regular-Trial', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 

@@ -16,6 +16,8 @@ import './App.css'
 import Triagem from './pages/Triagem'
 import OrdemServico from './pages/OrdemServico'
 import Produtos from './pages/Produtos'
+import Eventos from './pages/Eventos'
+import EventoDetalhes from './pages/EventoDetalhes'
 
 function AppContent() {
   const { theme } = useTheme();
@@ -118,6 +120,18 @@ function AppContent() {
           <Route path="/ordens" element={
             <ProtectedRoute>
               <OrdemServico />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/eventos" element={
+            <ProtectedRoute>
+              <Eventos />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/evento/:id" element={
+            <ProtectedRoute>
+              <EventoDetalhes />
             </ProtectedRoute>
           } />
           

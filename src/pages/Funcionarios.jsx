@@ -434,7 +434,7 @@ const Funcionarios = () => {
                 <i className="bi bi-exclamation-triangle"></i>
                 <h3>Erro ao carregar funcionários</h3>
                 <p>{error}</p>
-                <Button variant="primary" text="Tentar novamente" iconName="arrow-clockwise" iconPosition="left" onClick={loadEmployees} disabled={isLoadingEmployees} style={{ width: 'fit-content', marginLeft: 'auto' }} />
+                <Button variant="primary" text="Tentar novamente" iconName="arrow-clockwise" iconPosition="left" onClick={loadEmployees} disabled={isLoadingEmployees} style={{ width: 'fit-content'}} />
               </div>
             ) : filteredFuncionarios.length === 0 ? (
               <div className="no-results">
