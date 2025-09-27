@@ -73,11 +73,6 @@ const Sidebar = ({ setSideOpen }) => {
       return 'Carregando...';
     }
     
-    console.log('Dados do usuário no Sidebar:', user);
-    console.log('user.person?.name:', user?.person?.name);
-    console.log('user.first_name:', user?.first_name);
-    console.log('user.username:', user?.username);
-    
     // Prioriza o nome da pessoa (mais completo)
     if (user?.person?.name) {
       return capitalizeText(user.person.name); // Retorna o nome completo capitalizado

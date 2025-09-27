@@ -34,7 +34,7 @@ const Eventos = () => {
     };
 
     const handleEventoClick = (eventoId) => {
-        navigate(`/evento/${eventoId}`);
+        navigate(`/eventos/${eventoId}`);
     };
 
     const handleCreateEvent = () => {

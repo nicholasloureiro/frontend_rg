@@ -129,7 +129,7 @@ function AppContent() {
             </ProtectedRoute>
           } />
           
-          <Route path="/evento/:id" element={
+          <Route path="/eventos/:id" element={
             <ProtectedRoute>
               <EventoDetalhes />
             </ProtectedRoute>

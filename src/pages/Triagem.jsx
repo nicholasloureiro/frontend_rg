@@ -4,11 +4,14 @@ import 'react-phone-number-input/style.css';
 import Header from '../components/Header';
 import Button from '../components/Button';
 import InputDate from '../components/InputDate';
+import CustomSelect from '../components/CustomSelect';
+import CreateEventModal from '../components/CreateEventModal';
 import { mascaraCPF, mascaraCEP, removerMascara } from '../utils/Mascaras';
 import validarCPF from '../utils/ValidarCPF';
 import { triagemService } from '../services/triagemService';
 import { getEmployees } from '../services/employeeService';
 import { clientService } from '../services/clientService';
+import eventService from '../services/eventService';
 import { capitalizeText } from '../utils/capitalizeText';
 import Swal from 'sweetalert2';
 import '../styles/Triagem.css';
@@ -25,7 +28,7 @@ const Triagem = () => {
         numero: '',
         atendenteResponsavel: '',
         origem: '',
-        evento: '',
+        event_id: '',
         papelNoEvento: '',
         dataEvento: null
     });
@@ -35,6 +38,9 @@ const Triagem = () => {
     const [cepLoading, setCepLoading] = useState(false);
     const [atendentes, setAtendentes] = useState([]);
     const [loadingAtendentes, setLoadingAtendentes] = useState(false);
+    const [eventos, setEventos] = useState([]);
+    const [loadingEventos, setLoadingEventos] = useState(false);
+    const [showCreateEventModal, setShowCreateEventModal] = useState(false);
     const [cpfValido, setCpfValido] = useState(true);
     const [buscandoCliente, setBuscandoCliente] = useState(false);
 
@@ -50,15 +56,46 @@ const Triagem = () => {
             setAtendentes(atendentesFiltrados);
         } catch (error) {
             console.error('Erro ao carregar atendentes:', error);
-          
+
         } finally {
             setLoadingAtendentes(false);
         }
     };
 
-    // Carregar atendentes quando o componente montar
+    // Função para carregar eventos abertos da API
+    const carregarEventos = async () => {
+        setLoadingEventos(true);
+        try {
+            const eventosData = await eventService.listarEventosAbertos();
+            // Garante que eventos sempre será um array
+            const listaEventos = Array.isArray(eventosData) ? eventosData : [];
+            setEventos(listaEventos);
+        } catch (error) {
+            console.error('Erro ao carregar eventos:', error);
+        } finally {
+            setLoadingEventos(false);
+        }
+    };
+
+    // Função para abrir modal de criar evento
+    const handleOpenCreateEventModal = () => {
+        setShowCreateEventModal(true);
+    };
+
+    // Função para fechar modal de criar evento
+    const handleCloseCreateEventModal = () => {
+        setShowCreateEventModal(false);
+    };
+
+    // Função para atualizar lista após criar evento
+    const handleEventCreated = () => {
+        carregarEventos();
+    };
+
+    // Carregar atendentes e eventos quando o componente montar
     React.useEffect(() => {
         carregarAtendentes();
+        carregarEventos();
     }, []);
 
     // Opções para os selects
@@ -89,6 +126,14 @@ const Triagem = () => {
         { value: 'mae', label: 'Mãe' },
         { value: 'familia', label: 'Família' },
         { value: 'outro', label: 'Outro' }
+    ];
+
+    const opcoesEventos = [
+        { value: '', label: loadingEventos ? 'Carregando...' : 'Selecione um evento' },
+        ...eventos.map(evento => ({
+            value: evento.id,
+            label: evento.name
+        }))
     ];
 
 
@@ -163,8 +208,7 @@ const Triagem = () => {
             cpf: removerMascara(formData.cpf),
             atendente_id: formData.atendenteResponsavel ? parseInt(formData.atendenteResponsavel) : null,
             origem: formData.origem.toUpperCase(),
-            data_evento: formatarDataParaAPI(formData.dataEvento),
-            evento: formData.evento.toUpperCase(),
+            event_id: formData.event_id ? parseInt(formData.event_id) : null,
             papel_evento: formData.papelNoEvento.toUpperCase(),
             endereco: {
                 cep: removerMascara(formData.cep),
@@ -211,7 +255,7 @@ const Triagem = () => {
                 numero: '',
                 atendenteResponsavel: '',
                 origem: '',
-                evento: '',
+                event_id: '',
                 papelNoEvento: '',
                 dataEvento: null
             });
@@ -256,7 +300,7 @@ const Triagem = () => {
         setBuscandoCliente(true);
         try {
             const cliente = await clientService.buscarPorCPF(cpf);
-            
+
             if (cliente) {
                 // Formatar o telefone para o componente PhoneInput
                 let telefoneFormatado = '';
@@ -312,7 +356,7 @@ const Triagem = () => {
         if (cpfLimpo.length === 11) {
             const ehValido = validarCPF(cpfLimpo);
             setCpfValido(ehValido);
-            
+
             // Se o CPF for válido, buscar dados do cliente
             if (ehValido) {
                 buscarClientePorCPF(cpfLimpo);
@@ -425,11 +469,11 @@ const Triagem = () => {
 
                                 {renderInput('nomeCliente', 'Nome do Cliente', 'text', 'Digite o nome completo', true)}
 
-                               
+
                             </div>
 
                             <div className="form-row">
-                            <div className="form-group">
+                                <div className="form-group">
                                     <label htmlFor="telefone" className="form-label">
                                         Telefone *
                                     </label>
@@ -490,23 +534,38 @@ const Triagem = () => {
                             </div>
 
                             <div className="form-row">
-                                {renderInput('evento', 'Evento', 'text', 'Nome do evento')}
-                                {renderSelect('papelNoEvento', 'Papel no Evento', opcoesPapel)}
-                            </div>
-
-                            <div className="form-row">
                                 <div className="form-group">
-                                    <label htmlFor="dataEvento" className="form-label">
-                                        Data do Evento
+                                    <label htmlFor="event_id" className="form-label">
+                                        Evento *
                                     </label>
-                                    <InputDate
-                                        selectedDate={formData.dataEvento}
-                                        onDateChange={(date) => handleInputChange('dataEvento', date)}
-                                        placeholderText="Selecione a data"
+                                    <CustomSelect
+                                        options={opcoesEventos}
+                                        value={formData.event_id}
+                                        onChange={(value) => handleInputChange('event_id', value)}
+                                        placeholder="Selecione um evento"
+                                        disabled={loadingEventos}
+                                        error={errors.event_id}
                                     />
+                                    {errors.event_id && (
+                                        <span className="error-message">{errors.event_id}</span>
+                                    )}
+                                    <small
+                                        className="create-event-link"
+                                        onClick={handleOpenCreateEventModal}
+                                        style={{
+                                            color: 'var(--color-accent)',
+                                            cursor: 'pointer',
+                                            textDecoration: 'underline',
+                                            fontSize: '12px',
+                                            marginTop: '-5px',
+                                            marginLeft: 'auto',
+                                            display: 'block'
+                                        }}
+                                    >
+                                        Criar novo evento
+                                    </small>
                                 </div>
-                                <div className="form-row">
-                                </div>
+                                {renderSelect('papelNoEvento', 'Papel no Evento *', opcoesPapel)}
                             </div>
                         </div>
                         <Button
@@ -522,6 +581,13 @@ const Triagem = () => {
                     </form>
                 </div>
             </div>
+
+            {/* Modal para criar evento */}
+            <CreateEventModal
+                show={showCreateEventModal}
+                onClose={handleCloseCreateEventModal}
+                onEventCreated={handleEventCreated}
+            />
         </div>
     );
 };
