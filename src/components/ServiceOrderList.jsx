@@ -340,7 +340,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
                                         </div>
                                         <div className="info-row">
                                             <span className="label">Evento:</span>
-                                            <span className="value">{capitalizeText(order.occasion)}</span>
+                                            <span className="value">{capitalizeText(order.event_name)}</span>
                                         </div>
                                         <div className="info-row">
                                             <span className="label">Data do Evento:</span>
