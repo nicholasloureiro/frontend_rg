@@ -37,7 +37,7 @@ const eventService = {
   // Atualizar evento
   atualizarEvento: async (id, eventoData) => {
     try {
-      const response = await api.put(`/api/v1/events/${id}/`, eventoData);
+      const response = await api.put(`/api/v1/events/${id}/update/`, eventoData);
       return response.data;
     } catch (error) {
       console.error('Erro ao atualizar evento:', error);

@@ -5,6 +5,7 @@ import Header from '../components/Header';
 import eventService from '../services/eventService';
 import { capitalizeText } from '../utils/capitalizeText';
 import Button from '../components/Button';
+import EditEventModal from '../components/EditEventModal';
 
 const EventoDetalhes = () => {
     const { id } = useParams();
@@ -12,6 +13,7 @@ const EventoDetalhes = () => {
     const [evento, setEvento] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showEditModal, setShowEditModal] = useState(false);
 
     useEffect(() => {
         if (id) {
@@ -78,6 +80,19 @@ const EventoDetalhes = () => {
 
     const handleVoltar = () => {
         navigate('/eventos');
+    };
+
+    const handleEditEvent = () => {
+        setShowEditModal(true);
+    };
+
+    const handleCloseEditModal = () => {
+        setShowEditModal(false);
+    };
+
+    const handleEventUpdated = () => {
+        // Recarregar os dados do evento após a edição
+        loadEvento();
     };
 
     if (isLoading) {
@@ -150,7 +165,7 @@ const EventoDetalhes = () => {
                 {/* Informações principais do evento */}
                 <div className="evento-info-card">
                     <div className="evento-info-header">
-                        <div className="evento-title-section d-flex flex-row justify-content-between align-items-center">
+                        <div className="evento-title-section d-flex flex-row">
                             <h1 className="evento-title">
                                 {evento.name ? capitalizeText(evento.name) : 'Evento sem nome'}
                             </h1>
@@ -159,6 +174,9 @@ const EventoDetalhes = () => {
                             <span className={`status-badge status-${evento.status?.toLowerCase().replace(' ', '-') || 'open'}`}>
                                 {evento.status || 'Em Aberto'}
                             </span>
+                        </div>
+                        <div className="evento-actions" style={{ marginLeft: 'auto' }}>
+                            <Button text="Editar Evento" onClick={handleEditEvent} variant="primary" iconName="pencil" iconPosition="left" />
                         </div>
                     </div>
 
@@ -241,6 +259,14 @@ const EventoDetalhes = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Modal de edição */}
+            <EditEventModal
+                show={showEditModal}
+                onClose={handleCloseEditModal}
+                eventData={evento}
+                onEventUpdated={handleEventUpdated}
+            />
         </>
     );
 };

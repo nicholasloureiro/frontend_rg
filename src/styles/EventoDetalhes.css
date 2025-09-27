@@ -4,9 +4,12 @@
   margin: 0 auto;
 }
 
-/* Header com botão de voltar */
+/* Header com botões de ação */
 .evento-header {
   margin-bottom: 24px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .btn-back {
@@ -43,8 +46,7 @@
 
 .evento-info-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 24px;
   gap: 16px;
   flex-wrap: wrap;
