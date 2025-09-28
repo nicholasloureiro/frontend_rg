@@ -6,6 +6,7 @@ import '../styles/OrdemServico.css';
 import Header from '../components/Header';
 import ServiceOrderList from '../components/ServiceOrderList';
 import { serviceOrderService } from '../services/serviceOrderService';
+import { clientService } from '../services/clientService';
 import { mascaraCPF, mascaraCEP, formatarParaExibicaoDecimal, formatarTelefoneParaExibicao } from '../utils/Mascaras';
 import { capitalizeText } from '../utils/capitalizeText';
 import PhoneInput from 'react-phone-number-input';
@@ -287,7 +288,7 @@ const OrdemServico = () => {
         }
     };
 
-    const handleInputBlur = (field, value) => {
+    const handleInputBlur = async (field, value) => {
         // Para campos de moeda, garantir valor numérico no formData
         if (field === 'total' || field === 'sinal') {
             setFormData(prev => ({
@@ -308,6 +309,59 @@ const OrdemServico = () => {
             }));
             return;
         }
+
+        // Buscar cliente por CPF quando o campo CPF perder o foco
+        if (field === 'cpf' && value && value.replace(/\D/g, '').length === 11) {
+            try {
+                const cpfLimpo = value.replace(/\D/g, '');
+                const clienteEncontrado = await clientService.buscarPorCPF(cpfLimpo);
+                
+                if (clienteEncontrado && clienteEncontrado.length > 0) {
+                    const cliente = clienteEncontrado[0];
+                    
+                    // Preencher automaticamente os campos com os dados do cliente
+                    // Usando a estrutura correta do response da API
+                    const clienteData = {
+                        nome: cliente.name || '',
+                        telefone: cliente.contacts?.[0]?.phone || '',
+                        email: cliente.contacts?.[0]?.email || '',
+                        cep: cliente.addresses?.[0]?.cep || '',
+                        rua: cliente.addresses?.[0]?.rua || '',
+                        numero: cliente.addresses?.[0]?.numero || '',
+                        complemento: cliente.addresses?.[0]?.complemento || '',
+                        bairro: cliente.addresses?.[0]?.bairro || '',
+                        cidade: cliente.addresses?.[0]?.cidade?.name || ''
+                    };
+                    
+                    setInputValues(prev => ({
+                        ...prev,
+                        ...clienteData
+                    }));
+                    
+                    // Também atualizar o formData para garantir que os dados sejam enviados
+                    setFormData(prev => ({
+                        ...prev,
+                        ...clienteData
+                    }));
+
+                    // Mostrar mensagem de sucesso
+                    Swal.fire({
+                        title: 'Cliente encontrado!',
+                        text: 'Os dados do cliente foram preenchidos automaticamente.',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    // Cliente não encontrado - não fazer nada, deixar campos vazios
+                    console.log('Cliente não encontrado para o CPF:', cpfLimpo);
+                }
+            } catch (error) {
+                console.error('Erro ao buscar cliente por CPF:', error);
+                // Em caso de erro, não mostrar mensagem para não incomodar o usuário
+            }
+        }
+
         setFormData(prev => ({
             ...prev,
             [field]: value
@@ -770,11 +824,11 @@ const OrdemServico = () => {
                 cliente: {
                     nome: formData.nome,
                     cpf: formData.cpf ? formData.cpf.replace(/\D/g, '') : '',
+                    email: formData.email,
                     contatos: [
                         {
                             tipo: "telefone",
-                            valor: formData.telefone ? formData.telefone.replace(/\D/g, '') : '',
-                            email: formData.email
+                            valor: formData.telefone ? formData.telefone.replace(/\D/g, '') : ''
                         }
                     ],
                     enderecos: [

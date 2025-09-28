@@ -219,6 +219,7 @@ const Triagem = () => {
         return {
             cliente_nome: formData.nomeCliente.toUpperCase(),
             telefone: formData.telefone ? formData.telefone.replace(/\D/g, '') : '',
+            email: formData.email,
             cpf: removerMascara(formData.cpf),
             atendente_id: formData.atendenteResponsavel ? parseInt(formData.atendenteResponsavel) : null,
             origem: formData.origem.toUpperCase(),
@@ -228,6 +229,7 @@ const Triagem = () => {
                 cep: removerMascara(formData.cep),
                 rua: formData.rua.toUpperCase(),
                 numero: formData.numero,
+                complemento: formData.complemento.toUpperCase(),
                 bairro: formData.bairro.toUpperCase(),
                 cidade: formData.cidade.toUpperCase()
             }

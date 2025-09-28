@@ -22,6 +22,7 @@ const Clientes = () => {
     rua: '',
     numero: '',
     bairro: '',
+    complemento: '',
     cidade: ''
   });
   const [editingId, setEditingId] = useState(null);
@@ -103,7 +104,8 @@ const Clientes = () => {
             rua: data.logradouro || '',
             bairro: data.bairro || '',
             cidade: data.localidade || '',
-            cep: formatCep(cep)
+            cep: formatCep(cep),
+            complemento: '' // Limpar complemento ao buscar novo CEP
           }));
         } else {
           Swal.fire({
@@ -167,6 +169,7 @@ const Clientes = () => {
           rua: formData.rua,
           numero: formData.numero,
           bairro: formData.bairro,
+          complemento: formData.complemento,
           cidade: formData.cidade
         };
         await clientService.atualizar(editingId, updateData);
@@ -193,6 +196,7 @@ const Clientes = () => {
           rua: formData.rua,
           numero: formData.numero,
           bairro: formData.bairro,
+          complemento: formData.complemento,
           cidade: formData.cidade
         };
         await clientService.criar(createData);
@@ -220,6 +224,7 @@ const Clientes = () => {
         rua: '',
         numero: '',
         bairro: '',
+        complemento: '',
         cidade: ''
       });
     } catch (error) {
@@ -248,6 +253,7 @@ const Clientes = () => {
       rua: cliente.address?.street ? capitalizeText(cliente.address.street) : '',
       numero: cliente.address?.number || '',
       bairro: cliente.address?.neighborhood ? capitalizeText(cliente.address.neighborhood) : '',
+      complemento: cliente.address?.complemento ? capitalizeText(cliente.address.complemento) : '',
       cidade: cliente.address?.city ? capitalizeText(cliente.address.city) : ''
     };
     setFormData(clienteData);
@@ -265,6 +271,7 @@ const Clientes = () => {
       rua: '',
       numero: '',
       bairro: '',
+      complemento: '',
       cidade: ''
     });
   };
@@ -280,6 +287,7 @@ const Clientes = () => {
     const parts = [];
     if (address.street) parts.push(capitalizeText(address.street));
     if (address.number) parts.push(address.number);
+    if (address.complemento) parts.push(capitalizeText(address.complemento));
     if (address.neighborhood) parts.push(capitalizeText(address.neighborhood));
     if (address.city) parts.push(capitalizeText(address.city));
     if (address.cep) parts.push(address.cep);
@@ -297,7 +305,7 @@ const Clientes = () => {
     // Busca no endereço
     let addressMatch = false;
     if (cliente.address) {
-      const addressString = `${cliente.address.street || ''} ${cliente.address.number || ''} ${cliente.address.neighborhood || ''} ${cliente.address.city || ''} ${cliente.address.cep || ''}`.toLowerCase();
+      const addressString = `${cliente.address.street || ''} ${cliente.address.number || ''} ${cliente.address.complemento || ''} ${cliente.address.neighborhood || ''} ${cliente.address.city || ''} ${cliente.address.cep || ''}`.toLowerCase();
       addressMatch = addressString.includes(searchLower);
     }
     
@@ -439,6 +447,25 @@ const Clientes = () => {
                 />
               </div>
               <div className="form-group">
+                <label htmlFor="complemento">Complemento</label>
+                <input
+                  type="text"
+                  id="complemento"
+                  name="complemento"
+                  value={formData.complemento || ''}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    complemento: e.target.value
+                  }))}
+                  placeholder="Apartamento, casa, etc."
+                  style={{ height: '35px' }}
+                  disabled={isLoading || isLoadingCep}
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
                 <label htmlFor="bairro">Bairro *</label>
                 <input
                   type="text"
@@ -454,9 +481,6 @@ const Clientes = () => {
                   disabled={isLoading || isLoadingCep}
                 />
               </div>
-            </div>
-
-            <div className="form-row mb-0">
               <div className="form-group">
                 <label htmlFor="cidade">Cidade *</label>
                 <input
@@ -473,8 +497,8 @@ const Clientes = () => {
                   disabled={isLoading || isLoadingCep}
                 />
               </div>
-              <div className="form-group"></div>
             </div>
+
 
 
 
@@ -559,7 +583,7 @@ const Clientes = () => {
                   <div className="header-cell">Telefone</div>
                   <div className="header-cell">E-mail</div>
                   <div className="header-cell">Endereço</div>
-                  <div className="header-cell">Ações</div>
+                  <div className="header-cell">Editar/Histórico</div>
                 </div>
                 {filteredClientes.map(cliente => (
                   <div key={cliente.id} className="table-row">
