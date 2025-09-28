@@ -4,6 +4,7 @@ import { serviceOrderService } from '../services/serviceOrderService';
 import { clientService } from '../services/clientService';
 import { capitalizeText } from '../utils/capitalizeText';
 import Header from '../components/Header';
+import HistorySearch from '../components/HistorySearch';
 import '../styles/ClienteHistorico.css';
 import Button from '../components/Button';
 
@@ -12,6 +13,7 @@ const ClienteHistorico = () => {
     const navigate = useNavigate();
     const [client, setClient] = useState(null);
     const [serviceOrders, setServiceOrders] = useState([]);
+    const [filteredOrders, setFilteredOrders] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingOrders, setIsLoadingOrders] = useState(false);
     const [error, setError] = useState(null);
@@ -51,7 +53,9 @@ const ClienteHistorico = () => {
         setIsLoadingOrders(true);
         try {
             const data = await serviceOrderService.getServiceOrdersByRenter(id);
-            setServiceOrders(Array.isArray(data) ? data : []);
+            const orders = Array.isArray(data) ? data : [];
+            setServiceOrders(orders);
+            setFilteredOrders(orders); // Inicializar com todas as ordens
         } catch (error) {
             console.error('Erro ao carregar histórico do cliente:', error);
             setError('Não foi possível carregar o histórico de ordens de serviço.');
@@ -79,21 +83,54 @@ const ClienteHistorico = () => {
         }
     };
 
-    const getStatusColor = (phaseName) => {
-        switch (phaseName?.toLowerCase()) {
-            case 'triagem':
-                return 'status-triagem';
-            case 'lavagem':
-                return 'status-lavagem';
-            case 'costura':
-                return 'status-costura';
-            case 'finalizado':
-                return 'status-finalizado';
-            case 'pendente':
-                return 'status-pendente';
-            default:
-                return 'status-default';
-        }
+    const getStatusColor = (status) => {
+        if (!status) return '#9e9e9e';
+        
+        // Normalizar o status para maiúsculas e tratar variações
+        const normalizedStatus = status.toString().toUpperCase().trim();
+        
+        const statusMap = {
+            'PENDENTE': '#0095e2',
+            'AGUARDANDO_RETIRADA': '#e2d502',
+            'AGUARDANDO_DEVOLUCAO': '#1c3b4d',
+            'ATRASADO': '#f44336',
+            'RECUSADA': '#9e9e9e',
+            'FINALIZADO': '#4caf50',
+            // Variações que podem vir do backend
+            'RETIRADA': '#e2d502',
+            'DEVOLVIDA': '#4caf50',
+            'EM_ANDAMENTO': '#0095e2',
+            'FINALIZADA': '#4caf50',
+            'CANCELADA': '#9e9e9e',
+            'RECUSADO': '#9e9e9e',
+            'ATRASADA': '#f44336'
+        };
+        
+        return statusMap[normalizedStatus] || '#9e9e9e';
+    };
+
+    const getStatusLabel = (status) => {
+        if (!status) return 'Não definido';
+        
+        const statusMap = {
+            'PENDENTE': 'Pendente',
+            'AGUARDANDO_RETIRADA': 'Aguardando Retirada',
+            'AGUARDANDO_DEVOLUCAO': 'Aguardando Devolução',
+            'ATRASADO': 'Atrasado',
+            'RECUSADA': 'Recusada',
+            'FINALIZADO': 'Finalizado',
+            // Variações que podem vir do backend
+            'RETIRADA': 'Aguardando Retirada',
+            'DEVOLVIDA': 'Finalizado',
+            'EM_ANDAMENTO': 'Pendente',
+            'FINALIZADA': 'Finalizado',
+            'CANCELADA': 'Recusada',
+            'RECUSADO': 'Recusada',
+            'ATRASADA': 'Atrasado'
+        };
+        
+        const normalizedStatus = status.toString().toUpperCase().trim();
+        return statusMap[normalizedStatus] || capitalizeText(status);
     };
 
     const toggleOrderExpansion = (orderId) => {
@@ -110,6 +147,16 @@ const ClienteHistorico = () => {
 
     const handleGoBack = () => {
         navigate('/clientes');
+    };
+
+    // Função para lidar com os resultados filtrados
+    const handleFilteredResults = (filtered) => {
+        setFilteredOrders(filtered);
+    };
+
+    // Função para limpar filtros
+    const handleClearFilters = () => {
+        setFilteredOrders(serviceOrders);
     };
 
     if (isLoading) {
@@ -178,18 +225,37 @@ const ClienteHistorico = () => {
                     </div>
                 </div>
 
+                {/* Sistema de busca */}
+                <div className="search-section">
+                    <HistorySearch
+                        serviceOrders={serviceOrders}
+                        onFilteredResults={handleFilteredResults}
+                        onClearFilters={handleClearFilters}
+                        isLoading={isLoadingOrders}
+                    />
+                </div>
+
                 {/* Histórico de ordens de serviço */}
                 <div className="service-orders-section">
                     <div className="section-header">
-                        <h3>Histórico de Ordens de Serviço</h3>
-                        <button
-                            className="btn-refresh"
-                            onClick={loadServiceOrders}
-                            disabled={isLoadingOrders}
-                        >
-                            <i className="bi bi-arrow-clockwise"></i>
-                            Atualizar
-                        </button>
+                        <h3 className="section-title d-flex align-items-center gap-2">Histórico de Ordens de Serviço <span className="filtered-count">{filteredOrders.length}</span></h3>
+                        <div className="section-actions">
+                            <div className="results-info">
+                                {filteredOrders.length !== serviceOrders.length && (
+                                    <span className="filtered-count">
+                                        Mostrando {filteredOrders.length} de {serviceOrders.length} ordens
+                                    </span>
+                                )}
+                            </div>
+                            <button
+                                className="btn-refresh"
+                                onClick={loadServiceOrders}
+                                disabled={isLoadingOrders}
+                            >
+                                <i className="bi bi-arrow-clockwise"></i>
+                                Atualizar
+                            </button>
+                        </div>
                     </div>
 
                     {isLoadingOrders ? (
@@ -197,18 +263,20 @@ const ClienteHistorico = () => {
                             <div className="spinner"></div>
                             <p>Carregando histórico...</p>
                         </div>
-                    ) : serviceOrders.length === 0 ? (
+                    ) : filteredOrders.length === 0 ? (
                         <div className="no-orders">
                             <i className="bi bi-clipboard"></i>
-                            <p>Nenhuma ordem de serviço encontrada para este cliente.</p>
+                            <p>
+                                {serviceOrders.length === 0 
+                                    ? 'Nenhuma ordem de serviço encontrada para este cliente.'
+                                    : 'Nenhuma ordem encontrada com os termos de busca.'
+                                }
+                            </p>
                         </div>
                     ) : (
                         <div className="service-orders-list">
-                            <div className="orders-summary">
-                                <p>Total de ordens: <strong>{serviceOrders.length}</strong></p>
-                            </div>
                             <div className="orders-container">
-                                {serviceOrders.map((order) => {
+                                {filteredOrders.map((order) => {
                                     const isExpanded = expandedOrders.has(order.id);
 
                                     return (
@@ -220,8 +288,11 @@ const ClienteHistorico = () => {
                                             >
                                                 <div className="order-id">
                                                     <strong>Ordem #{order.id}</strong>
-                                                    <span className={`status-badge ${getStatusColor(order.phase_name)}`}>
-                                                        {capitalizeText(order.phase_name || 'Não definido')}
+                                                    <span 
+                                                        className="status-badge"
+                                                        style={{ backgroundColor: getStatusColor(order.phase_name) }}
+                                                    >
+                                                        {getStatusLabel(order.phase_name)}
                                                     </span>
                                                 </div>
                                                 <div className="order-header-right">

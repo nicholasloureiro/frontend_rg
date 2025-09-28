@@ -26,6 +26,8 @@ const Triagem = () => {
         bairro: '',
         cidade: '',
         numero: '',
+        complemento: '',
+        email: '',
         atendenteResponsavel: '',
         origem: '',
         event_id: '',
@@ -42,6 +44,7 @@ const Triagem = () => {
     const [loadingEventos, setLoadingEventos] = useState(false);
     const [showCreateEventModal, setShowCreateEventModal] = useState(false);
     const [cpfValido, setCpfValido] = useState(true);
+    const [emailValido, setEmailValido] = useState(true);
     const [buscandoCliente, setBuscandoCliente] = useState(false);
 
     // Função para carregar atendentes da API
@@ -163,7 +166,14 @@ const Triagem = () => {
         }
     };
 
-
+    // Função para validar email
+    const validarEmail = (email) => {
+        if (!email.trim()) {
+            return true; // Email vazio é válido (não obrigatório)
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
 
     // Função para validar campos obrigatórios
     const validarCampos = () => {
@@ -179,6 +189,10 @@ const Triagem = () => {
 
         if (formData.cpf && !cpfValido) {
             novosErros.cpf = 'CPF inválido';
+        }
+
+        if (formData.email && !emailValido) {
+            novosErros.email = 'Email inválido';
         }
 
         if (!formData.atendenteResponsavel || formData.atendenteResponsavel === '') {
@@ -257,7 +271,9 @@ const Triagem = () => {
                 origem: '',
                 event_id: '',
                 papelNoEvento: '',
-                dataEvento: null
+                dataEvento: null,
+                complemento: '',
+                email: ''
             });
             setErrors({});
 
@@ -293,6 +309,11 @@ const Triagem = () => {
         if (field === 'cpf' && !value) {
             setCpfValido(true);
         }
+
+        // Resetar validação do email quando o campo for limpo
+        if (field === 'email' && !value) {
+            setEmailValido(true);
+        }
     };
 
     // Função para buscar dados do cliente por CPF
@@ -317,7 +338,9 @@ const Triagem = () => {
                     rua: cliente.address?.street || '',
                     bairro: cliente.address?.neighborhood || '',
                     cidade: cliente.address?.city || '',
-                    numero: cliente.address?.number || ''
+                    numero: cliente.address?.number || '',
+                    complemento: cliente.address?.complement || '',
+                    email: cliente.email || ''
                 }));
 
                 // Se o CEP foi preenchido, buscar dados do endereço
@@ -364,6 +387,19 @@ const Triagem = () => {
         } else {
             setCpfValido(true); // Reset quando não tem 11 dígitos
         }
+    };
+
+    // Função para lidar com mudança do email e validação
+    const handleEmailChange = (e) => {
+        const value = e.target.value;
+        handleInputChange('email', value);
+    };
+
+    // Função para validar email no onBlur
+    const handleEmailBlur = (e) => {
+        const email = e.target.value;
+        const ehValido = validarEmail(email);
+        setEmailValido(ehValido);
     };
 
     // Função para aplicar máscara de CEP
@@ -436,6 +472,7 @@ const Triagem = () => {
                         <div className="form-section">
                             <h3 className="section-title">Dados do Cliente</h3>
 
+                            {/* Primeira linha: CPF, Nome do Cliente, Telefone */}
                             <div className="form-row">
                                 <div className="form-group">
                                     <label htmlFor="cpf" className="form-label">
@@ -469,10 +506,6 @@ const Triagem = () => {
 
                                 {renderInput('nomeCliente', 'Nome do Cliente', 'text', 'Digite o nome completo', true)}
 
-
-                            </div>
-
-                            <div className="form-row">
                                 <div className="form-group">
                                     <label htmlFor="telefone" className="form-label">
                                         Telefone *
@@ -489,7 +522,33 @@ const Triagem = () => {
                                         <span className="error-message">{errors.telefone}</span>
                                     )}
                                 </div>
+                            </div>
+
+                            {/* Segunda linha: Email, CEP, Logradouro, Número */}
+                            <div className="form-row form-row-four-fields">
                                 <div className="form-group">
+                                    <label htmlFor="email" className="form-label">
+                                        E-mail *
+                                    </label>
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        className={`form-input ${errors.email ? 'error' : ''}`}
+                                        value={formData.email}
+                                        onChange={handleEmailChange}
+                                        onBlur={handleEmailBlur}
+                                        placeholder="Digite o e-mail"
+                                        autoComplete="off"
+                                    />
+                                    {errors.email && (
+                                        <span className="error-message">{errors.email}</span>
+                                    )}
+                                    {formData.email && !emailValido && (
+                                        <small className="error-message">Email inválido</small>
+                                    )}
+                                </div>
+
+                                <div className="form-group cep-field">
                                     <label htmlFor="cep" className="form-label">
                                         CEP*
                                     </label>
@@ -511,14 +570,31 @@ const Triagem = () => {
                                         )}
                                     </div>
                                 </div>
-                            </div>
 
-                            <div className="form-row">
                                 {renderInput('rua', 'Logradouro*', 'text', '')}
-                                {renderInput('numero', 'Número*', 'text', '')}
+
+                                <div className="form-group numero-field">
+                                    <label htmlFor="numero" className="form-label">
+                                        Número *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="numero"
+                                        className={`form-input ${errors.numero ? 'error' : ''}`}
+                                        value={formData.numero}
+                                        onChange={(e) => handleInputChange('numero', e.target.value)}
+                                        placeholder=""
+                                        autoComplete="off"
+                                    />
+                                    {errors.numero && (
+                                        <span className="error-message">{errors.numero}</span>
+                                    )}
+                                </div>
                             </div>
 
+                            {/* Quarta linha: Complemento, Bairro, Cidade */}
                             <div className="form-row">
+                                {renderInput('complemento', 'Complemento', 'text', '')}
                                 {renderInput('bairro', 'Bairro*', 'text', '')}
                                 {renderInput('cidade', 'Cidade*', 'text', '')}
                             </div>

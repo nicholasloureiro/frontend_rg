@@ -49,21 +49,54 @@ const ClientHistoryModal = ({ show, onClose, client }) => {
     }
   };
 
-  const getStatusColor = (phaseName) => {
-    switch (phaseName?.toLowerCase()) {
-      case 'triagem':
-        return 'status-triagem';
-      case 'lavagem':
-        return 'status-lavagem';
-      case 'costura':
-        return 'status-costura';
-      case 'finalizado':
-        return 'status-finalizado';
-      case 'pendente':
-        return 'status-pendente';
-      default:
-        return 'status-default';
-    }
+  const getStatusColor = (status) => {
+    if (!status) return '#9e9e9e';
+    
+    // Normalizar o status para maiúsculas e tratar variações
+    const normalizedStatus = status.toString().toUpperCase().trim();
+    
+    const statusMap = {
+      'PENDENTE': '#0095e2',
+      'AGUARDANDO_RETIRADA': '#e2d502',
+      'AGUARDANDO_DEVOLUCAO': '#1c3b4d',
+      'ATRASADO': '#f44336',
+      'RECUSADA': '#9e9e9e',
+      'FINALIZADO': '#4caf50',
+      // Variações que podem vir do backend
+      'RETIRADA': '#e2d502',
+      'DEVOLVIDA': '#4caf50',
+      'EM_ANDAMENTO': '#0095e2',
+      'FINALIZADA': '#4caf50',
+      'CANCELADA': '#9e9e9e',
+      'RECUSADO': '#9e9e9e',
+      'ATRASADA': '#f44336'
+    };
+    
+    return statusMap[normalizedStatus] || '#9e9e9e';
+  };
+
+  const getStatusLabel = (status) => {
+    if (!status) return 'Não definido';
+    
+    const statusMap = {
+      'PENDENTE': 'Pendente',
+      'AGUARDANDO_RETIRADA': 'Aguardando Retirada',
+      'AGUARDANDO_DEVOLUCAO': 'Aguardando Devolução',
+      'ATRASADO': 'Atrasado',
+      'RECUSADA': 'Recusada',
+      'FINALIZADO': 'Finalizado',
+      // Variações que podem vir do backend
+      'RETIRADA': 'Aguardando Retirada',
+      'DEVOLVIDA': 'Finalizado',
+      'EM_ANDAMENTO': 'Pendente',
+      'FINALIZADA': 'Finalizado',
+      'CANCELADA': 'Recusada',
+      'RECUSADO': 'Recusada',
+      'ATRASADA': 'Atrasado'
+    };
+    
+    const normalizedStatus = status.toString().toUpperCase().trim();
+    return statusMap[normalizedStatus] || capitalizeText(status);
   };
 
   const toggleOrderExpansion = (orderId) => {
@@ -123,8 +156,11 @@ const ClientHistoryModal = ({ show, onClose, client }) => {
                   >
                     <div className="order-id">
                       <strong>Ordem #{order.id}</strong>
-                      <span className={`status-badge ${getStatusColor(order.phase_name)}`}>
-                        {capitalizeText(order.phase_name || 'Não definido')}
+                      <span 
+                        className="status-badge"
+                        style={{ backgroundColor: getStatusColor(order.phase_name) }}
+                      >
+                        {getStatusLabel(order.phase_name)}
                       </span>
                     </div>
                     <div className="order-header-right">

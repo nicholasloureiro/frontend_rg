@@ -74,6 +74,12 @@
     margin-bottom: 16px;
 }
 
+/* Linha específica com Email, CEP, Logradouro e Número - controle de largura */
+.form-row-four-fields {
+    grid-template-columns: 1fr 150px 1fr 80px !important;
+    gap: 12px !important;
+}
+
 .form-row:last-child {
     margin-bottom: 0;
 }
@@ -84,6 +90,7 @@
     flex-direction: column;
     gap: 6px;
 }
+
 
 .form-label {
     color: var(--color-text-primary);

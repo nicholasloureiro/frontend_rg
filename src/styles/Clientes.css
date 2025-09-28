@@ -443,30 +443,6 @@
   color: var(--color-text-secondary);
 }
 
-.error-state i {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.error-state .bi-exclamation-triangle {
-  font-size: 48px;
-  margin-bottom: 16px;
-  color: var(--color-error);
-}
-
-.error-state h3 {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: 8px;
-}
-
-.error-state p {
-  font-size: 16px;
-  margin-bottom: 24px;
-  color: var(--color-text-secondary);
-}
 
 /* Loading indicator */
 .loading-indicator {

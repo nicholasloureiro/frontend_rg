@@ -404,7 +404,7 @@ const Clientes = () => {
                 </div>
               </div>
               <div className="form-group">
-                <label htmlFor="rua">Logradouro</label>
+                <label htmlFor="rua">Logradouro *</label>
                 <input
                   type="text"
                   id="rua"
@@ -423,7 +423,7 @@ const Clientes = () => {
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="numero">Número</label>
+                <label htmlFor="numero">Número *</label>
                 <input
                   type="text"
                   id="numero"
@@ -439,7 +439,7 @@ const Clientes = () => {
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="bairro">Bairro</label>
+                <label htmlFor="bairro">Bairro *</label>
                 <input
                   type="text"
                   id="bairro"
@@ -458,7 +458,7 @@ const Clientes = () => {
 
             <div className="form-row mb-0">
               <div className="form-group">
-                <label htmlFor="cidade">Cidade</label>
+                <label htmlFor="cidade">Cidade *</label>
                 <input
                   type="text"
                   id="cidade"
@@ -544,7 +544,7 @@ const Clientes = () => {
                 <i className="bi bi-exclamation-triangle"></i>
                 <h3>Erro ao carregar clientes</h3>
                 <p>{error}</p>
-                <Button variant="primary" text="Tentar novamente" iconName="arrow-clockwise" iconPosition="left" onClick={loadClientes} disabled={isLoadingClientes} style={{ width: 'fit-content', marginLeft: 'auto' }} />
+                <Button variant="primary" text="Tentar novamente" iconName="arrow-clockwise" iconPosition="left" onClick={loadClientes} disabled={isLoadingClientes} style={{ width: 'fit-content' }} />
               </div>
             ) : filteredClientes.length === 0 ? (
               <div className="no-results">
