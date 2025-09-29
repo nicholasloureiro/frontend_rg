@@ -277,7 +277,7 @@ const Clientes = () => {
   };
 
   const handleShowHistory = (cliente) => {
-    navigate(`/cliente/${cliente.id}/historico`);
+    navigate(`/clientes/${cliente.id}/historico`);
   };
 
   // Função para formatar o endereço
