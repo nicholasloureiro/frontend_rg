@@ -115,6 +115,7 @@ const Triagem = () => {
         { value: 'site', label: 'Site' },
         { value: 'instagram', label: 'Instagram' },
         { value: 'facebook', label: 'Facebook' },
+        { value: 'google', label: 'Google' },
         { value: 'indicacao', label: 'Indicação' },
         { value: 'outro', label: 'Outro' }
     ];
@@ -122,11 +123,10 @@ const Triagem = () => {
     const opcoesPapel = [
         { value: '', label: 'Selecione o papel' },
         { value: 'noivo', label: 'Noivo' },
-        { value: 'noiva', label: 'Noiva' },
         { value: 'padrinho', label: 'Padrinho' },
-        { value: 'madrinha', label: 'Madrinha' },
         { value: 'pai', label: 'Pai' },
-        { value: 'mae', label: 'Mãe' },
+        { value: 'convidado', label: 'Convidado' },
+        { value: 'pajem', label: 'Pajem' },
         { value: 'familia', label: 'Família' },
         { value: 'outro', label: 'Outro' }
     ];
