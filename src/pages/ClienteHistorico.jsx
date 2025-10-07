@@ -290,9 +290,9 @@ const ClienteHistorico = () => {
                                                     <strong>Ordem #{order.id}</strong>
                                                     <span 
                                                         className="status-badge"
-                                                        style={{ backgroundColor: getStatusColor(order.phase_name) }}
+                                                        style={{ backgroundColor: getStatusColor(order.phase_status) }}
                                                     >
-                                                        {getStatusLabel(order.phase_name)}
+                                                        {getStatusLabel(order.phase_status)}
                                                     </span>
                                                 </div>
                                                 <div className="order-header-right">

@@ -7,6 +7,8 @@ import { mascaraTelefoneInternacional } from '../utils/Mascaras';
 import { parseCurrency } from '../utils/parseCurrency';
 import Button from './Button';
 import InputDate from './InputDate';
+import CustomSelect from './CustomSelect';
+import Modal from './Modal';
 import Swal from 'sweetalert2';
 
 const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetry }) => {
@@ -15,6 +17,13 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(false);
     const [internalError, setInternalError] = useState(null);
+    const [refusalReasons, setRefusalReasons] = useState([]);
+
+    // Estados para o modal de recusa
+    const [showRefusalModal, setShowRefusalModal] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState(null);
+    const [selectedReasonId, setSelectedReasonId] = useState('');
+    const [refusalJustification, setRefusalJustification] = useState('');
 
     // Estados para busca
     const [showSearchPanel, setShowSearchPanel] = useState(false);
@@ -47,8 +56,80 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
         }
     };
 
+    const fetchRefusalReasons = async () => {
+        try {
+            const data = await serviceOrderService.getRefusalReasons();
+            setRefusalReasons(Array.isArray(data) ? data : []);
+        } catch (err) {
+            console.error('Erro ao carregar motivos de recusa:', err);
+        }
+    };
+
+    // Converte os motivos de recusa para o formato do CustomSelect
+    const refusalReasonOptions = refusalReasons.map(reason => ({
+        value: reason.id.toString(),
+        label: reason.name
+    }));
+
+    const openRefusalModal = (order) => {
+        setSelectedOrder(order);
+        setSelectedReasonId('');
+        setRefusalJustification('');
+        setShowRefusalModal(true);
+    };
+
+    const closeRefusalModal = () => {
+        setShowRefusalModal(false);
+        setSelectedOrder(null);
+        setSelectedReasonId('');
+        setRefusalJustification('');
+    };
+
+    const handleRefusalSubmit = async () => {
+        if (!selectedReasonId) {
+            Swal.fire({
+                title: 'Motivo obrigatório',
+                text: 'Por favor, selecione um motivo da recusa.',
+                icon: 'warning',
+                confirmButtonColor: '#f44336'
+            });
+            return;
+        }
+
+        try {
+            await serviceOrderService.refuseServiceOrder(
+                selectedOrder.id,
+                refusalJustification.trim() || null,
+                parseInt(selectedReasonId)
+            );
+
+            // Mostra mensagem de sucesso
+            await Swal.fire({
+                title: 'Ordem cancelada!',
+                text: `A ordem de serviço #${selectedOrder.id} foi cancelada com sucesso.`,
+                icon: 'success',
+                confirmButtonColor: '#f44336'
+            });
+
+            closeRefusalModal();
+            // Recarrega a lista de ordens
+            fetchOrders(activeTab);
+        } catch (error) {
+            console.error('Erro ao cancelar ordem:', error);
+
+            // Mostra mensagem de erro
+            await Swal.fire({
+                title: 'Erro!',
+                text: 'Não foi possível cancelar a ordem. Tente novamente.',
+                icon: 'error',
+                confirmButtonColor: '#f44336'
+            });
+        }
+    };
+
     useEffect(() => {
         fetchOrders(activeTab);
+        fetchRefusalReasons();
     }, [activeTab]);
 
     const formatDate = (dateString) => {
@@ -250,60 +331,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
 
     const handleRefuseOrder = async (order, event) => {
         event.stopPropagation(); // Previne que o clique propague para o card
-
-        const { value: justification, isConfirmed } = await Swal.fire({
-            title: 'Cancelar ordem de serviço',
-            text: `Deseja cancelar a ordem de serviço #${order.id}?`,
-            icon: 'warning',
-            input: 'textarea',
-            inputLabel: 'Justificativa do cancelamento:',
-            inputPlaceholder: 'Digite o motivo do cancelamento...',
-            inputAttributes: {
-                'aria-label': 'Justificativa do cancelamento',
-                'rows': 3
-            },
-            showCancelButton: true,
-            confirmButtonColor: '#f44336',
-            cancelButtonColor: '#ffff',
-            confirmButtonText: 'Sim, cancelar ordem',
-            cancelButtonText: 'Não, manter ordem',
-            reverseButtons: true,
-            inputValidator: (value) => {
-                if (!value || value.trim().length === 0) {
-                    return 'A justificativa é obrigatória';
-                }
-                if (value.trim().length < 10) {
-                    return 'A justificativa deve ter pelo menos 10 caracteres';
-                }
-            }
-        });
-
-        if (isConfirmed && justification) {
-            try {
-                await serviceOrderService.refuseServiceOrder(order.id, justification);
-
-                // Mostra mensagem de sucesso
-                await Swal.fire({
-                    title: 'Ordem cancelada!',
-                    text: `A ordem de serviço #${order.id} foi cancelada com sucesso.`,
-                    icon: 'success',
-                    confirmButtonColor: '#f44336'
-                });
-
-                // Recarrega a lista de ordens
-                fetchOrders(activeTab);
-            } catch (error) {
-                console.error('Erro ao cancelar ordem:', error);
-
-                // Mostra mensagem de erro
-                await Swal.fire({
-                    title: 'Erro!',
-                    text: 'Não foi possível cancelar a ordem. Tente novamente.',
-                    icon: 'error',
-                    confirmButtonColor: '#f44336'
-                });
-            }
-        }
+        openRefusalModal(order);
     };
 
     return (
@@ -460,11 +488,19 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
                                             <span className="label">Atendente Responsável:</span>
                                             <span className="value">{capitalizeText(order.employee_name)}</span>
                                         </div>
-                                        {activeTab === 'RECUSADA' && order.justification_refusal && (
-                                            <div className="info-row">
-                                                <span className="label">Justificativa da Recusa:</span>
-                                                <span className="value justification-refusal">{capitalizeText(order.justification_refusal)}</span>
-                                            </div>
+                                        {activeTab === 'RECUSADA' && order.justification_reason && (
+                                            <>
+                                                <div className="info-row">
+                                                    <span className="label">Motivo da Recusa:</span>
+                                                    <span className="value justification-reason">{capitalizeText(order.justification_reason)}</span>
+                                                </div>
+                                                {order.justification_refusal && (
+                                                    <div className="info-row">
+                                                        <span className="label">Justificativa da Recusa:</span>
+                                                        <span className="value justification-refusal">{capitalizeText(order.justification_refusal)}</span>
+                                                    </div>
+                                                )}
+                                            </>
                                         )}
                                         {activeTab === 'ATRASADO' && order.justificativa_atraso && (
                                             <div className="info-row">
@@ -584,6 +620,60 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
                     </div>
                 )}
             </div>
+
+            {/* Modal de Recusa */}
+            <Modal
+                show={showRefusalModal}
+                onClose={closeRefusalModal}
+                onCloseX={closeRefusalModal}
+                title="Cancelar Ordem de Serviço"
+                bodyContent={
+                    <div>
+                        <p style={{ marginBottom: '20px', color: 'var(--color-text-secondary)' }}>
+                            Deseja cancelar a ordem de serviço #{selectedOrder?.id}?
+                        </p>
+
+                        <div className="form-group mb-3">
+                            <label htmlFor="refusal-reason" className="form-label">
+                                Motivo da recusa:
+                            </label>
+                            <CustomSelect
+                                options={refusalReasonOptions}
+                                value={selectedReasonId}
+                                onChange={setSelectedReasonId}
+                                placeholder="Selecione um motivo"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="refusal-justification" className="form-label">
+                                Justificativa do cancelamento (opcional):
+                            </label>
+                            <textarea
+                                id="refusal-justification"
+                                className="form-textarea"
+                                placeholder="Digite o motivo do cancelamento (opcional)..."
+                                value={refusalJustification}
+                                onChange={(e) => setRefusalJustification(e.target.value)}
+                                rows={4}
+                            />
+                        </div>
+
+                        <div className="form-actions">
+                            <Button
+                                variant="outline"
+                                text="Cancelar"
+                                onClick={closeRefusalModal}
+                            />
+                            <Button
+                                variant="danger"
+                                text="Sim, cancelar ordem"
+                                onClick={handleRefusalSubmit}
+                            />
+                        </div>
+                    </div>
+                }
+            />
         </div>
     );
 };

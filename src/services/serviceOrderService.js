@@ -79,11 +79,17 @@ export const serviceOrderService = {
     },
 
     // Cancelar ordem de serviço
-    refuseServiceOrder: async (id, justification) => {
+    refuseServiceOrder: async (id, justification, justificationReasonId) => {
         try {
-            const response = await api.post(`/api/v1/service-orders/${id}/refuse/`, {
+            const requestData = {
                 justification_refusal: justification
-            });
+            };
+            
+            if (justificationReasonId) {
+                requestData.justification_reason_id = justificationReasonId;
+            }
+            
+            const response = await api.post(`/api/v1/service-orders/${id}/refuse/`, requestData);
             return response.data;
         } catch (error) {
             console.error('Erro ao cancelar ordem de serviço:', error);
@@ -125,6 +131,17 @@ export const serviceOrderService = {
             return response.data;
         } catch (error) {
             console.error('Erro ao buscar ordens de serviço do cliente:', error);
+            throw error;
+        }
+    },
+
+    // Buscar motivos de recusa
+    getRefusalReasons: async () => {
+        try {
+            const response = await api.get('/api/v1/service-orders/refusal-reasons/');
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao buscar motivos de recusa:', error);
             throw error;
         }
     }
