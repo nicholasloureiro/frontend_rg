@@ -227,3 +227,26 @@
     }
 }
 
+/* Círculo com iniciais do usuário quando sidebar está colapsado */
+.user-initials-circle {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: var(--color-accent);
+    border: 1px solid white;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    margin-right: 8px;
+    flex-shrink: 0;
+    transition: all 0.3s ease-in-out;
+}
+
+.user-initials-circle:hover {
+    background-color: var(--color-accent-hover);
+    transform: scale(1.05);
+}
+

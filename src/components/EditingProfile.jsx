@@ -232,7 +232,7 @@ const EditingProfile = ({ handleCloseModal }) => {
                     <div className="d-flex justify-content-between mb-3">
                         <h5 className="mb-0" style={{ fontSize: '20px', color: 'var(--font-color)' }}>Dados Pessoais</h5>
                         <span onClick={toggleEdit} style={{ cursor: 'pointer' }} title="Editar dados">
-                            {isEditable ? <PencilSimpleSlash size={20} /> : <PencilSimpleLine size={20} />}
+                            {!isEditable ? <PencilSimpleSlash size={20} /> : <PencilSimpleLine size={20} />}
                         </span>
                     </div>
 

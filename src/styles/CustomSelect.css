@@ -1,0 +1,166 @@
+.custom-select-container {
+  position: relative;
+  width: 100% !important;
+  height: 35px !important;
+}
+
+.custom-select-label {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem !important;
+  display: block;
+  color: var(--color-text-primary);
+  /* Adjust to your label color */
+}
+
+.custom-select-control {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 10px !important;
+  font-size: 14px !important;
+  font-weight: 400;
+  color: var(--font-color);
+  border-radius: 10px !important;
+  background-color: var(--background-inputs) !important;
+  background-clip: padding-box;
+  border: 2px solid var(--color-border);
+  border-radius: 8px !important;
+  width: 100% !important;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
+  cursor: pointer;
+}
+
+
+.custom-select-control.disabled {
+  background-color: var(--background-inputs-disabled) !important;
+  color: var(--font-color-disabled);
+  cursor: not-allowed;
+}
+
+.custom-select-control.error {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+/* Estilos para multi-select */
+.custom-select-multi-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 100%;
+}
+
+.custom-select-multi-tag {
+  background-color: var(--color-accent-hover);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.custom-select-multi-tag:last-child {
+  margin-right: 0;
+}
+
+/* Ajuste para o valor do multi-select */
+.custom-select-value {
+  flex-grow: 1;
+  border-right: 1px solid var(--borderColor-input);
+  margin-right: 8px !important;
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+}
+
+/* Estilo para placeholder do multi-select */
+.custom-select-control .custom-select-value:empty::before {
+  content: attr(placeholder);
+  color: #999;
+}
+
+.custom-select-arrow {
+color: var(--color-text-primary);
+  
+}
+
+.custom-select-arrow.open {
+  transform: rotate(180deg);
+}
+
+.custom-select-menu {
+  z-index: 9999999;
+  background-color: var(--background-inputs) !important;
+  border: 1px solid var(--color-border);
+  border-radius: 8px !important;
+  font-size: 16px;
+  max-height: 250px;
+  overflow-y: auto;
+  box-shadow: none;
+  margin-top: -7px;
+}
+
+.custom-select-search {
+  width: calc(100% - 1.5rem);
+  padding: 0.375rem 0.75rem;
+  margin: 0.375rem 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  outline: none;
+}
+
+.custom-select-search:focus {
+  border-color: var(--color-secondary);
+  /* Example: Bootstrap's focus color */
+  box-shadow: none;
+  /* No box-shadow as per request */
+}
+
+.custom-select-search:disabled {
+  background-color: var(--background-disabled);
+  color: var(--font-color-disabled);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.custom-select-option {
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: none !important;
+  margin-bottom: 5px;
+  color: var(--font-color);
+}
+
+.custom-select-option:last-child {
+  margin-bottom: 0;
+}
+
+.custom-select-option:hover{
+  color: var(--font-color-secondary);
+  font-weight: 600;
+}
+.custom-select-option.selected {
+  background-color: var(--color-accent-hover);
+  /* Custom color for hover and selected */
+  color: #fff;
+  /* Text color for better contrast */
+  transition: none !important
+}
+
+.custom-select-option.disabled {
+  color: var(--font-color-disabled);
+  cursor: not-allowed;
+  background-color: transparent;
+}
+
+.custom-select-no-options {
+  padding: 0.5rem 0.75rem;
+  color: #6c757d;
+  text-align: center;
+}

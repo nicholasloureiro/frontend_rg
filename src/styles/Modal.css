@@ -33,16 +33,17 @@
 .modal-content-modal {
     padding: 25px 35px;
     width: 700px;
-    overflow: auto;
+    max-width: 90vw;
+    overflow: visible;
     margin: 0 auto !important;
     border: none !important;
     box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
 }
 
 .modal-body-modal {
-    /*height: 75vh !important;*/
-    max-height: fit-content !important;
-
+    max-height: 75vh !important;
+    overflow-y: auto !important;
+    padding: 0 !important;
 }
 
 .modal-footer-modal {
@@ -97,5 +98,95 @@
         border-radius: 0px;
         width: 100vw !important;
         animation-duration: 0.3s !important;
+    }
+}
+
+/* Estilos para o formulário de criar evento */
+.create-event-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    font-size: 14px;
+}
+
+.form-input,
+.form-textarea {
+    padding: 12px 16px;
+    border: 2px solid var(--color-border);
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: var(--background-primary);
+    color: var(--color-text-primary);
+    transition: border-color 0.2s ease;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.1);
+}
+
+.form-input.error,
+.form-textarea.error {
+    border-color: var(--color-error);
+}
+
+.form-input:disabled,
+.form-textarea:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: var(--color-background-disabled);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+}
+
+.error-message {
+    color: var(--color-error);
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 4px;
+}
+
+.submit-error {
+    background-color: rgba(var(--color-error-rgb), 0.1);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(var(--color-error-rgb), 0.2);
+    text-align: center;
+    font-size: 14px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--color-border);
+}
+
+@media screen and (max-width: 480px) {
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions button {
+        width: 100%;
     }
 }

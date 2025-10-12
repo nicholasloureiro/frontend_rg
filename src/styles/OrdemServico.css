@@ -42,8 +42,11 @@
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .form-group {
@@ -70,6 +73,10 @@
   color: var(--color-text-primary);
   font-size: 14px;
   transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .form-group input:focus,
@@ -81,6 +88,74 @@
 
 .form-group input::placeholder {
   color: var(--color-text-placeholder);
+  font-size: 14px !important;
+}
+
+.form-group input:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  color: var(--font-color-disabled) !important;
+  background-color: var(--color-bg-disabled, #f5f5f5);
+}
+
+.form-group input:disabled:hover {
+  border: 1px solid var(--color-border) !important;
+}
+
+/* Estilos para campos com erro */
+.form-group input.error,
+.form-group select.error {
+  border-color: #dc3545;
+}
+
+.form-group .error-message {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* Mensagem de erro geral */
+.validation-error {
+  background-color: rgba(220, 53, 69, 0.1);
+  border: 1px solid #dc3545;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 20px;
+  color: #dc3545;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Estilos para containers de inputs lado a lado */
+.form-group>div {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.form-group>div input {
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Estilos específicos para labels com checkbox */
+.form-group label[style*="display: flex"] {
+  align-items: center;
+  flex-direction: row;
+}
+
+.form-group label[style*="display: flex"] input[type="checkbox"] {
+  margin-left: 8px;
+  width: auto;
+  height: auto;
+  order: 2;
+}
+
+.form-group label[style*="display: flex"] span {
+  order: 1;
 }
 
 /* Checkbox Groups */
@@ -116,7 +191,7 @@
 }
 
 .action-btn {
-  min-width: 120px;
+  min-width: max-content;
 }
 
 /* Seção de Preview */
@@ -143,7 +218,8 @@
   color: var(--color-text-primary);
   padding: 20px 25px;
   text-align: center;
-  position: relative;
+  position: sticky;
+  top: 0;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -220,7 +296,7 @@
 
 /* Cards de Itens */
 .item-card {
-    width: 33%;
+  width: 33%;
   background-color: var(--color-bg-secondary);
   border-radius: 8px;
   padding: 5px 10px;
@@ -309,6 +385,42 @@
   border-color: var(--color-accent);
 }
 
+.payment-item.highlight .payment-label {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.payment-item.highlight .payment-value {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+/* Cores específicas para campos de pagamento */
+.payment-item.highlight.total {
+  border-color: #28a745;
+}
+
+.payment-item.highlight.total .payment-label {
+  color: #28a745;
+}
+
+.payment-item.highlight.sinal {
+  border-color: #ffc107;
+}
+
+.payment-item.highlight.sinal .payment-label {
+  color: #ffc107;
+}
+
+.payment-item.highlight.restante {
+  border-color: #dc3545;
+}
+
+.payment-item.highlight.restante .payment-label {
+  color: #dc3545;
+}
+
+/* Definições base para payment-label e payment-value */
 .payment-label {
   color: var(--color-text-secondary);
   font-size: 12px;
@@ -391,11 +503,11 @@
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .preview-section {
     position: static;
   }
-  
+
   .preview-card {
     max-height: none;
   }
@@ -405,68 +517,68 @@
   .ordem-servico-container {
     padding: 15px;
   }
-  
+
   .form-section {
     padding: 20px;
   }
-  
+
   .form-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .form-actions {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .action-btn {
     width: 100%;
   }
-  
+
   .info-grid,
   .accessories-grid,
   .payment-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .item-details {
     grid-template-columns: 1fr;
   }
-  
+
   .preview-header {
     padding: 15px 20px;
   }
-  
+
   .preview-header h2 {
     font-size: 18px;
   }
-  
+
   .os-number {
     position: static;
     margin-top: 8px;
   }
-  
+
   .preview-section-group {
     padding: 15px 20px;
   }
-  
+
   .signature-line {
     flex-direction: column;
     gap: 8px;
     align-items: flex-start;
   }
-  
+
   .signature-box,
   .date-box {
     width: 100%;
   }
-  
+
   .ordem-servico-header {
     flex-direction: column;
     gap: 16px;
     padding: 16px;
   }
-  
+
   .order-details {
     flex-direction: column;
     gap: 8px;
@@ -479,6 +591,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -500,27 +613,296 @@
   .form-section {
     display: none;
   }
-  
+
   .ordem-servico-content {
     grid-template-columns: 1fr;
   }
-  
+
   .preview-card {
     box-shadow: none;
     border: 1px solid #000;
     border-radius: 0;
   }
-  
+
   .preview-header {
     background: #f5f5f5 !important;
     color: #000 !important;
   }
-  
+
   .preview-section-group {
     break-inside: avoid;
   }
 }
 
+/* Estilos específicos para geração de PDF */
+#os-preview[data-pdf-target="true"] {
+  background: white !important;
+  color: black !important;
+  box-shadow: none !important;
+  border: 1px solid #ddd !important;
+  max-height: none !important;
+  overflow: visible !important;
+  height: auto !important;
+  position: relative !important;
+  transform: none !important;
+  width: 800px !important;
+  max-width: 800px !important;
+  margin: 0 !important;
+  padding: 20px !important;
+  font-family: Arial, sans-serif !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+}
+
+/* Forçar cores claras para PDF */
+#os-preview[data-pdf-target="true"] * {
+  background-color: white !important;
+  color: black !important;
+  font-family: Arial, sans-serif !important;
+}
+
+#os-preview[data-pdf-target="true"] .preview-card {
+  max-height: none !important;
+  overflow: visible !important;
+  height: auto !important;
+  position: relative !important;
+  transform: none !important;
+  background: white !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+#os-preview[data-pdf-target="true"] .preview-header {
+  background: #f8f9fa !important;
+  color: #000 !important;
+  border-bottom: 2px solid #000 !important;
+  padding: 15px 20px !important;
+  margin: 0 !important;
+  position: static !important;
+  top: auto !important;
+  z-index: auto !important;
+  order: -1 !important;
+  flex-shrink: 0 !important;
+}
+
+#os-preview[data-pdf-target="true"] .preview-header h2 {
+  font-size: 18px !important;
+  margin: 0 !important;
+  color: #000 !important;
+  text-align: center !important;
+}
+
+#os-preview[data-pdf-target="true"] .os-number {
+  font-size: 12px !important;
+  background: #e9ecef !important;
+  color: #000 !important;
+  border: 1px solid #000 !important;
+  position: static !important;
+  top: auto !important;
+  right: auto !important;
+  float: right !important;
+  margin-top: -15px !important;
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
+}
+
+#os-preview[data-pdf-target="true"] .preview-section-group {
+  border-bottom: 1px solid #ddd !important;
+  color: #000 !important;
+  page-break-inside: avoid !important;
+  padding: 15px 20px !important;
+  margin: 0 !important;
+  order: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+#os-preview[data-pdf-target="true"] .preview-section-group h4 {
+  font-size: 14px !important;
+  margin-bottom: 10px !important;
+  color: #000 !important;
+  font-weight: bold !important;
+}
+
+#os-preview[data-pdf-target="true"] .info-item .label,
+#os-preview[data-pdf-target="true"] .accessory-label,
+#os-preview[data-pdf-target="true"] .payment-label {
+  color: #666 !important;
+  font-weight: bold !important;
+  font-size: 11px !important;
+}
+
+#os-preview[data-pdf-target="true"] .info-item .value,
+#os-preview[data-pdf-target="true"] .accessory-value,
+#os-preview[data-pdf-target="true"] .payment-value {
+  color: #000 !important;
+  font-weight: 500 !important;
+  font-size: 12px !important;
+}
+
+#os-preview[data-pdf-target="true"] .item-card {
+  background: white !important;
+  border: 1px solid #ddd !important;
+  padding: 8px 12px !important;
+  margin-bottom: 8px !important;
+  width: 100% !important;
+  max-width: none !important;
+}
+
+#os-preview[data-pdf-target="true"] .item-title {
+  font-size: 12px !important;
+  font-weight: bold !important;
+  color: #000 !important;
+  margin-bottom: 5px !important;
+}
+
+#os-preview[data-pdf-target="true"] .item-details {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 5px !important;
+}
+
+#os-preview[data-pdf-target="true"] .item-details span {
+  font-size: 10px !important;
+  color: #666 !important;
+  padding: 2px 4px !important;
+  background: #f8f9fa !important;
+  border: 1px solid #ddd !important;
+}
+
+#os-preview[data-pdf-target="true"] .accessory-item,
+#os-preview[data-pdf-target="true"] .payment-item {
+  background: white !important;
+  border: 1px solid #ddd !important;
+  padding: 6px 10px !important;
+  margin-bottom: 4px !important;
+}
+
+#os-preview[data-pdf-target="true"] .payment-item.highlight {
+  background: transparent !important;
+  border-color: #007bff !important;
+}
+
+#os-preview[data-pdf-target="true"] .payment-item.highlight .payment-label {
+  color: #007bff !important;
+  font-weight: 600 !important;
+}
+
+#os-preview[data-pdf-target="true"] .payment-item.highlight .payment-value {
+  color: #000 !important;
+  font-weight: 600 !important;
+}
+
+/* Cores específicas para campos de pagamento no PDF */
+#os-preview[data-pdf-target="true"] .payment-item.highlight.total {
+  border-color: #28a745 !important;
+}
+
+#os-preview[data-pdf-target="true"] .payment-item.highlight.total .payment-label {
+  color: #28a745 !important;
+}
+
+#os-preview[data-pdf-target="true"] .payment-item.highlight.sinal {
+  border-color: #ffc107 !important;
+}
+
+#os-preview[data-pdf-target="true"] .payment-item.highlight.sinal .payment-label {
+  color: #ffc107 !important;
+}
+
+#os-preview[data-pdf-target="true"] .payment-item.highlight.restante {
+  border-color: #dc3545 !important;
+}
+
+#os-preview[data-pdf-target="true"] .payment-item.highlight.restante .payment-label {
+  color: #dc3545 !important;
+}
+
+/* Ajustes específicos para evitar overflow */
+#os-preview[data-pdf-target="true"] .d-flex {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+}
+
+#os-preview[data-pdf-target="true"] .item-card {
+  flex: 1 !important;
+  min-width: 200px !important;
+  max-width: none !important;
+}
+
+#os-preview[data-pdf-target="true"] .accessories-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+  gap: 10px !important;
+}
+
+#os-preview[data-pdf-target="true"] .payment-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+  gap: 10px !important;
+}
+
+/* Footer do PDF */
+#os-preview[data-pdf-target="true"] .preview-footer {
+  background: #f8f9fa !important;
+  border-top: 1px solid #000 !important;
+  padding: 15px 20px !important;
+  margin: 0 !important;
+}
+
+#os-preview[data-pdf-target="true"] .signature-line {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 10px !important;
+  font-size: 11px !important;
+}
+
+#os-preview[data-pdf-target="true"] .signature-line span {
+  color: #666 !important;
+  font-weight: 500 !important;
+}
+
+#os-preview[data-pdf-target="true"] .signature-box {
+  width: 150px !important;
+  height: 40px !important;
+  border: 1px dashed #000 !important;
+  background: white !important;
+}
+
+#os-preview[data-pdf-target="true"] .date-box {
+  width: 100px !important;
+  height: 30px !important;
+  border: 1px solid #000 !important;
+  background: white !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #000 !important;
+  font-weight: 500 !important;
+  font-size: 10px !important;
+}
+
+/* Responsividade para PDF */
+@media print {
+  #os-preview[data-pdf-target="true"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 10px !important;
+  }
+  
+  #os-preview[data-pdf-target="true"] .preview-card {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
 
 
 .back-btn {

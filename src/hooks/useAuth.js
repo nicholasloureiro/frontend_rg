@@ -6,7 +6,6 @@ export const useAuth = () => {
   const dispatch = useDispatch();
   const { user, accessToken, refreshToken, isAuthenticated, isLoading } = useSelector((state) => state.user);
   
-  console.log('useAuth - Estado atual:', { user, accessToken, refreshToken, isAuthenticated, isLoading });
 
   const login = (userData, access, refresh) => {
     dispatch(loginSuccess({ user: userData, access, refresh }));

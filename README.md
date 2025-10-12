@@ -1,12 +1,188 @@
-# React + Vite
+# RG - Sistema de Gestão para Alfaiataria
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sistema completo de gestão para lojas de aluguel e venda de trajes formais, desenvolvido com React e Vite.
 
-Currently, two official plugins are available:
+## 📋 Sobre o Projeto
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+O RG é uma aplicação web moderna para gerenciamento de alfaiatarias e lojas de trajes de gala. O sistema oferece controle completo sobre:
 
-## Expanding the ESLint configuration
+- **Dashboard Analítico**: Métricas em tempo real sobre vendas, conversões, ticket médio e desempenho
+- **Gestão de Clientes**: Cadastro completo com histórico de pedidos e atendimentos
+- **Gestão de Funcionários**: Controle de atendentes e seus desempenhos
+- **Triagem**: Sistema de primeiro atendimento para captura de leads e informações iniciais
+- **Ordens de Serviço**: Gerenciamento detalhado de pedidos de locação e venda com controle de estoque e ajustes
+- **Eventos**: Organização por eventos (casamentos, formaturas, etc.)
+- **Produtos**: Catálogo de produtos disponíveis para locação e venda
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🚀 Tecnologias Utilizadas
+
+### Frontend
+- **React 18.3** - Biblioteca principal
+- **React Router DOM 7** - Gerenciamento de rotas
+- **Redux Toolkit** - Gerenciamento de estado global
+- **Vite 7** - Build tool e dev server
+- **Axios** - Cliente HTTP
+
+### UI/UX
+- **Bootstrap 5** - Framework CSS
+- **Bootstrap Icons** - Ícones
+- **Phosphor Icons** & **Lucide React** - Ícones adicionais
+- **FontAwesome** - Ícones
+- **Material UI** - Componentes React
+- **SweetAlert2** - Alertas e modais elegantes
+
+### Gráficos e Visualização
+- **Nivo** - Biblioteca de gráficos (`@nivo/bar`, `@nivo/line`, `@nivo/pie`)
+
+### Utilitários
+- **React DatePicker** - Seleção de datas
+- **React Phone Number Input** - Input de telefone internacional
+- **jsPDF & html2canvas** - Geração de PDFs
+- **browser-image-compression** - Compressão de imagens
+- **google-libphonenumber** - Validação de telefones
+
+## 📂 Estrutura do Projeto
+
+```
+src/
+├── components/          # Componentes reutilizáveis
+│   ├── Button.jsx
+│   ├── Card.jsx
+│   ├── Charts.jsx
+│   ├── Header.jsx
+│   ├── Modal.jsx
+│   ├── Sidebar.jsx
+│   └── ...
+├── pages/              # Páginas da aplicação
+│   ├── Home.jsx        # Dashboard
+│   ├── Login.jsx
+│   ├── Clientes.jsx
+│   ├── Funcionarios.jsx
+│   ├── Triagem.jsx
+│   ├── OrdemServico.jsx
+│   ├── Eventos.jsx
+│   └── Produtos.jsx
+├── services/           # Serviços de API
+│   ├── api.js          # Configuração Axios
+│   ├── authService.js
+│   ├── clientService.js
+│   ├── dashboardService.js
+│   └── ...
+├── store/              # Redux Store
+│   ├── index.js
+│   └── slices/
+├── hooks/              # Custom Hooks
+│   ├── useAuth.js
+│   ├── useTheme.js
+│   └── ...
+├── utils/              # Funções utilitárias
+│   ├── Mascaras.js
+│   ├── ValidarCPF.js
+│   ├── format.js
+│   └── ...
+└── styles/             # Arquivos CSS
+```
+
+## 🔧 Configuração e Instalação
+
+### Pré-requisitos
+- Node.js (versão 16 ou superior)
+- NPM ou Yarn
+
+### Instalação
+
+1. Clone o repositório:
+```bash
+git clone <url-do-repositorio>
+cd RG
+```
+
+2. Instale as dependências:
+```bash
+npm install
+```
+
+3. Configure as variáveis de ambiente:
+Crie um arquivo `.env` na raiz do projeto:
+```env
+VITE_API_BASE_URL=http://localhost:8000
+```
+
+4. Inicie o servidor de desenvolvimento:
+```bash
+npm run dev
+```
+
+5. Acesse a aplicação em `http://localhost:5173`
+
+## 📦 Scripts Disponíveis
+
+- `npm run dev` - Inicia o servidor de desenvolvimento
+- `npm run build` - Gera build de produção
+- `npm run lint` - Executa o linter
+- `npm run preview` - Preview do build de produção
+
+## 🔐 Autenticação
+
+O sistema utiliza autenticação JWT (JSON Web Tokens) com refresh tokens automático. As rotas são protegidas e redirecionam para login quando não autenticado.
+
+## 📊 Funcionalidades Principais
+
+### Dashboard
+- Visualização de provas, retiradas e devoluções (em atraso, hoje, próximos 10 dias)
+- Resultados do dia, semana e mês
+- Gráficos analíticos: vendas por tipo, conversão por atendente, ticket médio, etc.
+- Filtros por período personalizados
+
+### Triagem
+- Formulário completo de primeiro atendimento
+- Busca automática de dados do cliente por CPF
+- Validação de CPF e email
+- Integração com ViaCEP para preenchimento automático de endereço
+- Seleção de atendente responsável
+- Vinculação com eventos
+
+### Ordem de Serviço
+- Cadastro detalhado de produtos (paletó, calça, camisa, colete, acessórios)
+- Controle de medidas e ajustes
+- Seleção de cores e marcas
+- Cálculo automático de valores
+- Datas de prova, retirada e devolução
+- Geração de PDF da ordem de serviço
+- Controle de status (Em andamento, Finalizado, Cancelado)
+
+### Gestão de Clientes
+- CRUD completo de clientes
+- Histórico de pedidos por cliente
+- Busca e filtros
+- Visualização de métricas do cliente
+
+### Eventos
+- Criação e gerenciamento de eventos
+- Vinculação de clientes a eventos
+- Acompanhamento de pedidos por evento
+- Detalhamento completo do evento
+
+## 🎨 Temas
+
+O sistema suporta tema claro/escuro com alternância automática e persistência da preferência do usuário.
+
+## 🤝 Contribuindo
+
+1. Faça um Fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## 📝 Licença
+
+Este projeto é privado e proprietário.
+
+## 👥 Autores
+
+Desenvolvido por [Seu Nome/Equipe]
+
+## 📞 Suporte
+
+Para suporte, entre em contato através do email: [seu-email@exemplo.com]

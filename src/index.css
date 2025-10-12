@@ -1,3 +1,6 @@
+/* Bootstrap Icons */
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
 /* Sistema de Temas - Claro e Escuro */
 :root {
   /* Tema Escuro (padrão) */
@@ -5,9 +8,10 @@
   --color-secondary: #1E1E1E;
   
   /* Cores de destaque (mantidas em ambos os temas) */
-  --color-accent: #FFD600;
-  --color-accent-dark: #CBA135;
-  --color-accent-hover: #cba035e2;
+  --color-accent: #1F3B4D;
+  --color-accent-dark: #1c3b4d;
+  --color-accent-hover: #1a3241;
+ 
   
   /* Cores de texto - Tema Escuro */
   --color-text-primary: #F5F5F5;
@@ -18,16 +22,18 @@
   /* Cores de fundo - Tema Escuro */
   --color-bg-primary: #3C342F;
   --color-bg-secondary: #1E1E1E;
-  --color-bg-header: #322b27;
+  --color-bg-header: #0f0f0f;
   --color-bg-input: #2a2a2a;
   --color-bg-card: #2d2d2d;
+  --gradient-hero: linear-gradient(135deg, hsl(200 43% 15%) 0%, hsl(200 35% 25%) 100%);
   
   /* Cores de borda - Tema Escuro */
   --color-border: #404040;
-  --color-border-focus: #FFD600;
+  --color-border-focus: #1c3b4d;
   
   /* Cores de estado - Tema Escuro */
   --color-disabled: rgba(255, 255, 255, 0.7);
+  --color-bg-disabled: #1a1a1a;
   --color-shadow: rgba(255, 214, 0, 0.08);
   --color-shadow-focus: rgba(255, 214, 0, 0.12);
   --color-shadow-card: rgba(0, 0, 0, 0.3);
@@ -62,22 +68,27 @@
   --color-bg-header: #ffffff;
   --color-bg-card: #ffffff;
   --background-modal: #ffffff;
+  --background-modal-body: #f3f3f3;
   --backgroundTheme: #aac2e5;
   --background-inputs-disabled: #e9ecef;
   --background-inputs: #ffffff;
+  --color-bg-card-icon: #C3FAF3;
+  --color-bg-card-produto-img: #3f789b;
   
   /* Cores de borda - Tema Claro */
   --color-border: #d0d0d0;
-  --color-border-focus: #FFD600;
+  --color-border-focus: #1c3b4d;
   --color-border-header: #e2e8f0;
   --border-color-modal: #e6e6e6;
 
   
   /* Cores de estado - Tema Claro */
   --color-disabled: rgba(0, 0, 0, 0.5);
+  --color-bg-disabled: #f5f5f5;
   --color-shadow: rgba(255, 214, 0, 0.15);
   --color-shadow-focus: rgba(255, 214, 0, 0.25);
   --color-shadow-card: rgba(0, 0, 0, 0.1);
+  --color-accent-step: #3b6580;
   
   /* Cores de sucesso, erro e aviso - Tema Claro */
   --color-success: #059669;
@@ -100,26 +111,30 @@
   --font-color-disabled: #6e6e6e;
   
   /* Cores de fundo */
-  --color-bg-primary: #3C342F;
+  --color-bg-primary: #121212 ;
   --color-bg-secondary: #1E1E1E;
   --color-bg-input: #2a2a2a;
   --color-bg-card: #2d2d2d;
   --background-modal: #282828;
+  --background-modal-body: #2d2d2d;
   --backgroundTheme: #1d1d25;
-  --background-inputs-disabled: #202024;
+  --background-inputs-disabled: #2121239f;
   --background-inputs: #1d1d20;
+  --color-bg-card-icon: #0f7769;
+  --color-bg-card-produto-img: #1F3B4D;
   
   /* Cores de borda */
   --color-border: #29292d;
-  --color-border-focus: #FFD600;
+  --color-border-focus: #1c3b4d;
   --border-color-modal: #5c5c5c;
-  --color-border-header: #28211c;
+  --color-border-header: #1e1e1f;
 
   /* Cores de estado */
   --color-disabled: rgba(255, 255, 255, 0.7);
   --color-shadow: rgba(255, 214, 0, 0.08);
   --color-shadow-focus: rgba(255, 214, 0, 0.12);
   --color-shadow-card: rgba(0, 0, 0, 0.3);
+  --color-accent-step: #4e80a4;
   
   /* Cores de sucesso, erro e aviso */
   --color-success: #10b981;

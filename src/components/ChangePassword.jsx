@@ -3,6 +3,8 @@ import { CheckCircle, Circle } from "@phosphor-icons/react";
 import "../styles/ChangePassword.css";
 import { useSelector } from "react-redux";
 import Button from "./Button";
+import Swal from 'sweetalert2';
+import { resetPassword } from '../services/authService';
 
 const ChangePassword = ({ handleCloseModalPassword }) => {
     const [currentPassword, setCurrentPassword] = useState("");
@@ -63,7 +65,6 @@ const ChangePassword = ({ handleCloseModalPassword }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const access = localStorage.getItem('access');
         setError("");
 
         if (!passwordsMatch) return;
@@ -75,9 +76,16 @@ const ChangePassword = ({ handleCloseModalPassword }) => {
 
         try {
             setLoading(true);
+            await resetPassword(dataPassword.old_password, dataPassword.new_password);
             handleCloseModalPassword();
+            Swal.fire({
+                icon: 'success',
+                title: 'Senha alterada com sucesso!',
+                showConfirmButton: true,
+                confirmButtonColor: '#198754',
+            });
         } catch (error) {
-            setError(error.response.data.message || "Erro ao alterar a senha");
+            setError(error.message || "Erro ao alterar a senha");
         } finally {
             setLoading(false);
         }
@@ -231,8 +239,8 @@ const ChangePassword = ({ handleCloseModalPassword }) => {
 
                     <div className="alterar-senha__acoes d-flex gap-2">
                         {loading ? (
-                            <div className="spinner-border text-success d-flex mx-auto mb-3" role="status">
-                                <span className="sr-only">Loading...</span>
+                            <div className="spinner-border d-flex mx-auto mb-3" role="status" style={{ color: 'var(--color-accent)'}}>
+                                <span className="sr-only"></span>
                             </div>
                         ) : (
                             <>

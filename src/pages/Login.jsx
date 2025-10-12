@@ -8,6 +8,7 @@ import { mascaraCPF } from '../utils/Mascaras';
 import PhoneInput from 'react-phone-number-input';
 import ptBR from 'react-phone-number-input/locale/pt-BR';
 import { useAuth } from '../hooks/useAuth';
+import Button from '../components/Button';
 
 const Login = () => {
   const { login, getCurrentUser } = useAuth();
@@ -120,13 +121,22 @@ const Login = () => {
   return (
     <div className="login-main-container">
       <div className="login-left">
-        <div className="login-logo-row">
-          <img src={logo} alt="Logo" className="login-logo-img" />
-          <h1 className="login-company-name" >Roupa de Gala</h1>
+        <div className="login-header-section">
+          <div className="login-header-content">
+            <img src={logo} alt="Logo" className="login-header-logo" />
+            <h1 className="login-header-title">Roupa de Gala</h1>
+          </div>
         </div>
-        <h1 className="login-title">Bem-vindo de volta</h1>
-        <h2 className="login-highlight">Faça login para continuar</h2>
-        <p className="login-desc">Lorem ipsum dolor sit amet consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+        <div className="login-left-content">
+          <h1 className="login-title">Bem-vindo de volta</h1>
+          <h2 className="login-highlight">Faça login para continuar</h2>
+          <p className="login-desc">Acesse a plataforma exclusiva de gerenciamento da Roupas de Gala. Organize clientes, pedidos e acervos com praticidade, segurança e sofisticação.</p>
+          <div className="login-left-content-labels d-flex flex-column gap-4 mt-4">
+            <span className="login-left-content-label"><i className="bi bi-people" style={{ color: '#10a3ff', padding: 7 , borderRadius: 100, backgroundColor: '#8f8f8faa'}}></i> Gestão de clientes e pedidos</span>
+            <span className="login-left-content-label"><i className="bi bi-shield-check" style={{ color: '#10a3ff', padding: 7 , borderRadius: 100, backgroundColor: '#8f8f8faa'}}></i> Controle de ternos e acessórios</span>
+            <span className="login-left-content-label"><i className="bi bi-star" style={{ color: '#10a3ff', padding: 7 , borderRadius: 100, backgroundColor: '#8f8f8faa'}}></i> Elegância e sofisticação</span>
+          </div>
+        </div>
       </div>
       <div className="login-card">
         <div className="login-header">
@@ -176,27 +186,12 @@ const Login = () => {
             </div>
           </div>
 
-
-
           <div className='login-button-container w-100 mb-2 mt-3' style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="login-button"
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            >
-              {isLoading ? (
-                <div className="loading-spinner" style={{ width: '20px', height: '20px', margin: '0' }}></div>
-              ) : (
-                'Entrar'
-              )}
-            </button>
+
+            <Button text="Entrar" onClick={handleSubmit} disabled={isLoading}/>
           </div>
-          {/* <div className='login-button-cadastrar w-100 text-center mt-3'>
-            <span style={{ textAlign: 'center', marginTop: 10, fontSize: 13 }}>Ainda não tem uma conta? <span type="button" className="register-toggle" onClick={() => setShowRegister(true)} style={{ fontSize: 13, textDecoration: 'underline', cursor: 'pointer', color: '#FFD600' }}>Cadastre-se</span></span>
-          </div> */}
           {errorMessage && (
-            <div className="error-message-login">
+            <div className="error-message-login mt-3">
               {errorMessage}
             </div>
           )}

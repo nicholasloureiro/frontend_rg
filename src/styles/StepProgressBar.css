@@ -27,7 +27,7 @@
     top: 24px;
     transform: translateY(-10px);
     height: 2px;
-    background-color: var(--color-accent);
+    background-color: var(--color-accent-step);
     z-index: 1;
     transition: width 0.3s ease, left 0.3s ease;
 }
@@ -58,15 +58,15 @@
 }
 
 .step-circle.completed {
-    background-color: var(--color-accent);
-    border-color: var(--color-accent);
+    background-color: var(--color-accent-step);
+    border-color: var(--color-accent-step);
     color: var(--color-primary);
     transition: all 0.3s ease;
 }
 
 .step-circle.active {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
+    border-color: var(--color-accent-step);
+    color: var(--color-accent-step);
 }
 
 .step-circle.future {
@@ -78,7 +78,7 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background-color: var(--color-accent);
+    background-color: var(--color-accent-step);
 }
 
 .step-check {
