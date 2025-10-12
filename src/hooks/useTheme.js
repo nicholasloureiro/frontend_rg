@@ -14,7 +14,7 @@ export const useTheme = () => {
     }
     
     // Padrão é dark
-    return 'dark';
+    return 'light';
   });
 
   const toggleTheme = () => {
