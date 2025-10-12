@@ -66,24 +66,32 @@ const Sidebar = ({ setSideOpen }) => {
     }
   };
 
-  // Obtém o nome do usuário para exibir (nome completo)
-  // Prioriza: user.person.name > user.first_name > user.username
+  // Obtém o nome do usuário para exibir (primeiro nome + último sobrenome)
+  // Prioriza: user.person.name > user.first_name + user.last_name > user.first_name > user.username
   const getUserDisplayName = () => {
     if (isLoading || !user) {
       return 'Carregando...';
     }
     
-    console.log('Dados do usuário no Sidebar:', user);
-    console.log('user.person?.name:', user?.person?.name);
-    console.log('user.first_name:', user?.first_name);
-    console.log('user.username:', user?.username);
-    
     // Prioriza o nome da pessoa (mais completo)
     if (user?.person?.name) {
-      return capitalizeText(user.person.name); // Retorna o nome completo capitalizado
+      const nameParts = user.person.name.trim().split(' ').filter(part => part.length > 0);
+      if (nameParts.length >= 2) {
+        // Primeiro nome + último sobrenome
+        const firstName = nameParts[0];
+        const lastName = nameParts[nameParts.length - 1];
+        return capitalizeText(`${firstName} ${lastName}`);
+      } else if (nameParts.length === 1) {
+        return capitalizeText(nameParts[0]);
+      }
     }
     
-    // Fallback para first_name do usuário
+    // Fallback para first_name + last_name do usuário
+    if (user?.first_name && user?.last_name) {
+      return capitalizeText(`${user.first_name} ${user.last_name}`);
+    }
+    
+    // Fallback para apenas first_name
     if (user?.first_name) {
       return capitalizeText(user.first_name);
     }
@@ -129,6 +137,35 @@ const Sidebar = ({ setSideOpen }) => {
     return null;
   };
 
+  // Obtém as iniciais do nome do usuário (primeira letra do nome + primeira letra do sobrenome)
+  const getUserInitials = () => {
+    if (isLoading || !user) {
+      return 'U';
+    }
+    
+    let firstName = '';
+    let lastName = '';
+    
+    // Prioriza o nome da pessoa (mais completo)
+    if (user?.person?.name) {
+      const nameParts = user.person.name.trim().split(' ');
+      firstName = nameParts[0] || '';
+      lastName = nameParts[1] || '';
+    } else if (user?.first_name && user?.last_name) {
+      firstName = user.first_name;
+      lastName = user.last_name;
+    } else if (user?.first_name) {
+      firstName = user.first_name;
+    } else if (user?.username) {
+      firstName = user.username;
+    }
+    
+    const firstInitial = firstName.charAt(0).toUpperCase();
+    const lastInitial = lastName.charAt(0).toUpperCase();
+    
+    return firstInitial + lastInitial;
+  };
+
   return (
     <>
       <nav className={`sidebar d-flex flex-column position-fixed ${isCollapsed ? 'collapsed' : ''}`} id="sidebar">
@@ -153,6 +190,12 @@ const Sidebar = ({ setSideOpen }) => {
             aria-expanded="false"
             style={{ height: '45px', cursor: 'pointer' }}
           >
+            {/* Círculo com iniciais quando colapsado */}
+            {isCollapsed && (
+              <div className="user-initials-circle">
+                {getUserInitials()}
+              </div>
+            )}
 
             <div className="ms-3 profile-info" style={{ width: '100%' }}>
               <h6 className="text-white mb-0" style={{ whiteSpace: 'normal' }}>
@@ -191,8 +234,10 @@ const Sidebar = ({ setSideOpen }) => {
           <SidebarLink to="/dashboard" iconBoot={'graph-up'} label="Dashboard" onClick={toggleSidebar} />
           <SidebarLink to="/triagem" iconBoot={'clipboard-check'} label="Triagem" onClick={toggleSidebar} />
           <SidebarLink to="/ordens" iconBoot={'list-check'} label="Ordens de serviço" onClick={toggleSidebar} />
+          <SidebarLink to="/eventos" iconBoot={'calendar2-event'} label="Eventos" onClick={toggleSidebar} />
           <SidebarLink to="/clientes" iconBoot={'people'} label="Clientes" onClick={toggleSidebar} />
           <SidebarLink to="/funcionarios" iconBoot={'person-lines-fill'} label="Funcionários" onClick={toggleSidebar} />
+          <SidebarLink to="/produtos" iconBoot={'box'} label="Produtos" onClick={toggleSidebar} />
           
           <div className="mt-auto mb-3" style={{ width: '100%', justifyContent: 'center', display: 'flex' }}>
             <span className="version" style=

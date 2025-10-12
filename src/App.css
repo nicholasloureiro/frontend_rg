@@ -1,6 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
 * {
-  font-family: 'Roboto', sans-serif;
+  font-family: "Inter", sans-serif;
 }
+
 
 .App {
   min-height: 100vh;
@@ -72,11 +75,15 @@ select:focus {
 }
 
 .PhoneInputCountrySelect {
- background-color: transparent !important;
- border: none !important;
+  background-color: transparent !important;
+  border: none !important;
 }
 
-.PhoneInput input{
+.PhoneInputCountrySelect:disabled {
+  display: none !important;
+}
+
+.PhoneInput input {
   transition: all 0s ease-in-out !important;
 
 }
@@ -123,22 +130,23 @@ select:focus {
   color: var(--font-color-disabled) !important;
 }
 
-input:disabled{
+input:disabled {
   background-color: var(--background-inputs-disabled) !important;
   opacity: 1 !important;
   color: var(--font-color-disabled) !important;
 }
 
-.react-datepicker__input-container input{
+.react-datepicker__input-container input {
   height: 35px !important;
   border: 2px solid var(--color-border) !important;
 }
 
-.react-datepicker__calendar-icon{
- display: flex !important;
+.react-datepicker__calendar-icon {
+  display: flex !important;
 }
 
-.bi-eye, .bi-eye-slash{
+.bi-eye,
+.bi-eye-slash {
   color: var(--color-text-primary) !important;
 }
 
@@ -166,6 +174,10 @@ i,
 svg,
 input {
   transition: color 0.3s ease-out !important;
+}
+
+label {
+  font-size: 12px !important;
 }
 
 input,

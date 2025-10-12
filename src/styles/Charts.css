@@ -1,0 +1,243 @@
+.chart-container {
+  width: 100%;
+  background: var(--color-bg-secondary);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card {
+  background: var(--color-bg-card);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 120px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stat-card-icon {
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-card-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.stat-card-value {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1;
+  margin-top: 4px;
+}
+
+.stat-card-subtitle {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-top: auto;
+}
+
+.analytics-section {
+  margin-top: 32px;
+}
+
+.analytics-section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 20px;
+  padding-left: 4px;
+}
+
+.analytics-grid {
+  display: grid;
+  gap: 24px;
+}
+
+.analytics-grid-2 {
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+}
+
+.analytics-grid-3 {
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+}
+
+.analytics-grid-4 {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.chart-card {
+  background: var(--color-bg-card);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.chart-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 16px;
+  padding-left: 4px;
+}
+
+.reclamacoes-card {
+  background: var(--color-bg-card);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.reclamacoes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.reclamacoes-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.reclamacoes-stats {
+  display: flex;
+  gap: 16px;
+}
+
+.reclamacao-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.reclamacao-stat-label {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.reclamacao-stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.reclamacao-stat-value.success {
+  color: var(--color-success);
+}
+
+.reclamacao-stat-value.warning {
+  color: var(--color-warning);
+}
+
+.reclamacao-stat-value.error {
+  color: var(--color-error);
+}
+
+.reclamacoes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.reclamacao-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: var(--color-bg-secondary);
+  border-radius: 8px;
+}
+
+.reclamacao-categoria {
+  font-size: 14px;
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.reclamacao-quantidade {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-primary);
+  background: var(--color-bg-card-icon);
+  padding: 4px 12px;
+  border-radius: 12px;
+}
+
+.satisfaction-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 20px;
+  margin-top: 12px;
+}
+
+.satisfaction-badge-icon {
+  color: var(--color-success);
+  font-size: 16px;
+}
+
+.satisfaction-badge-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-success);
+}
+
+@media (max-width: 1400px) {
+  .analytics-grid-2 {
+    grid-template-columns: 1fr;
+  }
+  
+  .analytics-grid-3 {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .analytics-grid-3,
+  .analytics-grid-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-container {
+    height: 250px !important;
+    padding: 16px;
+  }
+
+  .stat-card {
+    min-height: 100px;
+  }
+
+  .stat-card-value {
+    font-size: 24px;
+  }
+
+  .reclamacoes-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}

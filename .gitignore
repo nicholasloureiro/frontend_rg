@@ -20,6 +20,9 @@ dist-ssr
 *.suo
 .env
 .env.production
+.env
+.env.development
+.env.production
 *.ntvs*
 *.njsproj
 *.sln

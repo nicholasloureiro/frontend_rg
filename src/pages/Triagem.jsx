@@ -4,10 +4,14 @@ import 'react-phone-number-input/style.css';
 import Header from '../components/Header';
 import Button from '../components/Button';
 import InputDate from '../components/InputDate';
+import CustomSelect from '../components/CustomSelect';
+import CreateEventModal from '../components/CreateEventModal';
 import { mascaraCPF, mascaraCEP, removerMascara } from '../utils/Mascaras';
 import validarCPF from '../utils/ValidarCPF';
 import { triagemService } from '../services/triagemService';
 import { getEmployees } from '../services/employeeService';
+import { clientService } from '../services/clientService';
+import eventService from '../services/eventService';
 import { capitalizeText } from '../utils/capitalizeText';
 import Swal from 'sweetalert2';
 import '../styles/Triagem.css';
@@ -22,9 +26,11 @@ const Triagem = () => {
         bairro: '',
         cidade: '',
         numero: '',
+        complemento: '',
+        email: '',
         atendenteResponsavel: '',
         origem: '',
-        evento: '',
+        event_id: '',
         papelNoEvento: '',
         dataEvento: null
     });
@@ -34,33 +40,65 @@ const Triagem = () => {
     const [cepLoading, setCepLoading] = useState(false);
     const [atendentes, setAtendentes] = useState([]);
     const [loadingAtendentes, setLoadingAtendentes] = useState(false);
+    const [eventos, setEventos] = useState([]);
+    const [loadingEventos, setLoadingEventos] = useState(false);
+    const [showCreateEventModal, setShowCreateEventModal] = useState(false);
     const [cpfValido, setCpfValido] = useState(true);
+    const [emailValido, setEmailValido] = useState(true);
+    const [buscandoCliente, setBuscandoCliente] = useState(false);
 
     // Função para carregar atendentes da API
     const carregarAtendentes = async () => {
         setLoadingAtendentes(true);
         try {
             const funcionarios = await getEmployees();
+            // Garante que funcionarios sempre será um array
+            const listaFuncionarios = Array.isArray(funcionarios) ? funcionarios : [];
             // Filtrar apenas funcionários com role ATENDENTE
-            const atendentesFiltrados = funcionarios.filter(func => func.role === 'ATENDENTE');
+            const atendentesFiltrados = listaFuncionarios.filter(func => func.role === 'ATENDENTE');
             setAtendentes(atendentesFiltrados);
         } catch (error) {
             console.error('Erro ao carregar atendentes:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Erro!',
-                text: 'Erro ao carregar lista de atendentes',
-                confirmButtonText: 'OK',
-                confirmButtonColor: '#d33'
-            });
+
         } finally {
             setLoadingAtendentes(false);
         }
     };
 
-    // Carregar atendentes quando o componente montar
+    // Função para carregar eventos abertos da API
+    const carregarEventos = async () => {
+        setLoadingEventos(true);
+        try {
+            const eventosData = await eventService.listarEventosAbertos();
+            // Garante que eventos sempre será um array
+            const listaEventos = Array.isArray(eventosData) ? eventosData : [];
+            setEventos(listaEventos);
+        } catch (error) {
+            console.error('Erro ao carregar eventos:', error);
+        } finally {
+            setLoadingEventos(false);
+        }
+    };
+
+    // Função para abrir modal de criar evento
+    const handleOpenCreateEventModal = () => {
+        setShowCreateEventModal(true);
+    };
+
+    // Função para fechar modal de criar evento
+    const handleCloseCreateEventModal = () => {
+        setShowCreateEventModal(false);
+    };
+
+    // Função para atualizar lista após criar evento
+    const handleEventCreated = () => {
+        carregarEventos();
+    };
+
+    // Carregar atendentes e eventos quando o componente montar
     React.useEffect(() => {
         carregarAtendentes();
+        carregarEventos();
     }, []);
 
     // Opções para os selects
@@ -77,6 +115,7 @@ const Triagem = () => {
         { value: 'site', label: 'Site' },
         { value: 'instagram', label: 'Instagram' },
         { value: 'facebook', label: 'Facebook' },
+        { value: 'google', label: 'Google' },
         { value: 'indicacao', label: 'Indicação' },
         { value: 'outro', label: 'Outro' }
     ];
@@ -84,13 +123,20 @@ const Triagem = () => {
     const opcoesPapel = [
         { value: '', label: 'Selecione o papel' },
         { value: 'noivo', label: 'Noivo' },
-        { value: 'noiva', label: 'Noiva' },
         { value: 'padrinho', label: 'Padrinho' },
-        { value: 'madrinha', label: 'Madrinha' },
         { value: 'pai', label: 'Pai' },
-        { value: 'mae', label: 'Mãe' },
+        { value: 'convidado', label: 'Convidado' },
+        { value: 'pajem', label: 'Pajem' },
         { value: 'familia', label: 'Família' },
         { value: 'outro', label: 'Outro' }
+    ];
+
+    const opcoesEventos = [
+        { value: '', label: loadingEventos ? 'Carregando...' : 'Selecione um evento' },
+        ...eventos.map(evento => ({
+            value: evento.id,
+            label: evento.name
+        }))
     ];
 
 
@@ -120,7 +166,14 @@ const Triagem = () => {
         }
     };
 
-
+    // Função para validar email
+    const validarEmail = (email) => {
+        if (!email.trim()) {
+            return true; // Email vazio é válido (não obrigatório)
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
 
     // Função para validar campos obrigatórios
     const validarCampos = () => {
@@ -136,6 +189,10 @@ const Triagem = () => {
 
         if (formData.cpf && !cpfValido) {
             novosErros.cpf = 'CPF inválido';
+        }
+
+        if (formData.email && !emailValido) {
+            novosErros.email = 'Email inválido';
         }
 
         if (!formData.atendenteResponsavel || formData.atendenteResponsavel === '') {
@@ -161,18 +218,18 @@ const Triagem = () => {
     const prepararDadosParaAPI = () => {
         return {
             cliente_nome: formData.nomeCliente.toUpperCase(),
-            telefone: formData.telefone,
+            telefone: formData.telefone ? formData.telefone.replace(/\D/g, '') : '',
+            email: formData.email,
             cpf: removerMascara(formData.cpf),
             atendente_id: formData.atendenteResponsavel ? parseInt(formData.atendenteResponsavel) : null,
             origem: formData.origem.toUpperCase(),
-            data_evento: formatarDataParaAPI(formData.dataEvento),
-            tipo_servico: 'ALUGUEL',
-            evento: formData.evento.toUpperCase(),
+            event_id: formData.event_id ? parseInt(formData.event_id) : null,
             papel_evento: formData.papelNoEvento.toUpperCase(),
             endereco: {
                 cep: removerMascara(formData.cep),
                 rua: formData.rua.toUpperCase(),
                 numero: formData.numero,
+                complemento: formData.complemento.toUpperCase(),
                 bairro: formData.bairro.toUpperCase(),
                 cidade: formData.cidade.toUpperCase()
             }
@@ -214,9 +271,11 @@ const Triagem = () => {
                 numero: '',
                 atendenteResponsavel: '',
                 origem: '',
-                evento: '',
+                event_id: '',
                 papelNoEvento: '',
-                dataEvento: null
+                dataEvento: null,
+                complemento: '',
+                email: ''
             });
             setErrors({});
 
@@ -252,6 +311,63 @@ const Triagem = () => {
         if (field === 'cpf' && !value) {
             setCpfValido(true);
         }
+
+        // Resetar validação do email quando o campo for limpo
+        if (field === 'email' && !value) {
+            setEmailValido(true);
+        }
+    };
+
+    // Função para buscar dados do cliente por CPF
+    const buscarClientePorCPF = async (cpf) => {
+        setBuscandoCliente(true);
+        try {
+            const cliente = await clientService.buscarPorCPF(cpf);
+
+            if (cliente) {
+                // Formatar o telefone para o componente PhoneInput
+                let telefoneFormatado = '';
+                if (cliente.phone) {
+                    telefoneFormatado = cliente.phone.startsWith('+') ? cliente.phone : `+55${cliente.phone.substring(2)}`;
+                }
+
+                // Preencher os dados do formulário com os dados do cliente encontrado
+                setFormData(prev => ({
+                    ...prev,
+                    nomeCliente: cliente.name || '',
+                    telefone: telefoneFormatado,
+                    cep: cliente.address?.cep || '',
+                    rua: cliente.address?.street || '',
+                    bairro: cliente.address?.neighborhood || '',
+                    cidade: cliente.address?.city || '',
+                    numero: cliente.address?.number || '',
+                    complemento: cliente.address?.complement || '',
+                    email: cliente.email || ''
+                }));
+
+                // Se o CEP foi preenchido, buscar dados do endereço
+                if (cliente.address?.cep) {
+                    const cepFormatado = mascaraCEP(cliente.address.cep);
+                    buscarCEP(cepFormatado);
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao buscar cliente:', error);
+            // Não mostrar erro se o cliente não for encontrado (404)
+            if (error.response?.status !== 404) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro!',
+                    text: 'Erro ao buscar dados do cliente.',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            }
+        } finally {
+            setBuscandoCliente(false);
+        }
     };
 
     // Função para aplicar máscara de CPF e validar
@@ -265,9 +381,27 @@ const Triagem = () => {
         if (cpfLimpo.length === 11) {
             const ehValido = validarCPF(cpfLimpo);
             setCpfValido(ehValido);
+
+            // Se o CPF for válido, buscar dados do cliente
+            if (ehValido) {
+                buscarClientePorCPF(cpfLimpo);
+            }
         } else {
             setCpfValido(true); // Reset quando não tem 11 dígitos
         }
+    };
+
+    // Função para lidar com mudança do email e validação
+    const handleEmailChange = (e) => {
+        const value = e.target.value;
+        handleInputChange('email', value);
+    };
+
+    // Função para validar email no onBlur
+    const handleEmailBlur = (e) => {
+        const email = e.target.value;
+        const ehValido = validarEmail(email);
+        setEmailValido(ehValido);
     };
 
     // Função para aplicar máscara de CEP
@@ -295,6 +429,7 @@ const Triagem = () => {
                 onChange={(e) => handleInputChange(id, e.target.value)}
                 placeholder={placeholder}
                 maxLength={maxLength}
+                autoComplete="off"
             />
             {errors[id] && (
                 <span className="error-message">{errors[id]}</span>
@@ -339,7 +474,38 @@ const Triagem = () => {
                         <div className="form-section">
                             <h3 className="section-title">Dados do Cliente</h3>
 
+                            {/* Primeira linha: CPF, Nome do Cliente, Telefone */}
                             <div className="form-row">
+                                <div className="form-group">
+                                    <label htmlFor="cpf" className="form-label">
+                                        CPF
+                                    </label>
+                                    <div className="cpf-container">
+                                        <input
+                                            type="text"
+                                            id="cpf"
+                                            className={`form-input ${errors.cpf ? 'error' : ''}`}
+                                            value={formData.cpf}
+                                            onChange={handleCPFChange}
+                                            placeholder="000.000.000-00"
+                                            autoComplete="off"
+                                            maxLength="14"
+                                            disabled={buscandoCliente}
+                                        />
+                                        {buscandoCliente && (
+                                            <div className="cpf-loading">
+                                                <i className="bi bi-arrow-clockwise"></i>
+                                            </div>
+                                        )}
+                                    </div>
+                                    {errors.cpf && (
+                                        <span className="error-message">{errors.cpf}</span>
+                                    )}
+                                    {formData.cpf && !cpfValido && (
+                                        <small className="error-message">CPF inválido</small>
+                                    )}
+                                </div>
+
                                 {renderInput('nomeCliente', 'Nome do Cliente', 'text', 'Digite o nome completo', true)}
 
                                 <div className="form-group">
@@ -360,29 +526,31 @@ const Triagem = () => {
                                 </div>
                             </div>
 
-                            <div className="form-row">
+                            {/* Segunda linha: Email, CEP, Logradouro, Número */}
+                            <div className="form-row form-row-four-fields">
                                 <div className="form-group">
-                                    <label htmlFor="cpf" className="form-label">
-                                        CPF
+                                    <label htmlFor="email" className="form-label">
+                                        E-mail *
                                     </label>
                                     <input
-                                        type="text"
-                                        id="cpf"
-                                        className={`form-input ${errors.cpf ? 'error' : ''}`}
-                                        value={formData.cpf}
-                                        onChange={handleCPFChange}
-                                        placeholder="000.000.000-00"
-                                        maxLength="14"
+                                        type="email"
+                                        id="email"
+                                        className={`form-input ${errors.email ? 'error' : ''}`}
+                                        value={formData.email}
+                                        onChange={handleEmailChange}
+                                        onBlur={handleEmailBlur}
+                                        placeholder="Digite o e-mail"
+                                        autoComplete="off"
                                     />
-                                    {errors.cpf && (
-                                        <span className="error-message">{errors.cpf}</span>
+                                    {errors.email && (
+                                        <span className="error-message">{errors.email}</span>
                                     )}
-                                    {formData.cpf && !cpfValido && (
-                                        <small className="error-message">CPF inválido</small>
+                                    {formData.email && !emailValido && (
+                                        <small className="error-message">Email inválido</small>
                                     )}
                                 </div>
 
-                                <div className="form-group">
+                                <div className="form-group cep-field">
                                     <label htmlFor="cep" className="form-label">
                                         CEP*
                                     </label>
@@ -393,6 +561,7 @@ const Triagem = () => {
                                             className="form-input"
                                             value={formData.cep}
                                             onChange={handleCEPChange}
+                                            autoComplete="off"
                                             placeholder="00000-000"
                                             maxLength="9"
                                         />
@@ -403,14 +572,31 @@ const Triagem = () => {
                                         )}
                                     </div>
                                 </div>
-                            </div>
 
-                            <div className="form-row">
                                 {renderInput('rua', 'Logradouro*', 'text', '')}
-                                {renderInput('numero', 'Número*', 'text', '')}
+
+                                <div className="form-group numero-field">
+                                    <label htmlFor="numero" className="form-label">
+                                        Número *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="numero"
+                                        className={`form-input ${errors.numero ? 'error' : ''}`}
+                                        value={formData.numero}
+                                        onChange={(e) => handleInputChange('numero', e.target.value)}
+                                        placeholder=""
+                                        autoComplete="off"
+                                    />
+                                    {errors.numero && (
+                                        <span className="error-message">{errors.numero}</span>
+                                    )}
+                                </div>
                             </div>
 
+                            {/* Quarta linha: Complemento, Bairro, Cidade */}
                             <div className="form-row">
+                                {renderInput('complemento', 'Complemento', 'text', '')}
                                 {renderInput('bairro', 'Bairro*', 'text', '')}
                                 {renderInput('cidade', 'Cidade*', 'text', '')}
                             </div>
@@ -426,23 +612,38 @@ const Triagem = () => {
                             </div>
 
                             <div className="form-row">
-                                {renderInput('evento', 'Evento', 'text', 'Nome do evento')}
-                                {renderSelect('papelNoEvento', 'Papel no Evento', opcoesPapel)}
-                            </div>
-
-                            <div className="form-row">
                                 <div className="form-group">
-                                    <label htmlFor="dataEvento" className="form-label">
-                                        Data do Evento
+                                    <label htmlFor="event_id" className="form-label">
+                                        Evento *
                                     </label>
-                                    <InputDate
-                                        selectedDate={formData.dataEvento}
-                                        onDateChange={(date) => handleInputChange('dataEvento', date)}
-                                        placeholderText="Selecione a data"
+                                    <CustomSelect
+                                        options={opcoesEventos}
+                                        value={formData.event_id}
+                                        onChange={(value) => handleInputChange('event_id', value)}
+                                        placeholder="Selecione um evento"
+                                        disabled={loadingEventos}
+                                        error={errors.event_id}
                                     />
+                                    {errors.event_id && (
+                                        <span className="error-message">{errors.event_id}</span>
+                                    )}
+                                    <small
+                                        className="create-event-link"
+                                        onClick={handleOpenCreateEventModal}
+                                        style={{
+                                            color: 'var(--color-accent)',
+                                            cursor: 'pointer',
+                                            textDecoration: 'underline',
+                                            fontSize: '12px',
+                                            marginTop: '-5px',
+                                            marginLeft: 'auto',
+                                            display: 'block'
+                                        }}
+                                    >
+                                        Criar novo evento
+                                    </small>
                                 </div>
-                                <div className="form-row">
-                                </div>
+                                {renderSelect('papelNoEvento', 'Papel no Evento *', opcoesPapel)}
                             </div>
                         </div>
                         <Button
@@ -458,6 +659,13 @@ const Triagem = () => {
                     </form>
                 </div>
             </div>
+
+            {/* Modal para criar evento */}
+            <CreateEventModal
+                show={showCreateEventModal}
+                onClose={handleCloseCreateEventModal}
+                onEventCreated={handleEventCreated}
+            />
         </div>
     );
 };

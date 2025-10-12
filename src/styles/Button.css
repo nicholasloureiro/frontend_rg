@@ -5,11 +5,12 @@
   font-weight: 500;
   transition: all 0.2s ease-in-out;
   border: none;
+  font-size: 14px;
 }
 
 /* Primary button */
 .custom-btn-primary {
-  background-color: var(--color-accent-dark);
+  background-color: var(--color-accent);
   color: white;
 }
 
@@ -29,7 +30,7 @@
 }
 
 .custom-btn-primary:disabled {
-  background-color: #e5debc;
+  background-color: #6a6e7166;
   color: white;
   cursor: not-allowed !important;
 }

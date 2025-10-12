@@ -1,5 +1,6 @@
 import React from 'react';
 import '../styles/Modal.css';
+import Button from './Button';
 
 const Modal = ({ show, onClose, onCloseX, title, bodyContent, buttonText }) => {
   if (!show) return null;
@@ -24,9 +25,7 @@ const Modal = ({ show, onClose, onCloseX, title, bodyContent, buttonText }) => {
 
           {onClose && buttonText && (
             <div className="modal-footer-modal">
-              <button type="button" className="btn btn-primary" style={{ backgroundColor: 'var(--color-accent-dark)', border: 'none' }} onClick={onClose}>
-                {buttonText}
-              </button>
+              <Button text={buttonText} onClick={onClose} variant="primary" />
             </div>
           )}
         </div>

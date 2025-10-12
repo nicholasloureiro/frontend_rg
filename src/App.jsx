@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import Login from './pages/Login'
 import Home from './pages/Home'
 import Funcionarios from './pages/Funcionarios'
+import Clientes from './pages/Clientes'
 import Sidebar from './components/Sidebar'
 import ProtectedRoute from './components/ProtectedRoute'
 import { useTheme } from './hooks/useTheme'
@@ -14,6 +15,10 @@ import 'react-phone-number-input/style.css';
 import './App.css'
 import Triagem from './pages/Triagem'
 import OrdemServico from './pages/OrdemServico'
+import Produtos from './pages/Produtos'
+import Eventos from './pages/Eventos'
+import EventoDetalhes from './pages/EventoDetalhes'
+import ClienteHistorico from './pages/ClienteHistorico'
 
 function AppContent() {
   const { theme } = useTheme();
@@ -64,7 +69,7 @@ function AppContent() {
     return (
       <div className="App d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
         <div className="text-center">
-          <div className="spinner-border text-warning" role="status" style={{ width: '3rem', height: '3rem' }}>
+          <div className="spinner-border" role="status" style={{ width: '3rem', height: '3rem', color: 'var(--color-accent)'}}>
             <span className="visually-hidden">Carregando...</span>
           </div>
           <p className="mt-3">Carregando...</p>
@@ -101,6 +106,18 @@ function AppContent() {
             </ProtectedRoute>
           } />
           
+          <Route path="/clientes" element={
+            <ProtectedRoute>
+              <Clientes />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/clientes/:id/historico" element={
+            <ProtectedRoute>
+              <ClienteHistorico />
+            </ProtectedRoute>
+          } />
+          
           <Route path="/triagem" element={
             <ProtectedRoute>
               <Triagem />
@@ -110,6 +127,30 @@ function AppContent() {
           <Route path="/ordens" element={
             <ProtectedRoute>
               <OrdemServico />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/ordens/:id" element={
+            <ProtectedRoute>
+              <OrdemServico />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/eventos" element={
+            <ProtectedRoute>
+              <Eventos />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/eventos/:id" element={
+            <ProtectedRoute>
+              <EventoDetalhes />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/produtos" element={
+            <ProtectedRoute>
+              <Produtos />
             </ProtectedRoute>
           } />
           

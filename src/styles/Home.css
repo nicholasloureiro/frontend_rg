@@ -16,7 +16,7 @@
 }
 
 .dashboard-section {
-  background: var(--color-bg-secondary);
+  background: var(--color-bg-card);
   border-radius: 18px;
   box-shadow: 0 2px 12px var(--color-shadow-card);
   padding: 18px 16px 10px 16px;
@@ -30,6 +30,62 @@
   color: var(--color-text-primary);
   margin-bottom: 10px;
   text-align: left;
+}
+
+/* Error State */
+.error-state-dashboard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--color-text-secondary);
+  text-align: center;
+  min-height: 50vh;
+}
+
+.error-state-dashboard .bi-exclamation-triangle {
+  font-size: 48px;
+  margin-bottom: 16px;
+  color: var(--color-error);
+}
+
+.error-state-dashboard i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-state-dashboard h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+}
+
+.error-state-dashboard p {
+  font-size: 16px;
+  margin-bottom: 24px;
+  color: var(--color-text-secondary);
+}
+
+.error-state-dashboard button {
+  margin-top: 16px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .error-state-dashboard {
+    padding: 40px 20px;
+  }
+  
+  .error-state-dashboard h3 {
+    font-size: 18px;
+  }
+  
+  .error-state-dashboard p {
+    font-size: 14px;
+  }
 }
 
 @media (max-width: 900px) {

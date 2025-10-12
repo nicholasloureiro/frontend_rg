@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { mascaraCPF, mascaraTelefone, removerMascara } from '../utils/Mascaras';
+import { mascaraCPF, mascaraTelefone, removerMascara, formatarTelefoneParaExibicao } from '../utils/Mascaras';
 import { capitalizeText } from '../utils/capitalizeText';
 import PhoneInput from 'react-phone-number-input';
 import ptBR from 'react-phone-number-input/locale/pt-BR';
@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 import '../styles/Funcionarios.css';
 import Header from '../components/Header';
 import Button from '../components/Button';
+import EmployeeCardSkeleton from '../components/EmployeeCardSkeleton';
 import { registerEmployee, getEmployees, updateEmployee, toggleEmployeeStatus } from '../services/employeeService';
 
 const Funcionarios = () => {
@@ -21,6 +22,8 @@ const Funcionarios = () => {
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingEmployees, setIsLoadingEmployees] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     // Carregar dados da API
@@ -28,18 +31,18 @@ const Funcionarios = () => {
   }, []);
 
   const loadEmployees = async () => {
+    setIsLoadingEmployees(true);
+    setError(null);
     try {
       const data = await getEmployees();
-      setFuncionarios(data);
+      // Garante que funcionarios sempre será um array
+      setFuncionarios(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Erro ao carregar funcionários:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Erro ao carregar funcionários',
-        text: 'Não foi possível carregar a lista de funcionários.',
-        timer: 2000,
-        showConfirmButton: false
-      });
+      setError('Não foi possível carregar a lista de funcionários. Tente novamente.');
+
+    } finally {
+      setIsLoadingEmployees(false);
     }
   };
 
@@ -91,22 +94,13 @@ const Funcionarios = () => {
     try {
       if (editingId) {
         // Editar funcionário existente
-        // Enviar apenas os campos necessários para atualização (sem CPF)
-        // Formatar o telefone para o formato esperado pela API
-        let formattedPhone = formData.phone;
-        if (formData.phone) {
-          // Remove o código do país (+55) se presente
-          formattedPhone = formData.phone.replace('+55', '');
-          // Aplica a máscara brasileira se não estiver formatado
-          if (!formattedPhone.includes('(')) {
-            formattedPhone = formattedPhone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-          }
-        }
+        // Remover máscaras do CPF e telefone
+        const cpfSemMascara = removerMascara(formData.cpf);
 
         const updateData = {
           name: formData.name,
           email: formData.email,
-          phone: formattedPhone,
+          phone: formData.phone ? formData.phone.replace(/\D/g, '') : '',
           role: formData.role
         };
         await updateEmployee(editingId, updateData);
@@ -121,18 +115,49 @@ const Funcionarios = () => {
         });
       } else {
         // Adicionar novo funcionário
-        await registerEmployee(formData);
+        // Remover máscaras do CPF e telefone
+        const cpfSemMascara = removerMascara(formData.cpf);
+        
+        const createData = {
+          name: formData.name,
+          cpf: cpfSemMascara,
+          email: formData.email,
+          phone: formData.phone ? formData.phone.replace(/\D/g, '') : '',
+          role: formData.role
+        };
+        
+        const response = await registerEmployee(createData);
 
         Swal.fire({
           icon: 'success',
           title: 'Funcionário cadastrado!',
-          text: 'O funcionário foi cadastrado com sucesso.',
-          timer: 2000,
-          showConfirmButton: false
+          html: `<p>O funcionário foi cadastrado com sucesso.</p>
+                 <p style="font-weight:bold;color:#CBA135;font-size:18px;">Senha gerada: <span style="background:#fff3cd;padding:4px 8px;border-radius:4px;">${response.password}</span></p>
+                 <p style="color:#b91c1c;">Guarde esta senha com cuidado!<br/>Ela é exibida apenas agora e não poderá ser recuperada depois.</p>` ,
+          showConfirmButton: true,
+          confirmButtonText: 'Fechar',
+          confirmButtonColor: '#CBA135',
+          allowOutsideClick: false,
+          didOpen: () => {
+            const btn = Swal.getConfirmButton();
+            btn.disabled = true;
+            let seconds = 10;
+            btn.textContent = `Fechar (${seconds})`;
+            const interval = setInterval(() => {
+              seconds--;
+              btn.textContent = `Fechar (${seconds})`;
+              if (seconds <= 0) {
+                clearInterval(interval);
+                btn.textContent = 'Fechar';
+                btn.disabled = false;
+              }
+            }, 1000);
+          }
         });
       }
 
       // Recarregar lista de funcionários
+      setIsLoadingEmployees(true);
       await loadEmployees();
 
       // Limpar formulário
@@ -159,7 +184,15 @@ const Funcionarios = () => {
 
   const handleEdit = (funcionario) => {
     window.scrollTo(0, 0);
-    setFormData(funcionario);
+    // Mapear os dados do funcionário para o formato do formulário
+    const funcionarioData = {
+      name: funcionario.name || '',
+      cpf: funcionario.cpf || '',
+      phone: funcionario.phone ? (funcionario.phone.startsWith('+') ? funcionario.phone : `+55${funcionario.phone.substring(2)}`) : '', // Remover 55 do início e adicionar +55
+      email: funcionario.email || '',
+      role: funcionario.role || ''
+    };
+    setFormData(funcionarioData);
     // Usar person_id se disponível, senão usar id
     setEditingId(funcionario.person_id || funcionario.id);
   };
@@ -180,7 +213,7 @@ const Funcionarios = () => {
   const handleToggleStatus = async (funcionario) => {
     const personId = funcionario.person_id || funcionario.id;
     const newStatus = !funcionario.active;
-    
+
     // Confirmação antes de alterar o status
     const result = await Swal.fire({
       icon: 'question',
@@ -188,20 +221,20 @@ const Funcionarios = () => {
       text: `Deseja ${newStatus ? 'ativar' : 'desativar'} o funcionário ${capitalizeText(funcionario.name)}?`,
       showCancelButton: true,
       cancelButtonText: 'Cancelar',
-      confirmButtonText: 'Sim',   
+      confirmButtonText: 'Sim',
       confirmButtonColor: '#CBA135',
       cancelButtonColor: 'transparent',
- 
+
     });
-    
+
     // Se o usuário cancelou, não faz nada
     if (!result.isConfirmed) {
       return;
     }
-    
+
     try {
       await toggleEmployeeStatus(personId, newStatus);
-      
+
       Swal.fire({
         icon: 'success',
         title: 'Status alterado!',
@@ -209,8 +242,9 @@ const Funcionarios = () => {
         timer: 2000,
         showConfirmButton: false
       });
-      
+
       // Recarregar lista de funcionários
+      setIsLoadingEmployees(true);
       await loadEmployees();
     } catch (error) {
       console.error('Erro ao alterar status do funcionário:', error);
@@ -254,7 +288,7 @@ const Funcionarios = () => {
             <h2 style={{ fontSize: '18px' }}>{editingId ? 'Editar Funcionário' : 'Cadastrar Novo Funcionário'}</h2>
             {isLoading && (
               <div className="loading-indicator">
-                <div className="spinner"></div>
+                <div className="spinner" style={{ color: 'var(--color-accent)'}}></div>
                 <span>Salvando...</span>
               </div>
             )}
@@ -342,7 +376,7 @@ const Funcionarios = () => {
               <div className="form-group"></div>
             </div>
 
-            <div className="form-actions">
+            <div className="form-actions-funcionarios">
               {editingId && (
                 <Button
                   text="Cancelar"
@@ -368,7 +402,14 @@ const Funcionarios = () => {
         {/* Listagem de Funcionários */}
         <div className="list-section">
           <div className="list-header">
-            <h2 style={{ fontSize: '18px', color: 'var(--color-text-primary)' }}>Funcionários Cadastrados</h2>
+            <h2 style={{ fontSize: '18px', color: 'var(--color-text-primary)' }}>
+              Funcionários Cadastrados
+              {isLoadingEmployees && (
+                <span style={{ fontSize: '14px', color: 'var(--color-text-secondary)', marginLeft: '8px', fontWeight: 'normal' }}>
+                  (Carregando...)
+                </span>
+              )}
+            </h2>
             <div className="search-container">
               <input
                 type="text"
@@ -376,15 +417,28 @@ const Funcionarios = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"
+                disabled={isLoadingEmployees}
               />
               <i className="bi bi-search search-icon"></i>
             </div>
           </div>
 
           <div className="funcionarios-grid">
-            {filteredFuncionarios.length === 0 ? (
+            {isLoadingEmployees ? (
+              // Renderizar skeletons durante o carregamento
+              Array.from({ length: 8 }).map((_, index) => (
+                <EmployeeCardSkeleton key={index} />
+              ))
+            ) : error ? (
+              <div className="error-state">
+                <i className="bi bi-exclamation-triangle"></i>
+                <h3>Erro ao carregar funcionários</h3>
+                <p>{error}</p>
+                <Button variant="primary" text="Tentar novamente" iconName="arrow-clockwise" iconPosition="left" onClick={loadEmployees} disabled={isLoadingEmployees} style={{ width: 'fit-content'}} />
+              </div>
+            ) : filteredFuncionarios.length === 0 ? (
               <div className="no-results">
-                <i className="bi bi-people"></i>
+                <i className="bi bi-people" style={{ color: 'var(--color-accent)'}}></i>
                 <p>Nenhum funcionário encontrado</p>
               </div>
             ) : (
@@ -426,7 +480,7 @@ const Funcionarios = () => {
                     </div>
                     <div className="detail-item">
                       <i className="bi bi-telephone"></i>
-                      <span>{funcionario.phone ? funcionario.phone.replace('+55', '').replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3') : ''}</span>
+                      <span>{formatarTelefoneParaExibicao(funcionario.phone)}</span>
                     </div>
                     <div className="detail-item">
                       <i className="bi bi-envelope"></i>

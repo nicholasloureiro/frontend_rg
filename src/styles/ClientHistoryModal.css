@@ -1,0 +1,428 @@
+/* Container principal do modal de histórico */
+.client-history-modal {
+  width: 100%;
+  max-width: 100%;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 0;
+  margin: 0;
+}
+
+/* Informações do cliente */
+.client-history-modal .client-info {
+  background: var(--color-bg-card);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  border: 1px solid var(--color-border);
+}
+
+.client-history-modal .client-info h4 {
+  margin: 0 0 8px 0;
+  color: var(--color-text-primary);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.client-history-modal .client-info p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+/* Estados de loading, erro e lista vazia */
+.client-history-modal .loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.client-history-modal .loading-state .spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-border);
+  border-top: 3px solid var(--color-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+.client-history-modal .loading-state p {
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.client-history-modal .error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.client-history-modal .error-state i {
+  font-size: 48px;
+  color: var(--color-error);
+  margin-bottom: 16px;
+}
+
+.client-history-modal .error-state p {
+  color: var(--color-text-secondary);
+  margin: 0 0 16px 0;
+}
+
+.client-history-modal .btn-retry {
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.client-history-modal .btn-retry:hover:not(:disabled) {
+  background: var(--color-accent-dark);
+}
+
+.client-history-modal .btn-retry:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.client-history-modal .no-orders {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.client-history-modal .no-orders i {
+  font-size: 48px;
+  color: var(--color-accent);
+  margin-bottom: 16px;
+}
+
+.client-history-modal .no-orders p {
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Lista de ordens de serviço */
+.client-history-modal .service-orders-list h5 {
+  color: var(--color-text-primary);
+  margin: 0 0 20px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.client-history-modal .orders-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 50vh;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.client-history-modal .service-order-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  transition: box-shadow 0.2s;
+  margin-bottom: 0;
+}
+
+.client-history-modal .service-order-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Cabeçalho da ordem */
+.client-history-modal .order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Cabeçalho clicável para colapsar */
+.client-history-modal .collapsible-header {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-radius: 6px;
+  padding: 8px;
+  margin: -8px;
+  margin-bottom: 8px;
+}
+
+.client-history-modal .collapsible-header:hover {
+  background-color: var(--color-bg-secondary);
+}
+
+.client-history-modal .order-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.client-history-modal .expand-icon {
+  transition: transform 0.2s ease;
+  color: var(--color-text-secondary);
+  font-size: 16px;
+}
+
+.client-history-modal .expand-icon.expanded {
+  transform: rotate(180deg);
+}
+
+.client-history-modal .order-id {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.client-history-modal .order-id strong {
+  color: var(--color-text-primary);
+  font-size: 16px;
+}
+
+.client-history-modal .status-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.client-history-modal .status-triagem {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.client-history-modal .status-lavagem {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.client-history-modal .status-costura {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.client-history-modal .status-finalizado {
+  background: #d4edda;
+  color: #155724;
+}
+
+.client-history-modal .status-pendente {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.client-history-modal .status-default {
+  background: var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+.client-history-modal .order-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+/* Conteúdo colapsável */
+.client-history-modal .collapsible-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  opacity: 0;
+}
+
+.client-history-modal .collapsible-content.expanded {
+  max-height: 1000px;
+  opacity: 1;
+  transition: max-height 0.3s ease-in, opacity 0.2s ease-in 0.1s;
+}
+
+/* Detalhes da ordem - sempre visíveis */
+.client-history-modal .order-details {
+  padding-top: 8px;
+}
+
+.client-history-modal .detail-row {
+    width: calc(50% - 4px);
+}
+
+.client-history-modal .detail-row:last-child {
+  margin-bottom: 0;
+}
+
+.client-history-modal .detail-row .label {
+  color: var(--color-text-secondary);
+  margin-right: 10px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.client-history-modal .detail-row .value {
+  color: var(--color-text-primary);
+  font-size: 14px;
+}
+
+/* Informações de pagamento - dentro do conteúdo colapsável */
+.client-history-modal .collapsible-content .payment-info {
+  background: var(--color-bg-secondary);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 16px;
+  margin-top: 16px;
+}
+
+.client-history-modal .payment-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.client-history-modal .payment-row:last-child {
+  margin-bottom: 0;
+}
+
+.client-history-modal .payment-row .label {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.client-history-modal .payment-row .value {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.client-history-modal .payment-row .value.total {
+  color: var(--color-text-primary);
+}
+
+.client-history-modal .payment-row .value.advance {
+  color: var(--color-success);
+}
+
+.client-history-modal .payment-row .value.remaining {
+  color: red;
+}
+
+/* Informações de datas - dentro do conteúdo colapsável */
+.client-history-modal .collapsible-content .dates-info {
+  margin-bottom: 16px;
+}
+
+.client-history-modal .dates-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.client-history-modal .date-item {
+  text-align: center;
+  background: var(--color-bg-secondary);
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.client-history-modal .date-item .label {
+  display: block;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.client-history-modal .date-item .value {
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Justificativa de atraso - dentro do conteúdo colapsável */
+.client-history-modal .collapsible-content .delay-justification {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.client-history-modal .delay-justification .label {
+  display: block;
+  color: #856404;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.client-history-modal .delay-justification .value {
+  color: #856404;
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.4;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Scrollbar personalizado para o container de ordens */
+.client-history-modal .orders-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.client-history-modal .orders-container::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+  border-radius: 3px;
+}
+
+.client-history-modal .orders-container::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.client-history-modal .orders-container::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .client-history-modal .order-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .client-history-modal .order-id {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .client-history-modal .dates-row {
+    grid-template-columns: 1fr;
+  }
+
+  .client-history-modal .detail-row,
+  .client-history-modal .payment-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}

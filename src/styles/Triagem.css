@@ -9,10 +9,7 @@
     padding: 20px;
 }
 
-/* Card principal */
-.triagem-card {
-    padding: 24px;
-}
+
 
 /* Título */
 .triagem-title {
@@ -77,6 +74,12 @@
     margin-bottom: 16px;
 }
 
+/* Linha específica com Email, CEP, Logradouro e Número - controle de largura */
+.form-row-four-fields {
+    grid-template-columns: 1fr 150px 1fr 80px !important;
+    gap: 12px !important;
+}
+
 .form-row:last-child {
     margin-bottom: 0;
 }
@@ -87,6 +90,7 @@
     flex-direction: column;
     gap: 6px;
 }
+
 
 .form-label {
     color: var(--color-text-primary);
@@ -106,13 +110,20 @@
     border-radius: 6px;
     background-color: var(--color-bg-input);
     color: var(--color-text-primary);
-    font-size: 12px !important;
+    font-size: 14px !important;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
     outline: none;
 }
 
 .form-input::placeholder {
     color: var(--color-text-placeholder);
+    font-size: 14px !important;
+}
+
+/* Aumentar especificidade para sobrescrever outros estilos */
+.triagem-form .form-input::placeholder {
+    color: var(--color-text-placeholder);
+    font-size: 14px !important;
 }
 
 .form-input:focus,
@@ -137,6 +148,13 @@
 
 .phone-input .PhoneInputInput::placeholder {
     color: var(--color-text-placeholder);
+    font-size: 14px !important;
+}
+
+/* Aumentar especificidade para sobrescrever outros estilos */
+.triagem-form .phone-input .PhoneInputInput::placeholder {
+    color: var(--color-text-placeholder);
+    font-size: 14px !important;
 }
 
 .phone-input .PhoneInputInput:focus {
@@ -171,6 +189,24 @@
 }
 
 .cep-loading i {
+    font-size: 14px;
+}
+
+/* Container do CPF */
+.cpf-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.cpf-loading {
+    position: absolute;
+    right: 10px;
+    color: var(--color-accent);
+    animation: spin 1s linear infinite;
+}
+
+.cpf-loading i {
     font-size: 14px;
 }
 
@@ -345,5 +381,12 @@
 }
 
 .date-picker-container .react-datepicker__input-container input::placeholder {
+    font-size: 14px !important;
+    color: var(--color-text-placeholder);
+}
+
+/* Aumentar especificidade para sobrescrever outros estilos */
+.triagem-form .date-picker-container .react-datepicker__input-container input::placeholder {
+    font-size: 14px !important;
     color: var(--color-text-placeholder);
 }
