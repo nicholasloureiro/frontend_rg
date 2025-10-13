@@ -607,8 +607,38 @@ const Triagem = () => {
                             <h3 className="section-title">Informações do Evento</h3>
 
                             <div className="form-row">
-                                {renderSelect('atendenteResponsavel', 'Atendente Responsável', opcoesAtendentes, true)}
-                                {renderSelect('origem', 'Origem', opcoesOrigem, true)}
+                                <div className="form-group">
+                                    <label htmlFor="atendenteResponsavel" className="form-label">
+                                        Atendente Responsável *
+                                    </label>
+                                    <CustomSelect
+                                        options={opcoesAtendentes}
+                                        value={formData.atendenteResponsavel}
+                                        onChange={(value) => handleInputChange('atendenteResponsavel', value)}
+                                        placeholder="Selecione um atendente"
+                                        disabled={loadingAtendentes}
+                                        error={errors.atendenteResponsavel}
+                                    />
+                                    {errors.atendenteResponsavel && (
+                                        <span className="error-message">{errors.atendenteResponsavel}</span>
+                                    )}
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="origem" className="form-label">
+                                        Origem *
+                                    </label>
+                                    <CustomSelect
+                                        options={opcoesOrigem}
+                                        value={formData.origem}
+                                        onChange={(value) => handleInputChange('origem', value)}
+                                        placeholder="Selecione a origem"
+                                        disabled={false}
+                                        error={errors.origem}
+                                    />
+                                    {errors.origem && (
+                                        <span className="error-message">{errors.origem}</span>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="form-row">
@@ -643,7 +673,22 @@ const Triagem = () => {
                                         Criar novo evento
                                     </small>
                                 </div>
-                                {renderSelect('papelNoEvento', 'Papel no Evento *', opcoesPapel)}
+                                <div className="form-group">
+                                    <label htmlFor="papelNoEvento" className="form-label">
+                                        Papel no Evento *
+                                    </label>
+                                    <CustomSelect
+                                        options={opcoesPapel}
+                                        value={formData.papelNoEvento}
+                                        onChange={(value) => handleInputChange('papelNoEvento', value)}
+                                        placeholder="Selecione o papel"
+                                        disabled={false}
+                                        error={errors.papelNoEvento}
+                                    />
+                                    {errors.papelNoEvento && (
+                                        <span className="error-message">{errors.papelNoEvento}</span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                         <Button
