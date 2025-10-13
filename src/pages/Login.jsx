@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import '../styles/Login.css';
@@ -34,6 +34,22 @@ const Login = () => {
   });
   const [registerLoading, setRegisterLoading] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showLogoCard, setShowLogoCard] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setShowLogoCard(window.innerWidth < 1024);
+    };
+
+    // Define o estado inicial
+    handleResize();
+
+    // Adiciona listener de resize
+    window.addEventListener('resize', handleResize);
+
+    // Limpa o listener quando o componente desmonta
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -132,13 +148,18 @@ const Login = () => {
           <h2 className="login-highlight">Faça login para continuar</h2>
           <p className="login-desc">Acesse a plataforma exclusiva de gerenciamento da Roupas de Gala. Organize clientes, pedidos e acervos com praticidade, segurança e sofisticação.</p>
           <div className="login-left-content-labels d-flex flex-column gap-4 mt-4">
-            <span className="login-left-content-label"><i className="bi bi-people" style={{ color: '#10a3ff', padding: 7 , borderRadius: 100, backgroundColor: '#8f8f8faa'}}></i> Gestão de clientes e pedidos</span>
-            <span className="login-left-content-label"><i className="bi bi-shield-check" style={{ color: '#10a3ff', padding: 7 , borderRadius: 100, backgroundColor: '#8f8f8faa'}}></i> Controle de ternos e acessórios</span>
-            <span className="login-left-content-label"><i className="bi bi-star" style={{ color: '#10a3ff', padding: 7 , borderRadius: 100, backgroundColor: '#8f8f8faa'}}></i> Elegância e sofisticação</span>
+            <span className="login-left-content-label"><i className="bi bi-people" style={{ color: '#10a3ff', padding: 7, borderRadius: 100, backgroundColor: '#8f8f8faa' }}></i> Gestão de clientes e pedidos</span>
+            <span className="login-left-content-label"><i className="bi bi-shield-check" style={{ color: '#10a3ff', padding: 7, borderRadius: 100, backgroundColor: '#8f8f8faa' }}></i> Controle de ternos e acessórios</span>
+            <span className="login-left-content-label"><i className="bi bi-star" style={{ color: '#10a3ff', padding: 7, borderRadius: 100, backgroundColor: '#8f8f8faa' }}></i> Elegância e sofisticação</span>
           </div>
         </div>
       </div>
       <div className="login-card">
+        {showLogoCard && (
+          <div className="login-card-logo-container mb-5 d-flex justify-content-center">
+            <img src={logo} alt="Logo" className="login-card-logo" style={{ width: 100, height: 100, objectFit: 'cover' }} />
+          </div>
+        )}
         <div className="login-header">
           <h1>Login</h1>
           <p>Entre com suas credenciais para acessar sua conta</p>
@@ -188,7 +209,7 @@ const Login = () => {
 
           <div className='login-button-container w-100 mb-2 mt-3' style={{ display: 'flex', justifyContent: 'flex-end' }}>
 
-            <Button text="Entrar" onClick={handleSubmit} disabled={isLoading}/>
+            <Button text="Entrar" onClick={handleSubmit} disabled={isLoading} />
           </div>
           {errorMessage && (
             <div className="error-message-login mt-3">
