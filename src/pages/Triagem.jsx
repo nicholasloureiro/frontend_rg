@@ -112,12 +112,17 @@ const Triagem = () => {
 
     const opcoesOrigem = [
         { value: '', label: 'Selecione a origem' },
-        { value: 'site', label: 'Site' },
-        { value: 'instagram', label: 'Instagram' },
-        { value: 'facebook', label: 'Facebook' },
-        { value: 'google', label: 'Google' },
-        { value: 'indicacao', label: 'Indicação' },
-        { value: 'outro', label: 'Outro' }
+        { value: 'noivo', label: 'Noivo' },
+        { value: 'padrinho', label: 'Padrinho' },
+        { value: 'pais_noivos', label: 'Pais Noivos' },
+        { value: 'pajem', label: 'Pajem' },
+        { value: 'convidados', label: 'Convidados' },
+        { value: 'formando', label: 'Formando' },
+        { value: 'pais_formando', label: 'Pais Formando' },
+        { value: 'principe', label: 'Príncipe' },
+        { value: 'pais_debutante', label: 'Pais Debutante' },
+        { value: 'uso_diario', label: 'Uso Diário' },
+        { value: 'outro', label: 'Outros' }
     ];
 
     const opcoesPapel = [
@@ -179,28 +184,18 @@ const Triagem = () => {
     const validarCampos = () => {
         const novosErros = {};
 
+        // Apenas o nome do cliente é obrigatório
         if (!formData.nomeCliente.trim()) {
             novosErros.nomeCliente = 'Nome do cliente é obrigatório';
         }
 
-        if (!formData.telefone) {
-            novosErros.telefone = 'Telefone é obrigatório';
-        }
-
+        // Validações opcionais (só validam se o campo estiver preenchido)
         if (formData.cpf && !cpfValido) {
             novosErros.cpf = 'CPF inválido';
         }
 
         if (formData.email && !emailValido) {
             novosErros.email = 'Email inválido';
-        }
-
-        if (!formData.atendenteResponsavel || formData.atendenteResponsavel === '') {
-            novosErros.atendenteResponsavel = 'Atendente responsável é obrigatório';
-        }
-
-        if (!formData.origem) {
-            novosErros.origem = 'Origem é obrigatória';
         }
 
         setErrors(novosErros);
@@ -218,20 +213,20 @@ const Triagem = () => {
     const prepararDadosParaAPI = () => {
         return {
             cliente_nome: formData.nomeCliente.toUpperCase(),
-            telefone: formData.telefone ? formData.telefone.replace(/\D/g, '') : '',
-            email: formData.email,
-            cpf: removerMascara(formData.cpf),
+            telefone: formData.telefone ? formData.telefone.replace(/\D/g, '') : null,
+            email: formData.email || null,
+            cpf: formData.cpf ? removerMascara(formData.cpf) : null,
             atendente_id: formData.atendenteResponsavel ? parseInt(formData.atendenteResponsavel) : null,
-            origem: formData.origem.toUpperCase(),
+            origem: formData.origem ? formData.origem.toUpperCase() : null,
             event_id: formData.event_id ? parseInt(formData.event_id) : null,
-            papel_evento: formData.papelNoEvento.toUpperCase(),
+            papel_evento: formData.papelNoEvento ? formData.papelNoEvento.toUpperCase() : null,
             endereco: {
-                cep: removerMascara(formData.cep),
-                rua: formData.rua.toUpperCase(),
-                numero: formData.numero,
-                complemento: formData.complemento.toUpperCase(),
-                bairro: formData.bairro.toUpperCase(),
-                cidade: formData.cidade.toUpperCase()
+                cep: formData.cep ? removerMascara(formData.cep) : null,
+                rua: formData.rua ? formData.rua.toUpperCase() : null,
+                numero: formData.numero || null,
+                complemento: formData.complemento ? formData.complemento.toUpperCase() : null,
+                bairro: formData.bairro ? formData.bairro.toUpperCase() : null,
+                cidade: formData.cidade ? formData.cidade.toUpperCase() : null
             }
         };
     };
@@ -510,7 +505,7 @@ const Triagem = () => {
 
                                 <div className="form-group">
                                     <label htmlFor="telefone" className="form-label">
-                                        Telefone *
+                                        Telefone
                                     </label>
                                     <PhoneInput
                                         international
@@ -530,7 +525,7 @@ const Triagem = () => {
                             <div className="form-row form-row-four-fields">
                                 <div className="form-group">
                                     <label htmlFor="email" className="form-label">
-                                        E-mail *
+                                        E-mail
                                     </label>
                                     <input
                                         type="email"
@@ -552,7 +547,7 @@ const Triagem = () => {
 
                                 <div className="form-group cep-field">
                                     <label htmlFor="cep" className="form-label">
-                                        CEP*
+                                        CEP
                                     </label>
                                     <div className="cep-container">
                                         <input
@@ -573,11 +568,11 @@ const Triagem = () => {
                                     </div>
                                 </div>
 
-                                {renderInput('rua', 'Logradouro*', 'text', '')}
+                                {renderInput('rua', 'Logradouro', 'text', '')}
 
                                 <div className="form-group numero-field">
                                     <label htmlFor="numero" className="form-label">
-                                        Número *
+                                        Número
                                     </label>
                                     <input
                                         type="text"
@@ -597,8 +592,8 @@ const Triagem = () => {
                             {/* Quarta linha: Complemento, Bairro, Cidade */}
                             <div className="form-row">
                                 {renderInput('complemento', 'Complemento', 'text', '')}
-                                {renderInput('bairro', 'Bairro*', 'text', '')}
-                                {renderInput('cidade', 'Cidade*', 'text', '')}
+                                {renderInput('bairro', 'Bairro', 'text', '')}
+                                {renderInput('cidade', 'Cidade', 'text', '')}
                             </div>
                         </div>
 
@@ -609,7 +604,7 @@ const Triagem = () => {
                             <div className="form-row">
                                 <div className="form-group">
                                     <label htmlFor="atendenteResponsavel" className="form-label">
-                                        Atendente Responsável *
+                                        Atendente Responsável
                                     </label>
                                     <CustomSelect
                                         options={opcoesAtendentes}
@@ -625,7 +620,7 @@ const Triagem = () => {
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="origem" className="form-label">
-                                        Origem *
+                                        Origem
                                     </label>
                                     <CustomSelect
                                         options={opcoesOrigem}
@@ -644,7 +639,7 @@ const Triagem = () => {
                             <div className="form-row">
                                 <div className="form-group">
                                     <label htmlFor="event_id" className="form-label">
-                                        Evento *
+                                        Evento
                                     </label>
                                     <CustomSelect
                                         options={opcoesEventos}
@@ -675,7 +670,7 @@ const Triagem = () => {
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="papelNoEvento" className="form-label">
-                                        Papel no Evento *
+                                        Papel no Evento
                                     </label>
                                     <CustomSelect
                                         options={opcoesPapel}

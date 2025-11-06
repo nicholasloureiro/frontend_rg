@@ -34,23 +34,46 @@ function AppContent() {
   // Carrega os dados do usuário quando a aplicação inicia
   useEffect(() => {
     const initializeApp = async () => {
+      console.log('🚀 [APP INIT] Iniciando aplicação:', {
+        timestamp: new Date().toISOString(),
+        pathname: location.pathname,
+        isAuthenticated: isAuthenticated,
+        isLoading: isLoading
+      });
+      
       // Verifica se há tokens no localStorage
       const accessToken = localStorage.getItem('accessToken');
       const refreshToken = localStorage.getItem('refreshToken');
       
+      console.log('🔑 [APP INIT] Verificando tokens:', {
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken,
+        accessTokenLength: accessToken?.length || 0,
+        refreshTokenLength: refreshToken?.length || 0,
+        isAuthenticated: isAuthenticated
+      });
+      
       if (accessToken && refreshToken && !isAuthenticated) {
         try {
-          console.log('Carregando dados do usuário...');
+          console.log('👤 [APP INIT] Carregando dados do usuário...');
           await getCurrentUser();
-          console.log('Dados do usuário carregados com sucesso');
+          console.log('✅ [APP INIT] Dados do usuário carregados com sucesso');
         } catch (error) {
-          console.error('Erro ao carregar dados do usuário:', error);
+          console.error('❌ [APP INIT] Erro ao carregar dados do usuário:', {
+            error: error.message,
+            stack: error.stack,
+            timestamp: new Date().toISOString()
+          });
+          
+          console.log('🧹 [APP INIT] Limpando tokens inválidos e redirecionando...');
           // Se falhar ao carregar dados do usuário, limpa os tokens inválidos
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
           localStorage.removeItem('userData');
           navigate('/login', { replace: true });
         }
+      } else {
+        console.log('ℹ️ [APP INIT] Não há tokens ou usuário já autenticado - pulando inicialização');
       }
     };
 

@@ -46,6 +46,7 @@ const OrdemServico = () => {
         itensVendidos: [],
 
         // Paletó
+        incluirPaleto: false,
         paletoNumero: '',
         paletoCor: '',
         paletoManga: '',
@@ -55,15 +56,15 @@ const OrdemServico = () => {
         paletoExtras: '',
 
         // Camisa
+        incluirCamisa: false,
         camisaNumero: '',
         camisaCor: '',
         camisaManga: '',
         camisaMarca: '',
-        camisaAjuste: false,
-        camisaAjusteValor: '',
         camisaExtras: '',
 
         // Calça
+        incluirCalca: false,
         calcaNumero: '',
         calcaCor: '',
         calcaCintura: '',
@@ -86,10 +87,10 @@ const OrdemServico = () => {
         gravata: false,
         gravataNumero: '',
         gravataCor: '',
-        gravataMarca: '',
         cinto: false,
         cintoNumero: '',
         cintoCor: '',
+        cintoComprimento: '',
         cintoMarca: '',
         sapato: false,
         sapatoNumero: '',
@@ -104,6 +105,7 @@ const OrdemServico = () => {
         dataEvento: '',
         ocasiao: '',
         tipoPagamento: 'Aluguel',
+        formaPagamento: '',
         total: '',
         sinal: '',
         restante: '',
@@ -128,6 +130,7 @@ const OrdemServico = () => {
         itensVendidos: [],
 
         // Paletó
+        incluirPaleto: false,
         paletoNumero: '',
         paletoCor: '',
         paletoManga: '',
@@ -137,15 +140,15 @@ const OrdemServico = () => {
         paletoExtras: '',
 
         // Camisa
+        incluirCamisa: false,
         camisaNumero: '',
         camisaCor: '',
         camisaManga: '',
         camisaMarca: '',
-        camisaAjuste: false,
-        camisaAjusteValor: '',
         camisaExtras: '',
 
         // Calça
+        incluirCalca: false,
         calcaNumero: '',
         calcaCor: '',
         calcaCintura: '',
@@ -168,10 +171,10 @@ const OrdemServico = () => {
         gravata: false,
         gravataNumero: '',
         gravataCor: '',
-        gravataMarca: '',
         cinto: false,
         cintoNumero: '',
         cintoCor: '',
+        cintoComprimento: '',
         cintoMarca: '',
         sapato: false,
         sapatoNumero: '',
@@ -186,6 +189,7 @@ const OrdemServico = () => {
         dataEvento: '',
         ocasiao: '',
         tipoPagamento: 'Aluguel',
+        formaPagamento: '',
         total: '',
         sinal: '',
         restante: '',
@@ -253,12 +257,12 @@ const OrdemServico = () => {
             // Para campos obrigatórios simples
             if (['nome', 'telefone', 'email', 'cpf', 'cep', 'rua', 'numero', 'bairro', 'cidade', 
                  'paletoNumero', 'paletoCor', 'paletoManga', 'camisaNumero', 'camisaCor', 'camisaManga',
-                 'calcaNumero', 'calcaCor', 'calcaCintura', 'calcaPerna', 'dataPedido', 'dataEvento', 'dataRetirada'].includes(field)) {
+                 'calcaNumero', 'calcaCor', 'calcaCintura', 'calcaPerna', 'cintoComprimento', 'dataPedido', 'dataEvento', 'dataRetirada'].includes(field)) {
                 shouldClear = value.trim() !== '';
             }
             
             // Para campos de ajuste (só limpar se checkbox estiver marcado)
-            if (['paletoAjusteValor', 'camisaAjusteValor', 'calcaAjusteCosValor', 'calcaAjusteComprimentoValor'].includes(field)) {
+            if (['paletoAjusteValor', 'calcaAjusteCosValor', 'calcaAjusteComprimentoValor'].includes(field)) {
                 const checkboxField = field.replace('Valor', '');
                 shouldClear = inputValues[checkboxField] && value.trim() !== '';
             }
@@ -278,6 +282,11 @@ const OrdemServico = () => {
             // Para campos de pagamento
             if (['total', 'sinal'].includes(field)) {
                 shouldClear = parseFloat(value) > 0;
+            }
+            
+            // Para forma de pagamento
+            if (field === 'formaPagamento') {
+                shouldClear = value.trim() !== '';
             }
             
             if (shouldClear) {
@@ -405,14 +414,13 @@ const OrdemServico = () => {
             // Mapear campos relacionados aos checkboxes
             const relatedFields = {
                 paletoAjuste: ['paletoAjusteValor'],
-                camisaAjuste: ['camisaAjusteValor'],
                 calcaAjusteCos: ['calcaAjusteCosValor'],
                 calcaAjusteComprimento: ['calcaAjusteComprimentoValor'],
                 suspensorio: ['suspensorioCor'],
                 passante: ['passanteCor'],
                 lenco: ['lencoCor'],
                 gravata: ['gravataCor', 'gravataDescricao'],
-                cinto: ['cintoCor'],
+                cinto: ['cintoCor', 'cintoComprimento'],
                 sapato: ['sapatoCor', 'sapatoDescricao'],
                 colete: ['coleteCor', 'coleteDescricao']
             };
@@ -527,27 +535,27 @@ const OrdemServico = () => {
         setSelectedOrder(null);
         setFormData({
             nome: '', telefone: '', email: '', cpf: '', cep: '', rua: '', numero: '', bairro: '', complemento: '', cidade: '',
-            paletoNumero: '', paletoCor: '', paletoManga: '', paletoMarca: '', paletoAjuste: false, paletoAjusteValor: '', paletoExtras: '',
-            camisaNumero: '', camisaCor: '', camisaManga: '', camisaMarca: '', camisaAjuste: false, camisaAjusteValor: '', camisaExtras: '',
-            calcaNumero: '', calcaCor: '', calcaCintura: '', calcaPerna: '', calcaMarca: '', calcaAjusteCos: false,
+            incluirPaleto: false, paletoNumero: '', paletoCor: '', paletoManga: '', paletoMarca: '', paletoAjuste: false, paletoAjusteValor: '', paletoExtras: '',
+            incluirCamisa: false, camisaNumero: '', camisaCor: '', camisaManga: '', camisaMarca: '', camisaAjuste: false, camisaAjusteValor: '', camisaExtras: '',
+            incluirCalca: false, calcaNumero: '', calcaCor: '', calcaCintura: '', calcaPerna: '', calcaMarca: '', calcaAjusteCos: false,
             calcaAjusteComprimento: false,
             calcaAjusteCosValor: '',
             calcaAjusteComprimentoValor: '',
             calcaExtras: '',
             suspensorio: false, suspensorioCor: '', passante: false, passanteCor: '', passanteExtensor: false, lenco: false, lencoCor: '', gravata: false, gravataNumero: '', gravataCor: '', gravataMarca: '', cinto: false, cintoNumero: '', cintoCor: '', cintoMarca: '', sapato: false, sapatoNumero: '', sapatoCor: '', sapatoMarca: '', colete: false, coleteNumero: '', coleteCor: '',
-            dataPedido: '', dataEvento: '', ocasiao: '', tipoPagamento: 'Aluguel', total: '', sinal: '', restante: '', dataRetirada: ''
+            dataPedido: '', dataEvento: '', ocasiao: '', tipoPagamento: 'Aluguel', formaPagamento: '', total: '', sinal: '', restante: '', dataRetirada: ''
         });
         setInputValues({
             nome: '', telefone: '', email: '', cpf: '', cep: '', rua: '', numero: '', bairro: '', complemento: '', cidade: '',
-            paletoNumero: '', paletoCor: '', paletoManga: '', paletoMarca: '', paletoAjuste: false, paletoAjusteValor: '', paletoExtras: '',
-            camisaNumero: '', camisaCor: '', camisaManga: '', camisaMarca: '', camisaAjuste: false, camisaAjusteValor: '', camisaExtras: '',
-            calcaNumero: '', calcaCor: '', calcaCintura: '', calcaPerna: '', calcaMarca: '', calcaAjusteCos: false,
+            incluirPaleto: false, paletoNumero: '', paletoCor: '', paletoManga: '', paletoMarca: '', paletoAjuste: false, paletoAjusteValor: '', paletoExtras: '',
+            incluirCamisa: false, camisaNumero: '', camisaCor: '', camisaManga: '', camisaMarca: '', camisaAjuste: false, camisaAjusteValor: '', camisaExtras: '',
+            incluirCalca: false, calcaNumero: '', calcaCor: '', calcaCintura: '', calcaPerna: '', calcaMarca: '', calcaAjusteCos: false,
             calcaAjusteComprimento: false,
             calcaAjusteCosValor: '',
             calcaAjusteComprimentoValor: '',
             calcaExtras: '',
             suspensorio: false, suspensorioCor: '', passante: false, passanteCor: '', passanteExtensor: false, lenco: false, lencoCor: '', gravata: false, gravataNumero: '', gravataCor: '', gravataMarca: '', cinto: false, cintoNumero: '', cintoCor: '', cintoMarca: '', sapato: false, sapatoNumero: '', sapatoCor: '', sapatoMarca: '', colete: false, coleteNumero: '', coleteCor: '',
-            dataPedido: '', dataEvento: '', ocasiao: '', tipoPagamento: 'Aluguel', total: '', sinal: '', restante: '', dataRetirada: ''
+            dataPedido: '', dataEvento: '', ocasiao: '', tipoPagamento: 'Aluguel', formaPagamento: '', total: '', sinal: '', restante: '', dataRetirada: ''
         });
         setCurrentStep(0);
         setShowForm(true);
@@ -638,6 +646,7 @@ const OrdemServico = () => {
             itensVendidos,
 
             // Paletó
+            incluirPaleto: !!paleto.tipo,
             paletoNumero: paleto.numero || '',
             paletoCor: paleto.cor || '',
             paletoManga: paleto.manga || '',
@@ -647,15 +656,15 @@ const OrdemServico = () => {
             paletoExtras: paleto.extras || '',
 
             // Camisa
+            incluirCamisa: !!camisa.tipo,
             camisaNumero: camisa.numero || '',
             camisaCor: camisa.cor || '',
             camisaManga: camisa.manga || '',
             camisaMarca: camisa.marca ? String(camisa.marca) : '',
-            camisaAjuste: !!(camisa.ajuste && String(camisa.ajuste).trim() !== ''),
-            camisaAjusteValor: camisa.ajuste ? String(camisa.ajuste) : '',
             camisaExtras: camisa.extras || '',
 
             // Calça
+            incluirCalca: !!calca.tipo,
             calcaNumero: calca.numero || '',
             calcaCor: calca.cor || '',
             calcaCintura: calca.cintura || '',
@@ -678,9 +687,9 @@ const OrdemServico = () => {
             gravata: !!gravata.tipo,
             gravataDescricao: gravata.descricao || '',
             gravataCor: gravata.cor || '',
-            gravataMarca: gravata.marca ? String(gravata.marca) : '',
             cinto: !!cinto.tipo,
             cintoCor: cinto.cor || '',
+            cintoComprimento: cinto.comprimento || '',
             cintoMarca: cinto.marca ? String(cinto.marca) : '',
             sapato: !!sapato.tipo,
             sapatoDescricao: sapato.descricao || '',
@@ -697,6 +706,7 @@ const OrdemServico = () => {
             dataEvento: os.data_evento || order.event_date || '',
             ocasiao: os.ocasiao || order.occasion || '',
             tipoPagamento: modalidade,
+            formaPagamento: os.forma_pagamento || pagamento.forma_pagamento || '',
             total: (pagamento.total ?? order.total_value ?? '') !== '' ? String(pagamento.total ?? order.total_value) : '',
             sinal: (pagamento.sinal ?? order.advance_payment ?? '') !== '' ? String(pagamento.sinal ?? order.advance_payment) : '',
             restante: (pagamento.restante ?? order.remaining_payment ?? '') !== '' ? String(pagamento.restante ?? order.remaining_payment) : '',
@@ -737,7 +747,7 @@ const OrdemServico = () => {
                     ocasiao: formData.ocasiao,
                     modalidade: formData.tipoPagamento,
                     itens: [
-                        {
+                        ...(formData.incluirPaleto ? [{
                             tipo: "paleto",
                             numero: formData.paletoNumero,
                             cor: formData.paletoCor,
@@ -746,18 +756,17 @@ const OrdemServico = () => {
                             ajuste: formData.paletoAjuste ? formData.paletoAjusteValor : "",
                             extras: formData.paletoExtras,
                             venda: getItensVendidos().includes('paleto')
-                        },
-                        {
+                        }] : []),
+                        ...(formData.incluirCamisa ? [{
                             tipo: "camisa",
                             numero: formData.camisaNumero,
                             cor: formData.camisaCor,
                             manga: formData.camisaManga,
                             marca: formData.camisaMarca,
-                            ajuste: formData.camisaAjuste ? formData.camisaAjusteValor : "",
                             extras: formData.camisaExtras,
                             venda: getItensVendidos().includes('camisa')
-                        },
-                        {
+                        }] : []),
+                        ...(formData.incluirCalca ? [{
                             tipo: "calca",
                             numero: formData.calcaNumero,
                             cor: formData.calcaCor,
@@ -768,7 +777,7 @@ const OrdemServico = () => {
                             ajuste_comprimento: formData.calcaAjusteComprimento ? formData.calcaAjusteComprimentoValor : "",
                             extras: formData.calcaExtras,
                             venda: getItensVendidos().includes('calca')
-                        }
+                        }] : [])
                     ],
                     acessorios: [
                         ...(formData.suspensorio ? [{
@@ -791,12 +800,12 @@ const OrdemServico = () => {
                             tipo: "gravata",
                             cor: formData.gravataCor,
                             descricao: formData.gravataDescricao,
-                            marca: formData.gravataMarca,
                             venda: getItensVendidos().includes('gravata')
                         }] : []),
                         ...(formData.cinto ? [{
                             tipo: "cinto",
                             cor: formData.cintoCor,
+                            comprimento: formData.cintoComprimento,
                             marca: formData.cintoMarca,
                             venda: getItensVendidos().includes('cinto')
                         }] : []),
@@ -818,7 +827,8 @@ const OrdemServico = () => {
                     pagamento: {
                         total: parseFloat(formData.total) || 0,
                         sinal: parseFloat(formData.sinal) || 0,
-                        restante: parseFloat(formData.restante) || 0
+                        restante: parseFloat(formData.restante) || 0,
+                        forma_pagamento: formData.formaPagamento
                     }
                 },
                 cliente: {
@@ -912,6 +922,9 @@ const OrdemServico = () => {
                        inputValues.cidade.trim() !== '';
             
             case 1: // Paletó
+                // Se não incluir paletó, step é válido
+                if (!inputValues.incluirPaleto) return true;
+                
                 const paletoBaseValid = inputValues.paletoNumero.trim() !== '' && 
                        inputValues.paletoCor.trim() !== '' && 
                        inputValues.paletoManga.trim() !== '';
@@ -919,13 +932,18 @@ const OrdemServico = () => {
                 return paletoBaseValid && paletoAjusteValid;
             
             case 2: // Camisa
+                // Se não incluir camisa, step é válido
+                if (!inputValues.incluirCamisa) return true;
+                
                 const camisaBaseValid = inputValues.camisaNumero.trim() !== '' && 
                        inputValues.camisaCor.trim() !== '' && 
                        inputValues.camisaManga.trim() !== '';
-                const camisaAjusteValid = !inputValues.camisaAjuste || inputValues.camisaAjusteValor.trim() !== '';
-                return camisaBaseValid && camisaAjusteValid;
+                return camisaBaseValid;
             
             case 3: // Calça
+                // Se não incluir calça, step é válido
+                if (!inputValues.incluirCalca) return true;
+                
                 const calcaBaseValid = inputValues.calcaNumero.trim() !== '' && 
                        inputValues.calcaCor.trim() !== '' && 
                        inputValues.calcaCintura.trim() !== '' && 
@@ -968,6 +986,7 @@ const OrdemServico = () => {
                 const pagamentoBaseValid = inputValues.dataPedido.trim() !== '' && 
                        inputValues.dataEvento.trim() !== '' && 
                        inputValues.dataRetirada.trim() !== '' && 
+                       inputValues.formaPagamento.trim() !== '' &&
                        parseFloat(inputValues.total) > 0 && 
                        inputValues.sinal.trim() !== '';
                 
@@ -1009,37 +1028,43 @@ const OrdemServico = () => {
                 break;
                 
             case 1: // Paletó
-                if (!inputValues.paletoNumero.trim()) errors.paletoNumero = 'Número é obrigatório';
-                if (!inputValues.paletoCor.trim()) errors.paletoCor = 'Cor é obrigatória';
-                if (!inputValues.paletoManga.trim()) errors.paletoManga = 'Manga é obrigatória';
-                if (inputValues.paletoAjuste && !inputValues.paletoAjusteValor.trim()) {
-                    errors.paletoAjusteValor = 'Ajuste é obrigatório quando marcado';
+                // Só validar se incluir paletó estiver marcado
+                if (inputValues.incluirPaleto) {
+                    if (!inputValues.paletoNumero.trim()) errors.paletoNumero = 'Número é obrigatório';
+                    if (!inputValues.paletoCor.trim()) errors.paletoCor = 'Cor é obrigatória';
+                    if (!inputValues.paletoManga.trim()) errors.paletoManga = 'Manga é obrigatória';
+                    if (inputValues.paletoAjuste && !inputValues.paletoAjusteValor.trim()) {
+                        errors.paletoAjusteValor = 'Ajuste é obrigatório quando marcado';
+                    }
+                    if (!inputValues.paletoMarca.trim()) errors.paletoMarca = 'Marca é obrigatória';
                 }
-                if (!inputValues.paletoMarca.trim()) errors.paletoMarca = 'Marca é obrigatória';
                 break;
                 
             case 2: // Camisa
-                if (!inputValues.camisaNumero.trim()) errors.camisaNumero = 'Número é obrigatório';
-                if (!inputValues.camisaCor.trim()) errors.camisaCor = 'Cor é obrigatória';
-                if (!inputValues.camisaManga.trim()) errors.camisaManga = 'Manga é obrigatória';
-                if (inputValues.camisaAjuste && !inputValues.camisaAjusteValor.trim()) {
-                    errors.camisaAjusteValor = 'Ajuste é obrigatório quando marcado';
+                // Só validar se incluir camisa estiver marcado
+                if (inputValues.incluirCamisa) {
+                    if (!inputValues.camisaNumero.trim()) errors.camisaNumero = 'Número é obrigatório';
+                    if (!inputValues.camisaCor.trim()) errors.camisaCor = 'Cor é obrigatória';
+                    if (!inputValues.camisaManga.trim()) errors.camisaManga = 'Manga é obrigatória';
+                    if (!inputValues.camisaMarca.trim()) errors.camisaMarca = 'Marca é obrigatória';
                 }
-                if (!inputValues.camisaMarca.trim()) errors.camisaMarca = 'Marca é obrigatória';
                 break;
                 
             case 3: // Calça
-                if (!inputValues.calcaNumero.trim()) errors.calcaNumero = 'Número é obrigatório';
-                if (!inputValues.calcaCor.trim()) errors.calcaCor = 'Cor é obrigatória';
-                if (!inputValues.calcaCintura.trim()) errors.calcaCintura = 'Cós é obrigatório';
-                if (!inputValues.calcaPerna.trim()) errors.calcaPerna = 'Comprimento é obrigatório';
-                if (inputValues.calcaAjusteCos && !inputValues.calcaAjusteCosValor.trim()) {
-                    errors.calcaAjusteCosValor = 'Ajuste do cós é obrigatório quando marcado';
+                // Só validar se incluir calça estiver marcado
+                if (inputValues.incluirCalca) {
+                    if (!inputValues.calcaNumero.trim()) errors.calcaNumero = 'Número é obrigatório';
+                    if (!inputValues.calcaCor.trim()) errors.calcaCor = 'Cor é obrigatória';
+                    if (!inputValues.calcaCintura.trim()) errors.calcaCintura = 'Cós é obrigatório';
+                    if (!inputValues.calcaPerna.trim()) errors.calcaPerna = 'Comprimento é obrigatório';
+                    if (inputValues.calcaAjusteCos && !inputValues.calcaAjusteCosValor.trim()) {
+                        errors.calcaAjusteCosValor = 'Ajuste do cós é obrigatório quando marcado';
+                    }
+                    if (inputValues.calcaAjusteComprimento && !inputValues.calcaAjusteComprimentoValor.trim()) {
+                        errors.calcaAjusteComprimentoValor = 'Ajuste do comprimento é obrigatório quando marcado';
+                    }
+                    if (!inputValues.calcaMarca.trim()) errors.calcaMarca = 'Marca é obrigatória';
                 }
-                if (inputValues.calcaAjusteComprimento && !inputValues.calcaAjusteComprimentoValor.trim()) {
-                    errors.calcaAjusteComprimentoValor = 'Ajuste do comprimento é obrigatório quando marcado';
-                }
-                if (!inputValues.calcaMarca.trim()) errors.calcaMarca = 'Marca é obrigatória';
                 break;
                 
             case 4: // Acessórios
@@ -1057,6 +1082,7 @@ const OrdemServico = () => {
                 }
                 if (inputValues.cinto) {
                     if (!inputValues.cintoCor.trim()) errors.cintoCor = 'Cor do cinto é obrigatória';
+                    if (!inputValues.cintoComprimento.trim()) errors.cintoComprimento = 'Comprimento do cinto é obrigatório';
                 }
                 if (inputValues.sapato) {
                     if (!inputValues.sapatoCor.trim()) errors.sapatoCor = 'Cor do sapato é obrigatória';
@@ -1065,7 +1091,6 @@ const OrdemServico = () => {
                 if (inputValues.colete) {
                     if (!inputValues.coleteCor.trim()) errors.coleteCor = 'Cor do colete é obrigatória';
                 }
-                if (inputValues.gravata && !inputValues.gravataMarca.trim()) errors.gravataMarca = 'Marca da gravata é obrigatória';
                 if (inputValues.cinto && !inputValues.cintoMarca.trim()) errors.cintoMarca = 'Marca do cinto é obrigatória';
                 if (inputValues.sapato && !inputValues.sapatoMarca.trim()) errors.sapatoMarca = 'Marca do sapato é obrigatória';
                 break;
@@ -1074,6 +1099,7 @@ const OrdemServico = () => {
                 if (!inputValues.dataPedido.trim()) errors.dataPedido = 'Data do pedido é obrigatória';
                 if (!inputValues.dataEvento.trim()) errors.dataEvento = 'Data do evento é obrigatória';
                 if (!inputValues.dataRetirada.trim()) errors.dataRetirada = 'Data da retirada é obrigatória';
+                if (!inputValues.formaPagamento.trim()) errors.formaPagamento = 'Forma de pagamento é obrigatória';
                 
                 // Validar que a data de retirada não pode ser maior que a data do evento
                 if (inputValues.dataEvento.trim() && inputValues.dataRetirada.trim()) {
@@ -1272,12 +1298,26 @@ const OrdemServico = () => {
                 return (
                     <div className="step-content">
                         <h3>Detalhes do Paletó</h3>
+                        
+                        {/* Checkbox para incluir paletó */}
+                        <div className="form-group" style={{ marginBottom: '20px' }}>
+                            <label className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={inputValues.incluirPaleto}
+                                    onChange={(e) => handleCheckboxChange('incluirPaleto', e.target.checked)}
+                                />
+                                <span>Incluir Paletó</span>
+                            </label>
+                        </div>
+                        
                         <div className="form-grid">
                             <div className="form-group">
                                 <label>Número <span style={{ color: 'red' }}>*</span></label>
                                 <CustomSelect
                                     value={inputValues.paletoNumero}
                                     onChange={(value) => handleSelectChange('paletoNumero', value)}
+                                    disabled={!inputValues.incluirPaleto}
                                     options={[
                                         { value: '', label: 'Selecione o número' },
                                         { value: '1', label: '1' },
@@ -1341,7 +1381,7 @@ const OrdemServico = () => {
                                         }))
                                     ]}
                                     placeholder="Selecione a cor"
-                                    disabled={loadingColors}
+                                    disabled={loadingColors || !inputValues.incluirPaleto}
                                     error={!!validationErrors.paletoCor}
                                 />
                                 {validationErrors.paletoCor && (
@@ -1418,6 +1458,7 @@ const OrdemServico = () => {
                                         { value: '80', label: '80' }
                                     ]}
                                     placeholder="Selecione a medida da manga"
+                                    disabled={!inputValues.incluirPaleto}
                                     error={!!validationErrors.paletoManga}
                                 />
                                 {validationErrors.paletoManga && (
@@ -1430,6 +1471,7 @@ const OrdemServico = () => {
                                         type="checkbox"
                                         checked={inputValues.paletoAjuste}
                                         onChange={(e) => handleCheckboxChange('paletoAjuste', e.target.checked)}
+                                        disabled={!inputValues.incluirPaleto}
                                         style={{ marginRight: '8px' }}
                                     />
                                     Ajuste (cm)
@@ -1440,7 +1482,7 @@ const OrdemServico = () => {
                                     onChange={(e) => handleInputChange('paletoAjusteValor', e.target.value)}
                                     onBlur={(e) => handleInputBlur('paletoAjusteValor', e.target.value)}
                                     placeholder="Ajuste em centímetros"
-                                    disabled={!inputValues.paletoAjuste}
+                                    disabled={!inputValues.paletoAjuste || !inputValues.incluirPaleto}
                                     className={validationErrors.paletoAjusteValor ? 'error' : ''}
                                 />
                                 {validationErrors.paletoAjusteValor && (
@@ -1460,7 +1502,7 @@ const OrdemServico = () => {
                                         }))
                                     ]}
                                     placeholder="Selecione uma marca"
-                                    disabled={loadingBrands}
+                                    disabled={loadingBrands || !inputValues.incluirPaleto}
                                     error={!!validationErrors.paletoMarca}
                                 />
                                 {validationErrors.paletoMarca && (
@@ -1475,6 +1517,7 @@ const OrdemServico = () => {
                                     onChange={(e) => handleInputChange('paletoExtras', e.target.value)}
                                     onBlur={(e) => handleInputBlur('paletoExtras', e.target.value)}
                                     placeholder="Observações extras"
+                                    disabled={!inputValues.incluirPaleto}
                                 />
                             </div>
                         </div>
@@ -1485,12 +1528,26 @@ const OrdemServico = () => {
                 return (
                     <div className="step-content">
                         <h3>Detalhes da Camisa</h3>
+                        
+                        {/* Checkbox para incluir camisa */}
+                        <div className="form-group" style={{ marginBottom: '20px' }}>
+                            <label className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={inputValues.incluirCamisa}
+                                    onChange={(e) => handleCheckboxChange('incluirCamisa', e.target.checked)}
+                                />
+                                <span>Incluir Camisa</span>
+                            </label>
+                        </div>
+                        
                         <div className="form-grid">
                             <div className="form-group">
                                 <label>Número <span style={{ color: 'red' }}>*</span></label>
                                 <CustomSelect
                                     value={inputValues.camisaNumero}
                                     onChange={(value) => handleSelectChange('camisaNumero', value)}
+                                    disabled={!inputValues.incluirCamisa}
                                     options={[
                                         { value: '', label: 'Selecione o número' },
                                         // Números de 1 ao 20
@@ -1548,7 +1605,7 @@ const OrdemServico = () => {
                                         }))
                                     ]}
                                     placeholder="Selecione a cor"
-                                    disabled={loadingColors}
+                                    disabled={loadingColors || !inputValues.incluirCamisa}
                                     error={!!validationErrors.camisaCor}
                                 />
                                 {validationErrors.camisaCor && (
@@ -1625,35 +1682,13 @@ const OrdemServico = () => {
                                         { value: '80', label: '80' }
                                     ]}
                                     placeholder="Selecione a medida da manga"
+                                    disabled={!inputValues.incluirCamisa}
                                     error={!!validationErrors.camisaManga}
                                 />
                                 {validationErrors.camisaManga && (
                                     <div className="error-message">{validationErrors.camisaManga}</div>
                                 )}
                             </div>              
-                            <div className="form-group">
-                                <label style={{ display: 'flex', alignItems: 'center' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={inputValues.camisaAjuste}
-                                        onChange={(e) => handleCheckboxChange('camisaAjuste', e.target.checked)}
-                                        style={{ marginRight: '8px' }}
-                                    />
-                                    Ajuste (cm)
-                                </label>
-                                <input
-                                    type="number"
-                                    value={inputValues.camisaAjusteValor}
-                                    onChange={(e) => handleInputChange('camisaAjusteValor', e.target.value)}
-                                    onBlur={(e) => handleInputBlur('camisaAjusteValor', e.target.value)}
-                                    placeholder="Ajuste em centímetros"
-                                    disabled={!inputValues.camisaAjuste}
-                                    className={validationErrors.camisaAjusteValor ? 'error' : ''}
-                                />
-                                {validationErrors.camisaAjusteValor && (
-                                    <div className="error-message">{validationErrors.camisaAjusteValor}</div>
-                                )}
-                            </div>
                             <div className="form-group">
                                 <label>Marca <span style={{ color: 'red' }}>*</span></label>
                                 <CustomSelect
@@ -1667,7 +1702,7 @@ const OrdemServico = () => {
                                         }))
                                     ]}
                                     placeholder="Selecione uma marca"
-                                    disabled={loadingBrands}
+                                    disabled={loadingBrands || !inputValues.incluirCamisa}
                                     error={!!validationErrors.camisaMarca}
                                 />
                                 {validationErrors.camisaMarca && (
@@ -1682,6 +1717,7 @@ const OrdemServico = () => {
                                     onChange={(e) => handleInputChange('camisaExtras', e.target.value)}
                                     onBlur={(e) => handleInputBlur('camisaExtras', e.target.value)}
                                     placeholder="Observações extras"
+                                    disabled={!inputValues.incluirCamisa}
                                 />
                             </div>
                         </div>
@@ -1692,12 +1728,26 @@ const OrdemServico = () => {
                 return (
                     <div className="step-content">
                         <h3>Detalhes da Calça</h3>
+                        
+                        {/* Checkbox para incluir calça */}
+                        <div className="form-group" style={{ marginBottom: '20px' }}>
+                            <label className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={inputValues.incluirCalca}
+                                    onChange={(e) => handleCheckboxChange('incluirCalca', e.target.checked)}
+                                />
+                                <span>Incluir Calça</span>
+                            </label>
+                        </div>
+                        
                         <div className="form-grid">
                             <div className="form-group">
                                 <label>Número <span style={{ color: 'red' }}>*</span></label>
                                 <CustomSelect
                                     value={inputValues.calcaNumero}
                                     onChange={(value) => handleSelectChange('calcaNumero', value)}
+                                    disabled={!inputValues.incluirCalca}
                                     options={[
                                         { value: '', label: 'Selecione o número' },
                                         // Números de 1 ao 16 (de 2 em 2, com exceção do 1)
@@ -1760,7 +1810,7 @@ const OrdemServico = () => {
                                     ]}
                                     placeholder="Selecione a cor"
                                     searchPlaceholder="Pesquisar cor..."
-                                    disabled={loadingColors}
+                                    disabled={loadingColors || !inputValues.incluirCalca}
                                     error={!!validationErrors.calcaCor}
                                 />
                                 {validationErrors.calcaCor && (
@@ -1775,12 +1825,14 @@ const OrdemServico = () => {
                                     onBlur={(value) => handleInputBlur('calcaCintura', value)}
                                     options={[
                                         { value: '', label: 'Selecione o cós' },
+                                        { value: 'ajustavel', label: 'Ajustável' },
                                         ...Array.from({ length: 71 }, (_, i) => i + 10).map(num => ({
                                             value: num.toString(),
                                             label: num.toString()
                                         }))
                                     ]}
                                     placeholder="Selecione o cós"
+                                    disabled={!inputValues.incluirCalca}
                                     error={!!validationErrors.calcaCintura}
                                 />
                                 {validationErrors.calcaCintura && (
@@ -1794,6 +1846,7 @@ const OrdemServico = () => {
                                         type="checkbox"
                                         checked={inputValues.calcaAjusteCos}
                                         onChange={(e) => handleCheckboxChange('calcaAjusteCos', e.target.checked)}
+                                        disabled={!inputValues.incluirCalca}
                                         style={{ marginRight: '8px' }}
                                     />
                                     Ajuste do Cós
@@ -1810,7 +1863,7 @@ const OrdemServico = () => {
                                         }))
                                     ]}
                                     placeholder="Selecione o ajuste"
-                                    disabled={!inputValues.calcaAjusteCos}
+                                    disabled={!inputValues.calcaAjusteCos || !inputValues.incluirCalca}
                                     error={!!validationErrors.calcaAjusteCosValor}
                                 />
                                 {validationErrors.calcaAjusteCosValor && (
@@ -1831,6 +1884,7 @@ const OrdemServico = () => {
                                         }))
                                     ]}
                                     placeholder="Selecione o comprimento"
+                                    disabled={!inputValues.incluirCalca}
                                     error={!!validationErrors.calcaPerna}
                                 />
                                 {validationErrors.calcaPerna && (
@@ -1843,6 +1897,7 @@ const OrdemServico = () => {
                                         type="checkbox"
                                         checked={inputValues.calcaAjusteComprimento}
                                         onChange={(e) => handleCheckboxChange('calcaAjusteComprimento', e.target.checked)}
+                                        disabled={!inputValues.incluirCalca}
                                         style={{ marginRight: '8px' }}
                                     />
                                     Ajuste do Comprimento
@@ -1859,7 +1914,7 @@ const OrdemServico = () => {
                                         }))
                                     ]}
                                     placeholder="Selecione o ajuste"
-                                    disabled={!inputValues.calcaAjusteComprimento}
+                                    disabled={!inputValues.calcaAjusteComprimento || !inputValues.incluirCalca}
                                     error={!!validationErrors.calcaAjusteComprimentoValor}
                                 />
                                 {validationErrors.calcaAjusteComprimentoValor && (
@@ -1879,7 +1934,7 @@ const OrdemServico = () => {
                                         }))
                                     ]}
                                     placeholder="Selecione uma marca"
-                                    disabled={loadingBrands}
+                                    disabled={loadingBrands || !inputValues.incluirCalca}
                                     error={!!validationErrors.calcaMarca}
                                 />
                                 {validationErrors.calcaMarca && (
@@ -1894,6 +1949,7 @@ const OrdemServico = () => {
                                     onChange={(e) => handleInputChange('calcaExtras', e.target.value)}
                                     onBlur={(e) => handleInputBlur('calcaExtras', e.target.value)}
                                     placeholder="Observações extras"
+                                    disabled={!inputValues.incluirCalca}
                                 />
                             </div>
                         </div>
@@ -2046,20 +2102,6 @@ const OrdemServico = () => {
                                         error={!!validationErrors.gravataCor}
                                     />
                                 </div>
-                                <CustomSelect
-                                    value={inputValues.gravataMarca}
-                                    onChange={(value) => handleSelectChange('gravataMarca', value)}
-                                    options={[
-                                        { value: '', label: 'Selecione uma marca' },
-                                        ...brands.map((brand) => ({
-                                            value: brand.id.toString(),
-                                            label: brand.description
-                                        }))
-                                    ]}
-                                    placeholder="Selecione uma marca"
-                                    disabled={!inputValues.gravata || loadingBrands}
-                                    error={!!validationErrors.gravataMarca}
-                                />
                                 <input
                                     type="text"
                                     value={inputValues.gravataDescricao}
@@ -2067,11 +2109,10 @@ const OrdemServico = () => {
                                     onBlur={(e) => handleInputBlur('gravataDescricao', e.target.value)}
                                     placeholder="Descrição (lisa, riscada, etc.)"
                                     disabled={!inputValues.gravata}
-
                                 />
-                                {(validationErrors.gravataCor || validationErrors.gravataMarca) && (
+                                {validationErrors.gravataCor && (
                                     <div className="error-message">
-                                        {validationErrors.gravataCor || validationErrors.gravataMarca}
+                                        {validationErrors.gravataCor}
                                     </div>
                                 )}
                             </div>
@@ -2105,6 +2146,20 @@ const OrdemServico = () => {
                                     />
                                 </div>
                                 <CustomSelect
+                                    value={inputValues.cintoComprimento}
+                                    onChange={(value) => handleSelectChange('cintoComprimento', value)}
+                                    options={[
+                                        { value: '', label: 'Selecione o comprimento' },
+                                        ...Array.from({ length: 81 }, (_, i) => i + 70).map(num => ({
+                                            value: num.toString(),
+                                            label: num.toString()
+                                        }))
+                                    ]}
+                                    placeholder="Selecione o comprimento"
+                                    disabled={!inputValues.cinto}
+                                    error={!!validationErrors.cintoComprimento}
+                                />
+                                <CustomSelect
                                     value={inputValues.cintoMarca}
                                     onChange={(value) => handleSelectChange('cintoMarca', value)}
                                     options={[
@@ -2118,9 +2173,9 @@ const OrdemServico = () => {
                                     disabled={!inputValues.cinto || loadingBrands}
                                     error={!!validationErrors.cintoMarca}
                                 />
-                                {(validationErrors.cintoCor || validationErrors.cintoMarca) && (
+                                {(validationErrors.cintoCor || validationErrors.cintoComprimento || validationErrors.cintoMarca) && (
                                     <div className="error-message">
-                                        {validationErrors.cintoCor || validationErrors.cintoMarca}
+                                        {validationErrors.cintoCor || validationErrors.cintoComprimento || validationErrors.cintoMarca}
                                     </div>
                                 )}
                             </div>
@@ -2335,6 +2390,27 @@ const OrdemServico = () => {
                                     placeholder="Selecione a modalidade"
                                     searchPlaceholder="Pesquisar modalidade..."
                                 />
+                            </div>
+                            <div className="form-group">
+                                <label>Forma de Pagamento <span style={{ color: 'red' }}>*</span></label>
+                                <CustomSelect
+                                    value={inputValues.formaPagamento}
+                                    onChange={(value) => handleSelectChange('formaPagamento', value)}
+                                    options={[
+                                        { value: '', label: 'Selecione a forma de pagamento' },
+                                        { value: 'credito', label: 'Crédito' },
+                                        { value: 'debito', label: 'Débito' },
+                                        { value: 'pix', label: 'PIX' },
+                                        { value: 'dinheiro', label: 'Dinheiro' },
+                                        { value: 'voucher', label: 'Voucher' }
+                                    ]}
+                                    placeholder="Selecione a forma de pagamento"
+                                    searchPlaceholder="Pesquisar forma de pagamento..."
+                                    error={!!validationErrors.formaPagamento}
+                                />
+                                {validationErrors.formaPagamento && (
+                                    <div className="error-message">{validationErrors.formaPagamento}</div>
+                                )}
                             </div>
                             {inputValues.tipoPagamento === 'Aluguel + Venda' && (
                                 <div className="form-group">
@@ -2593,8 +2669,12 @@ const OrdemServico = () => {
         const modalidade = inputValues.tipoPagamento;
         
         if (modalidade === 'Venda') {
-            // Todos os itens são vendidos
-            const itensVendidos = ['paleto', 'camisa', 'calca'];
+            // Apenas os itens marcados para serem incluídos são vendidos
+            const itensVendidos = [];
+            
+            if (formData.incluirPaleto) itensVendidos.push('paleto');
+            if (formData.incluirCamisa) itensVendidos.push('camisa');
+            if (formData.incluirCalca) itensVendidos.push('calca');
             
             // Adicionar acessórios se selecionados
             if (formData.suspensorio) itensVendidos.push('suspensorio');
@@ -2772,7 +2852,6 @@ const OrdemServico = () => {
                                             <span><strong>Cor:</strong> {capitalizeText(formData.camisaCor)}</span>
                                             <span><strong>Manga:</strong> {formData.camisaManga}</span>
                                             <span><strong>Marca:</strong> {getBrandName(formData.camisaMarca)}</span>
-                                            <span><strong>Ajuste:</strong> {formData.camisaAjuste ? formData.camisaAjusteValor : 'Não'}</span>
                                             <span><strong>Extras:</strong> {formData.camisaExtras}</span>
                                         </div>
                                     </div>
@@ -2834,13 +2913,13 @@ const OrdemServico = () => {
                                     {formData.gravata && (
                                         <div className="accessory-item">
                                             <span className="accessory-label">Gravata:</span>
-                                            <span className="accessory-value">{capitalizeText(formData.gravataCor)} - {formData.gravataDescricao} {formData.gravataMarca && `(${getBrandName(formData.gravataMarca)})`}</span>
+                                            <span className="accessory-value">{capitalizeText(formData.gravataCor)} - {formData.gravataDescricao}</span>
                                         </div>
                                     )}
                                     {formData.cinto && (
                                         <div className="accessory-item">
                                             <span className="accessory-label">Cinto:</span>
-                                            <span className="accessory-value">{capitalizeText(formData.cintoCor)} {formData.cintoMarca && `(${getBrandName(formData.cintoMarca)})`}</span>
+                                            <span className="accessory-value">{capitalizeText(formData.cintoCor)} - {formData.cintoComprimento}cm {formData.cintoMarca && `(${getBrandName(formData.cintoMarca)})`}</span>
                                         </div>
                                     )}
                                     {formData.sapato && (
@@ -2897,6 +2976,10 @@ const OrdemServico = () => {
                                     <div className="payment-item">
                                         <span className="payment-label">Tipo:</span>
                                         <span className="payment-value">{formData.tipoPagamento}</span>
+                                    </div>
+                                    <div className="payment-item">
+                                        <span className="payment-label">Forma de Pagamento:</span>
+                                        <span className="payment-value">{formData.formaPagamento ? capitalizeText(formData.formaPagamento) : 'Não informada'}</span>
                                     </div>
                                     <div className="payment-item highlight total">
                                         <span className="payment-label">Total:</span>

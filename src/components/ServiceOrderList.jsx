@@ -25,6 +25,13 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
     const [selectedReasonId, setSelectedReasonId] = useState('');
     const [refusalJustification, setRefusalJustification] = useState('');
 
+    // Estados para o modal de retirada
+    const [showPickupModal, setShowPickupModal] = useState(false);
+    const [pickupOrder, setPickupOrder] = useState(null);
+    const [receiveRemainingPayment, setReceiveRemainingPayment] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState('');
+    const [isProcessingPickup, setIsProcessingPickup] = useState(false);
+
     // Estados para busca
     const [showSearchPanel, setShowSearchPanel] = useState(false);
     const [searchText, setSearchText] = useState('');
@@ -244,88 +251,70 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
         }
     };
 
-    const handleMarkAsPickedUp = async (order, event) => {
-        event.stopPropagation(); // Previne que o clique propague para o card
+    const openPickupModal = (order, event) => {
+        event.stopPropagation();
+        setPickupOrder(order);
+        setReceiveRemainingPayment(order.remaining_payment > 0);
+        setPaymentMethod('');
+        setShowPickupModal(true);
+    };
 
-        // Verifica se há valor restante para receber
-        const hasRemainingPayment = order.remaining_payment > 0;
+    const closePickupModal = () => {
+        setShowPickupModal(false);
+        setPickupOrder(null);
+        setReceiveRemainingPayment(false);
+        setPaymentMethod('');
+        setIsProcessingPickup(false);
+    };
 
-        if (hasRemainingPayment) {
-            // Modal informativo sobre valor restante
-            const result = await Swal.fire({
-                title: 'Valor restante para receber',
-                text: `A ordem #${order.id} possui ${formatCurrency(order.remaining_payment)} restantes. Deseja marcar como retirada mesmo assim?`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#CBA135',
-                cancelButtonColor: '#ffff',
-                confirmButtonText: 'Sim, marcar como retirada',
-                cancelButtonText: 'Cancelar',
-                reverseButtons: true
+    const handlePickupSubmit = async () => {
+        if (!pickupOrder) return;
+
+        setIsProcessingPickup(true);
+
+        try {
+            // Se há valor restante e foi selecionado para receber, mas não escolheu forma de pagamento
+            if (pickupOrder.remaining_payment > 0 && receiveRemainingPayment && !paymentMethod) {
+                await Swal.fire({
+                    title: 'Forma de pagamento obrigatória',
+                    text: 'Por favor, selecione a forma de pagamento para o valor restante.',
+                    icon: 'warning',
+                    confirmButtonColor: '#CBA135'
+                });
+                setIsProcessingPickup(false);
+                return;
+            }
+
+            // Prepara os dados de pagamento se necessário
+            const paymentData = pickupOrder.remaining_payment > 0 && receiveRemainingPayment ? {
+                receiveRemainingPayment: true,
+                paymentMethod: paymentMethod,
+                remainingAmount: pickupOrder.remaining_payment
+            } : null;
+
+            // Chama o serviço para marcar como retirada com dados de pagamento
+            await serviceOrderService.pickUpServiceOrder(pickupOrder.id, paymentData);
+
+            await Swal.fire({
+                title: 'Retirada confirmada!',
+                text: `Ordem #${pickupOrder.id} marcada como retirada${receiveRemainingPayment ? ` e valor restante recebido via ${paymentMethod}` : ''}.`,
+                icon: 'success',
+                confirmButtonColor: '#CBA135'
             });
 
-            if (result.isConfirmed) {
-                try {
-                    await serviceOrderService.pickUpServiceOrder(order.id);
+            closePickupModal();
+            fetchOrders(activeTab);
+        } catch (error) {
+            console.error('Erro ao marcar como retirada:', error);
 
-                    await Swal.fire({
-                        title: 'Retirada confirmada!',
-                        text: `Ordem #${order.id} marcada como retirada.}`,
-                        icon: 'success',
-                        confirmButtonColor: '#CBA135'
-                    });
-
-                    // Recarrega a lista de ordens
-                    fetchOrders(activeTab);
-                } catch (error) {
-                    console.error('Erro ao marcar como retirada:', error);
-
-                    await Swal.fire({
-                        title: 'Erro!',
-                        text: 'Não foi possível marcar a ordem como retirada. Tente novamente.',
-                        icon: 'error',
-                        confirmButtonColor: '#f44336'
-                    });
-                }
-            }
-        } else {
-            // Não há valor restante, confirma diretamente
-            const result = await Swal.fire({
-                title: 'Confirmar retirada',
-                text: `Deseja marcar a ordem de serviço #${order.id} como retirada?`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#CBA135',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Sim, marcar como retirada',
-                cancelButtonText: 'Cancelar',
-                reverseButtons: true
+            await Swal.fire({
+                title: 'Erro!',
+                text: 'Não foi possível marcar a ordem como retirada. Tente novamente.',
+                icon: 'error',
+                confirmButtonColor: '#f44336'
             });
-
-            if (result.isConfirmed) {
-                try {
-                    await serviceOrderService.pickUpServiceOrder(order.id);
-
-                    await Swal.fire({
-                        title: 'Retirada confirmada!',
-                        text: 'Ordem de serviço marcada como retirada.',
-                        icon: 'success',
-                        confirmButtonColor: '#CBA135'
-                    });
-
-                    // Recarrega a lista de ordens
-                    fetchOrders(activeTab);
-                } catch (error) {
-                    console.error('Erro ao marcar como retirada:', error);
-
-                    await Swal.fire({
-                        title: 'Erro!',
-                        text: 'Não foi possível marcar a ordem como retirada. Tente novamente.',
-                        icon: 'error',
-                        confirmButtonColor: '#f44336'
-                    });
-                }
-            }
+        } finally {
+            setIsProcessingPickup(false);
         }
     };
 
@@ -567,11 +556,10 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
                                                 </button>
                                                 <button
                                                     className="action-btn pickup"
-                                                    onClick={(e) => handleMarkAsPickedUp(order, e)}
+                                                    onClick={(e) => openPickupModal(order, e)}
                                                     title="Marcar como retirada"
                                                 >
                                                     <i className="bi bi-box-arrow-right"></i>
-
                                                 </button>
                                             </>
                                         )}
@@ -669,6 +657,141 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
                                 variant="danger"
                                 text="Sim, cancelar ordem"
                                 onClick={handleRefusalSubmit}
+                            />
+                        </div>
+                    </div>
+                }
+            />
+
+            {/* Modal de Retirada */}
+            <Modal
+                show={showPickupModal}
+                onClose={closePickupModal}
+                onCloseX={closePickupModal}
+                title="Confirmar Retirada"
+                bodyContent={
+                    <div>
+                        <div style={{ 
+                            background: 'linear-gradient(135deg, #CBA135 0%, #e2d502 100%)', 
+                            color: 'white', 
+                            padding: '16px', 
+                            borderRadius: '8px', 
+                            marginBottom: '20px',
+                            textAlign: 'center'
+                        }}>
+                            <h4 style={{ margin: '0 0 8px 0', fontSize: '18px' }}>
+                                🎉 Ordem #{pickupOrder?.id} - Retirada
+                            </h4>
+                            <p style={{ margin: '0', fontSize: '14px', opacity: '0.9' }}>
+                                Cliente: {capitalizeText(pickupOrder?.client?.name)}
+                            </p>
+                        </div>
+
+                        {pickupOrder?.remaining_payment > 0 && (
+                            <div style={{ 
+                                border: '2px solid #ff9800', 
+                                borderRadius: '8px', 
+                                padding: '16px', 
+                                marginBottom: '20px',
+                                backgroundColor: '#fff8e1'
+                            }}>
+                                <div style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    marginBottom: '12px',
+                                    color: '#e65100'
+                                }}>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: '8px' }}>
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                    </svg>
+                                    <strong>Valor Restante para Receber</strong>
+                                </div>
+                                <div style={{ 
+                                    fontSize: '20px', 
+                                    fontWeight: 'bold', 
+                                    color: '#e65100',
+                                    marginBottom: '12px'
+                                }}>
+                                    {formatCurrency(pickupOrder.remaining_payment)}
+                                </div>
+                                
+                                <div className="form-group mb-3">
+                                    <label style={{ 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        cursor: 'pointer',
+                                        fontSize: '14px',
+                                        fontWeight: '500'
+                                    }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={receiveRemainingPayment}
+                                            onChange={(e) => {
+                                                setReceiveRemainingPayment(e.target.checked);
+                                                if (!e.target.checked) {
+                                                    setPaymentMethod('');
+                                                }
+                                            }}
+                                            style={{ 
+                                                marginRight: '8px',
+                                                transform: 'scale(1.2)'
+                                            }}
+                                        />
+                                        <span>Receber valor restante agora</span>
+                                    </label>
+                                </div>
+
+                                {receiveRemainingPayment && (
+                                    <div className="form-group">
+                                        <label className="form-label">
+                                            Forma de Pagamento <span style={{ color: '#f44336' }}>*</span>
+                                        </label>
+                                        <CustomSelect
+                                            value={paymentMethod}
+                                            onChange={setPaymentMethod}
+                                            options={[
+                                                { value: '', label: 'Selecione a forma de pagamento' },
+                                                { value: 'credito', label: '💳 Crédito' },
+                                                { value: 'debito', label: '💳 Débito' },
+                                                { value: 'pix', label: '📱 PIX' },
+                                                { value: 'dinheiro', label: '💵 Dinheiro' },
+                                                { value: 'voucher', label: '🎫 Voucher' }
+                                            ]}
+                                            placeholder="Selecione a forma de pagamento"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        <div style={{ 
+                            background: '#f5f5f5', 
+                            padding: '12px', 
+                            borderRadius: '6px', 
+                            marginBottom: '20px',
+                            fontSize: '14px',
+                            color: 'var(--color-text-secondary)'
+                        }}>
+                            <strong>Confirmação:</strong> Ao confirmar, a ordem será marcada como retirada 
+                            {pickupOrder?.remaining_payment > 0 && receiveRemainingPayment && ' e o pagamento restante será registrado'}.
+                        </div>
+
+                        <div className="form-actions">
+                            <Button
+                                variant="outline"
+                                text="Cancelar"
+                                onClick={closePickupModal}
+                                disabled={isProcessingPickup}
+                            />
+                            <Button
+                                variant="primary"
+                                text={isProcessingPickup ? "Processando..." : "Confirmar Retirada"}
+                                onClick={handlePickupSubmit}
+                                disabled={isProcessingPickup}
+                                style={{ 
+                                    background: 'linear-gradient(135deg, #CBA135 0%, #e2d502 100%)',
+                                    border: 'none'
+                                }}
                             />
                         </div>
                     </div>

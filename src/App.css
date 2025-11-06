@@ -10,6 +10,8 @@
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
+  overflow: visible !important;
+  position: relative;
 }
 
 .main-content {
@@ -30,6 +32,26 @@
   margin-left: 0;
   width: 100%;
   transition: all 0.3s ease-in-out !important;
+}
+
+/* Ajustes para modo mobile (footer) */
+@media (max-width: 999px) {
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding-bottom: 80px; /* Espaço para o footer fixo */
+    z-index: 1;
+    position: relative;
+    overflow: visible !important;
+  }
+
+  .main-content.collapsed {
+    margin-left: 0 !important;
+    width: 100% !important;
+    z-index: 1;
+    position: relative;
+    overflow: visible !important;
+  }
 }
 
 input {

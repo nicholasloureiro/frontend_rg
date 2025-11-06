@@ -68,9 +68,18 @@ export const serviceOrderService = {
     },
 
     // Marcar ordem de serviço como retirada
-    pickUpServiceOrder: async (id) => {
+    pickUpServiceOrder: async (id, paymentData = null) => {
         try {
-            const response = await api.post(`/api/v1/service-orders/${id}/mark-retrieved/`);
+            const requestData = {};
+            
+            // Se há dados de pagamento, inclui no request
+            if (paymentData && paymentData.receiveRemainingPayment) {
+                requestData.receive_remaining_payment = true;
+                requestData.payment_method = paymentData.paymentMethod;
+                requestData.remaining_amount = paymentData.remainingAmount;
+            }
+            
+            const response = await api.post(`/api/v1/service-orders/${id}/mark-retrieved/`, requestData);
             return response.data;
         } catch (error) {
             console.error('Erro ao marcar ordem como retirada:', error);
