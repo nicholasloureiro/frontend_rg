@@ -573,6 +573,10 @@
 .css-di3982 > button > svg > path{
     color: var(--color-text-primary) !important;
 }
+.css-1bug3cd-MuiButtonBase-root-MuiPaginationItem-root.Mui-selected{
+    background-color: var(--color-accent) !important;
+    border-radius: 4px;
+}
 /* Responsive */
 @media (max-width: 768px) {
     .service-order-list-container {

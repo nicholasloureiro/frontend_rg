@@ -54,6 +54,8 @@ const Sidebar = ({ setSideOpen }) => {
     { to: "/clientes", iconBoot: "people", label: "Clientes" },
     { to: "/funcionarios", iconBoot: "person-lines-fill", label: "Funcionários" },
     { to: "/produtos", iconBoot: "box", label: "Produtos" },
+    // Financeiro: visualização de vendas por tipo e fechamento de caixa
+    { to: "/financeiro", iconBoot: "currency-dollar", label: "Financeiro" },
   ];
 
   // Número de links visíveis em telas pequenas

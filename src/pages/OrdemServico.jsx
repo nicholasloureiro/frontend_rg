@@ -264,6 +264,11 @@ const OrdemServico = () => {
             [field]: value
         }));
 
+        // sincronizar formData para garantir que valores sejam enviados sem depender do blur
+        if (!['total', 'sinal'].includes(field)) {
+            setFormData(prev => ({ ...prev, [field]: value }));
+        }
+
         // Limpar erro do campo se foi preenchido corretamente
         if (validationErrors[field]) {
             let shouldClear = false;
@@ -887,7 +892,7 @@ const OrdemServico = () => {
             restante: (pagamento.restante ?? order.remaining_payment ?? '') !== '' ? String(pagamento.restante ?? order.remaining_payment) : '',
             dataRetirada: os.data_retirada || order.retirada_date || '',
             // Data da prova (opcional)
-            dataProva: os.data_prova || order.prova_date || order.proof_date || '',
+            dataProva: os.data_prova || null,
             dataDevolucao: os.data_devolucao || order.devolucao_date || ''
         };
 

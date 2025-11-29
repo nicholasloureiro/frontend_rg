@@ -4,7 +4,7 @@ export const serviceOrderService = {
     // Buscar ordens de serviço por fase
     getServiceOrdersByPhase: async (phaseName) => {
         try {
-            const response = await api.get(`/api/v1/service-orders/phase/${phaseName}/`);
+            const response = await api.get(`/api/v1/service-orders/v2/phase/${phaseName}/?page_size=2   `);
             return response.data;
         } catch (error) {
             console.error('Erro ao buscar ordens de serviço:', error);
@@ -120,6 +120,13 @@ export const serviceOrderService = {
             }
             if (filters.end_date) {
                 params.append('end_date', filters.end_date);
+            }
+            // paginação
+            if (filters.page) {
+                params.append('page', filters.page);
+            }
+            if (filters.page_size) {
+                params.append('page_size', filters.page_size);
             }
 
             const queryString = params.toString();

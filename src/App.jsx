@@ -19,6 +19,7 @@ import Produtos from './pages/Produtos'
 import Eventos from './pages/Eventos'
 import EventoDetalhes from './pages/EventoDetalhes'
 import ClienteHistorico from './pages/ClienteHistorico'
+import Financeiro from './pages/Financeiro'
 
 function AppContent() {
   const { theme } = useTheme();
@@ -174,6 +175,12 @@ function AppContent() {
           <Route path="/produtos" element={
             <ProtectedRoute>
               <Produtos />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/financeiro" element={
+            <ProtectedRoute>
+              <Financeiro />
             </ProtectedRoute>
           } />
           

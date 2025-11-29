@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { serviceOrderService } from '../services/serviceOrderService';
+import api from '../services/api';
 import '../styles/ServiceOrderList.css';
 import { capitalizeText } from '../utils/capitalizeText';
 import { mascaraTelefoneInternacional } from '../utils/Mascaras';
@@ -10,7 +11,7 @@ import InputDate from './InputDate';
 import CustomSelect from './CustomSelect';
 // Material React Table + MUI (requer instalar: @mui/material @mui/icons-material material-react-table)
 import { MaterialReactTable } from 'material-react-table';
-import { Box, IconButton } from '@mui/material';
+import { Box, IconButton, Pagination } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import CheckIcon from '@mui/icons-material/Check';
@@ -25,6 +26,10 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('PENDENTE');
     const [orders, setOrders] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [pageSize, setPageSize] = useState(20);
+    const [totalCount, setTotalCount] = useState(0);
     const [loading, setLoading] = useState(false);
     const [internalError, setInternalError] = useState(null);
     const [refusalReasons, setRefusalReasons] = useState([]);
@@ -57,6 +62,8 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
     const [isSearching, setIsSearching] = useState(false);
     // Modo de visualização: 'cards' (padrão) ou 'table'
     const [viewMode, setViewMode] = useState('cards');
+    // Filtro de data ao lado do select de modo de visualização (todos | hoje)
+    const [dateFilter, setDateFilter] = useState('todos');
 
     const tabs = [
         { key: 'PENDENTE', label: 'PENDENTES', color: '#0095e2' },
@@ -68,13 +75,55 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
         { key: 'FINALIZADO', label: 'FINALIZADAS', color: '#4caf50' },
     ];
 
-    const fetchOrders = async (phase, filters = {}) => {
+    const buildFiltersFromState = () => {
+        const filters = {};
+        if (searchText && searchText.trim()) {
+            filters.search = searchText.trim();
+        }
+        if (initialDate) {
+            filters.initial_date = initialDate.toISOString().split('T')[0];
+        }
+        if (endDate) {
+            filters.end_date = endDate.toISOString().split('T')[0];
+        }
+        return filters;
+    };
+
+    const fetchOrders = async (phase, filters = {}, page = 1) => {
         setLoading(true);
         setInternalError(null);
         try {
-            const data = await serviceOrderService.searchServiceOrders(phase, filters);
-            // Garante que orders sempre será um array
-            setOrders(Array.isArray(data) ? data : []);
+            let data;
+            const hasFilters = filters && Object.keys(filters).length > 0;
+            if (hasFilters) {
+                // Quando há filtros, usa endpoint de busca com query params que suporta paginação
+                const effectiveFilters = { ...filters, page, page_size: pageSize };
+                data = await serviceOrderService.searchServiceOrders(phase, effectiveFilters);
+            } else {
+                // Quando não há filtros, usa endpoint v2 com paginação
+                const params = new URLSearchParams();
+                params.append('page', page);
+                params.append('page_size', pageSize);
+                const queryString = params.toString();
+                const response = await api.get(`/api/v1/service-orders/v2/phase/${phase}/?${queryString}`);
+                data = response.data;
+            }
+
+            // Se a API retornou objeto paginado
+            if (data && typeof data === 'object' && Array.isArray(data.results)) {
+                setOrders(data.results);
+                setCurrentPage(data.page || page);
+                setTotalPages(data.total_pages || 1);
+                setPageSize(data.page_size || pageSize);
+                setTotalCount(data.count || 0);
+            } else {
+                // Compatibilidade: se retornou array simples
+                setOrders(Array.isArray(data) ? data : []);
+                setCurrentPage(1);
+                setTotalPages(1);
+                setPageSize(Array.isArray(data) ? data.length : pageSize);
+                setTotalCount(Array.isArray(data) ? data.length : 0);
+            }
         } catch (err) {
             setInternalError('Erro ao carregar ordens de serviço');
             console.error('Erro:', err);
@@ -155,6 +204,9 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
     };
 
     useEffect(() => {
+        // reseta para primeira página ao mudar de aba
+        setCurrentPage(1);
+        // chama o endpoint por fase sem filtros
         fetchOrders(activeTab);
         fetchRefusalReasons();
     }, [activeTab]);
@@ -192,23 +244,14 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
         setSearchText('');
         setInitialDate(null);
         setEndDate(null);
+        setDateFilter('todos');
     };
 
     const handleSearch = async () => {
         setIsSearching(true);
-        const filters = {};
-
-        if (searchText.trim()) {
-            filters.search = searchText.trim();
-        }
-        if (initialDate) {
-            filters.initial_date = initialDate.toISOString().split('T')[0];
-        }
-        if (endDate) {
-            filters.end_date = endDate.toISOString().split('T')[0];
-        }
-
-        await fetchOrders(activeTab, filters);
+        const filters = buildFiltersFromState();
+        setCurrentPage(1);
+        await fetchOrders(activeTab, filters, 1);
         setIsSearching(false);
     };
 
@@ -216,7 +259,8 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
         setSearchText('');
         setInitialDate(null);
         setEndDate(null);
-        await fetchOrders(activeTab);
+        setCurrentPage(1);
+        await fetchOrders(activeTab, {}, 1);
     };
 
     const toggleSearchPanel = () => {
@@ -469,6 +513,40 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
         }
     };
 
+    // Lista de ordens exibidas considerando filtros locais (ex: filtro por dia na aba PENDENTE)
+    const displayedOrders = useMemo(() => {
+        if (dateFilter === 'todos') return orders;
+
+        const today = new Date();
+        const isSameDay = (dateString) => {
+            if (!dateString) return false;
+            const normalized = dateString.includes('T') ? dateString : `${dateString}T00:00:00`;
+            const d = new Date(normalized);
+            return d.getFullYear() === today.getFullYear()
+                && d.getMonth() === today.getMonth()
+                && d.getDate() === today.getDate();
+        };
+
+        // Filtra por data_pedido na aba PENDENTE, por retirada_date na aba AGUARDANDO_RETIRADA
+        if (activeTab === 'PENDENTE') {
+            return orders.filter(o => isSameDay(o.data_pedido || o.order_date || o.orderDate));
+        }
+
+        if (activeTab === 'AGUARDANDO_RETIRADA') {
+            return orders.filter(o => isSameDay(o.retirada_date));
+        }
+
+        if (activeTab === 'EM_PRODUCAO') {
+            return orders.filter(o => isSameDay(o.production_date));
+        }
+
+        if (activeTab === 'AGUARDANDO_DEVOLUCAO') {
+            return orders.filter(o => isSameDay(o.devolucao_date));
+        }
+
+        return orders;
+    }, [orders, dateFilter, activeTab]);
+
     // Tabela memoizada com MaterialReactTable (hook chamado no topo do componente)
     const materialTable = useMemo(() => {
         const cols = [
@@ -540,7 +618,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
                 enableSorting: false,
                 Cell: ({ row }) => (
                     <Box sx={{ display: 'flex', gap: 1 }}>
-             
+
                         <IconButton size="small" onClick={(e) => { e.stopPropagation(); handleRefuseOrder(row.original, e); }} title="Cancelar">
                             <CloseIcon fontSize="small" />
                         </IconButton>
@@ -576,7 +654,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
             <div className="orders-table-wrapper">
                 <MaterialReactTable
                     columns={cols}
-                    data={orders}
+                    data={displayedOrders}
                     enableSorting={false}
                     muiTableBodyRowProps={({ row }) => ({
                         onClick: () => handleOrderClick(row.original),
@@ -585,7 +663,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
                 />
             </div>
         );
-    }, [orders, activeTab]);
+    }, [displayedOrders, activeTab]);
 
     return (
         <div className="service-order-list-container">
@@ -619,19 +697,35 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
             </div>
             <div className="search-toggle-btn-container mb-3">
                 <div className="search-toggle-btn-container-content d-flex justify-content-end">
-                    <div style={{ width: 200, marginRight: 'auto' }}>
-                        <label>Modo de visualização</label>
-                        <CustomSelect
-                            options={[
-                                { value: 'cards', label: 'Cards' },
-                                { value: 'table', label: 'List' }
-                            ]}
-                            value={viewMode}
-                            onChange={setViewMode}
-                            placeholder="Visualização"
-                        />
+                    <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-end', marginRight: 'auto' }}>
+                        <div style={{ width: 200 }}>
+                            <label>Modo de visualização</label>
+                            <CustomSelect
+                                options={[
+                                    { value: 'cards', label: 'Cards' },
+                                    { value: 'table', label: 'Lista' }
+                                ]}
+                                value={viewMode}
+                                onChange={setViewMode}
+                                placeholder="Visualização"
+                            />
+                        </div>
+                        {(activeTab === 'PENDENTE' || activeTab === 'EM_PRODUCAO' || activeTab === 'AGUARDANDO_RETIRADA' || activeTab === 'AGUARDANDO_DEVOLUCAO' || activeTab === 'ATRASADO') && (
+                            <div style={{ width: 160 }}>
+                                <label>Filtro de data</label>
+                                <CustomSelect
+                                    options={[
+                                        { value: 'todos', label: 'Todos' },
+                                        { value: 'hoje', label: 'Hoje' }
+                                    ]}
+                                    value={dateFilter}
+                                    onChange={setDateFilter}
+                                    placeholder="Filtrar por data"
+                                />
+                            </div>
+                        )}
                     </div>
-                    <Button variant="primary" text={`${showSearchPanel ? 'Ocultar Busca' : 'Buscar'}`} iconName={`${showSearchPanel ? 'x-circle' : 'search'}`} iconPosition="left" onClick={toggleSearchPanel} style={{ width: 'fit-content', height:'min-content', marginTop: 'auto', marginBottom: 'auto'}} />
+                    <Button variant="primary" text={`${showSearchPanel ? 'Ocultar Busca' : 'Buscar'}`} iconName={`${showSearchPanel ? 'x-circle' : 'search'}`} iconPosition="left" onClick={toggleSearchPanel} style={{ width: 'fit-content', height: 'min-content', marginTop: 'auto', marginBottom: 'auto' }} />
                 </div>
                 {/* Painel de Busca */}
                 {showSearchPanel && (
@@ -706,7 +800,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
                         <p>{error || internalError}</p>
                         <Button variant="primary" text="Tentar novamente" iconName="arrow-clockwise" iconPosition="left" onClick={onRetry || (() => fetchOrders(activeTab))} disabled={isLoading || loading} style={{ width: 'fit-content' }} />
                     </div>
-                ) : orders.length === 0 ? (
+                ) : displayedOrders.length === 0 ? (
                     <div className="empty-state">
                         <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
@@ -716,7 +810,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
                     </div>
                 ) : viewMode === 'cards' ? (
                     <div className="orders-grid">
-                        {orders.map((order) => (
+                        {displayedOrders.map((order) => (
                             <div
                                 key={order.id}
                                 className={`order-card ${order.esta_atrasada ? 'order-card-delayed' : ''}`}
@@ -816,7 +910,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
 
                                 <div className="order-footer">
                                     <div className="order-date">
-                                        Pedido: {formatDate(order.order_date)}
+                                        Data OS: {formatDate(order.order_date)}
                                     </div>
                                     <div className="order-actions">
                                         {activeTab === 'PENDENTE' && (
@@ -835,7 +929,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
                                                     onClick={(e) => handleAssignAttendant(order, e)}
                                                     title="Atribuir atendente"
                                                 >
-                                                    <i className='bi bi-person-plus' style={{ fontSize: '14px', color:'green' }}></i>
+                                                    <i className='bi bi-person-plus' style={{ fontSize: '14px', color: 'green' }}></i>
                                                 </button>
                                                 <button
                                                     className="action-btn edit"
@@ -957,7 +1051,23 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
                             </div>
                         ))}
                     </div>
-                ) : materialTable }
+                ) : materialTable}
+
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', marginTop: '24px', flexWrap: 'wrap' }}>
+                    <Pagination
+                        count={totalPages}
+                        page={currentPage}
+                        onChange={(event, value) => {
+                            setCurrentPage(value);
+                            fetchOrders(activeTab, buildFiltersFromState(), value);
+                        }}
+                        color="primary"
+                        disabled={isLoading || loading}
+                        showFirstButton
+                        showLastButton
+                    />
+                </div>
+
             </div>
 
             {/* Modal de Recusa */}
@@ -995,7 +1105,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
                                 value={refusalJustification}
                                 onChange={(e) => setRefusalJustification(e.target.value)}
                                 rows={4}
-                                style={{backgroundColor: "var(--background-inputs)"}}
+                                style={{ backgroundColor: "var(--background-inputs)" }}
                             />
                         </div>
 
