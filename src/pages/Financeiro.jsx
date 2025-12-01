@@ -67,7 +67,11 @@ const normalizeSummary = (payload) => {
 
 const formatDate = (value) => {
   if (!value) return '—';
-  const dateObj = new Date(value);
+  // Adiciona T00:00:00 para corrigir problema de fuso horário
+  const dateStr = typeof value === 'string' && value.match(/^\d{4}-\d{2}-\d{2}$/) 
+    ? `${value}T00:00:00` 
+    : value;
+  const dateObj = new Date(dateStr);
   if (Number.isNaN(dateObj.getTime())) return value;
   return new Intl.DateTimeFormat('pt-BR').format(dateObj);
 };
@@ -82,6 +86,11 @@ const formatISODate = (dateObj) => {
   const month = String(dateObj.getMonth() + 1).padStart(2, '0');
   const day = String(dateObj.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+};
+
+const getTodayLocal = () => {
+  const today = new Date();
+  return formatISODate(today);
 };
 
 const getMonthRange = (value) => {
@@ -105,7 +114,7 @@ const getMonthRange = (value) => {
 const Financeiro = () => {
   const { user, isLoading } = useAuth();
   const [tab, setTab] = useState('today');
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(getTodayLocal());
   const [monthYear, setMonthYear] = useState(() => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
@@ -210,19 +219,15 @@ const Financeiro = () => {
         <div className="financeiro-controls enhanced">
           {tab === 'today' ? (
             <label>
-              <span>Data</span>
+              <span style={{ fontSize: '16px', fontWeight: 'bold' }}>Data</span>
               <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
             </label>
           ) : (
             <label>
-              <span>Mês</span>
+              <span style={{ fontSize: '16px', fontWeight: 'bold' }}>Mês</span>
               <input type="month" value={monthYear} onChange={(e) => setMonthYear(e.target.value)} />
             </label>
           )}
-
-          <button className="btn-refresh" onClick={fetchSummary} disabled={loadingSummary}>
-            {loadingSummary ? 'Carregando...' : 'Atualizar'}
-          </button>
         </div>
 
         {message && (
