@@ -22,9 +22,6 @@ const EditingProfile = ({ handleCloseModal }) => {
 
     // Função para obter o primeiro contato (email e telefone)
     const getFirstContact = () => {
-        console.log('Dados do usuário no EditingProfile:', user);
-        console.log('Contatos do usuário:', user?.person?.contacts);
-        
         if (user?.person?.contacts && user.person.contacts.length > 0) {
             return user.person.contacts[0];
         }
@@ -146,7 +143,6 @@ const EditingProfile = ({ handleCloseModal }) => {
 
         try {
             const response = await updateProfile(dataToSubmit);
-            console.log('Perfil atualizado com sucesso:', response);
             
             // Fecha o indicador de carregamento
             Swal.close();
@@ -154,7 +150,6 @@ const EditingProfile = ({ handleCloseModal }) => {
             // Recarrega os dados atualizados do usuário
             try {
                 await getCurrentUser();
-                console.log('Dados do usuário atualizados com sucesso');
             } catch (userError) {
                 console.error('Erro ao recarregar dados do usuário:', userError);
                 // Mesmo se falhar ao recarregar, não impede o fechamento do modal

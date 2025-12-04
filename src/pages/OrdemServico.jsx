@@ -378,8 +378,6 @@ const OrdemServico = () => {
                         showConfirmButton: false
                     });
                 } else {
-                    // Cliente não encontrado - não fazer nada, deixar campos vazios
-                    console.log('Cliente não encontrado para o CPF:', cpfLimpo);
                 }
             } catch (error) {
                 console.error('Erro ao buscar cliente por CPF:', error);
@@ -1049,8 +1047,6 @@ const OrdemServico = () => {
                 }
             };
 
-            // Log do payload para debug
-            console.log('📦 Payload sendo enviado:', JSON.stringify(payload, null, 2));
 
             if (selectedOrder) {
                 await serviceOrderService.updateServiceOrder(selectedOrder.id, payload);
@@ -1162,18 +1158,6 @@ const OrdemServico = () => {
                 const coleteValid = !inputValues.colete || (inputValues.coleteCor.trim() !== '');
 
                 const acessoriosValid = suspensorioValid && passanteValid && lencoValid && gravataValid && cintoValid && sapatoValid && coleteValid;
-
-                // Debug: mostrar quais campos estão falhando
-                if (!acessoriosValid) {
-                    console.log('Validação acessórios falhou:');
-                    console.log('Suspensorio:', inputValues.suspensorio, 'Cor:', inputValues.suspensorioCor, 'Valid:', suspensorioValid);
-                    console.log('Passante:', inputValues.passante, 'Cor:', inputValues.passanteCor, 'Valid:', passanteValid);
-                    console.log('Lenço:', inputValues.lenco, 'Cor:', inputValues.lencoCor, 'Valid:', lencoValid);
-                    console.log('Gravata:', inputValues.gravata, 'Cor:', inputValues.gravataCor, 'Descrição:', inputValues.gravataDescricao, 'Valid:', gravataValid);
-                    console.log('Cinto:', inputValues.cinto, 'Cor:', inputValues.cintoCor, 'Valid:', cintoValid);
-                    console.log('Sapato:', inputValues.sapato, 'Cor:', inputValues.sapatoCor, 'Número:', inputValues.sapatoNumero, 'Descrição:', inputValues.sapatoDescricao, 'Valid:', sapatoValid);
-                    console.log('Colete:', inputValues.colete, 'Cor:', inputValues.coleteCor, 'Descrição:', inputValues.coleteDescricao, 'Valid:', coleteValid);
-                }
 
                 return acessoriosValid;
 

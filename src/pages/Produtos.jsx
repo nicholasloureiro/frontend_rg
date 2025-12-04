@@ -94,8 +94,6 @@ const Produtos = () => {
 
       // Chamada real da API usando o service
       await productService.importarProdutos(formData);
-
-      console.log('Arquivo enviado:', selectedFile.name);
       
       // Fechar modal e recarregar produtos
       setShowImportModal(false);

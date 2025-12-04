@@ -27,7 +27,6 @@ export const clientService = {
     listarTodos: async () => {
         try {
             const response = await api.get('/api/v1/clients/list/');
-            console.log(response.data);
             return response.data;
         } catch (error) {
             console.error('Erro ao listar clientes:', error);

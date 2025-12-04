@@ -15,7 +15,6 @@ export const registerEmployee = async (employeeData) => {
 export const getEmployees = async () => {
   try {
     const response = await api.get('/api/v1/employees/list');
-    console.log(response.data);
     return response.data;
   } catch (error) {
     throw error.response?.data || error;

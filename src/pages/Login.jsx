@@ -87,14 +87,12 @@ const Login = () => {
       // Remove a máscara do CPF antes de enviar
       const usernameSemMascara = formData.username.replace(/\D/g, '');
       const data = await loginService(usernameSemMascara, formData.password);
-      console.log('Login realizado com sucesso:', data);
 
       // Salva os tokens no Redux primeiro (sem dados do usuário)
       login(null, data.access, data.refresh);
 
       // Busca as informações completas do usuário através da API /api/v1/auth/me/
       const userInfo = await getCurrentUser();
-      console.log('Informações do usuário obtidas:', userInfo);
 
       // Redireciona para a página desejada ou dashboard
       const redirectTo = searchParams.get('redirect') || '/dashboard';
@@ -120,7 +118,6 @@ const Login = () => {
       };
       // Aqui você faria a chamada para o endpoint de cadastro
       // Exemplo: await registerService(dadosParaEnviar)
-      console.log('Dados para cadastro:', dadosParaEnviar);
       alert('Cadastro realizado com sucesso! (simulação)');
       setShowRegister(false);
     } catch (error) {
@@ -131,7 +128,6 @@ const Login = () => {
   };
 
   const handleForgotPassword = () => {
-    console.log('Esqueceu a senha clicado');
   };
 
   return (

@@ -260,7 +260,6 @@ const Triagem = () => {
             const dadosParaAPI = prepararDadosParaAPI();
             const response = await triagemService.criarTriagem(dadosParaAPI);
 
-            console.log('Triagem criada com sucesso:', response);
             Swal.fire({
                 icon: 'success',
                 title: 'Sucesso!',

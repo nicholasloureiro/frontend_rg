@@ -26,17 +26,13 @@ export const useAuth = () => {
   const getCurrentUser = async () => {
     try {
       dispatch(setLoading(true));
-      console.log('Buscando dados do usuário atual...');
       const response = await getCurrentUserService();
-      console.log('Resposta do servidor:', response);
       
       if (response.success && response.user) {
-        console.log('Atualizando dados do usuário no estado:', response.user);
         dispatch(updateUser(response.user));
         return response.user;
       } else if (response.user) {
         // Se não há campo 'success', mas há dados do usuário
-        console.log('Atualizando dados do usuário no estado (sem campo success):', response.user);
         dispatch(updateUser(response.user));
         return response.user;
       }
