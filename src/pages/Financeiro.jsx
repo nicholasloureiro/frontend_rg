@@ -9,6 +9,7 @@ import Swal from 'sweetalert2';
 import { createRoot } from 'react-dom/client';
 import CustomSelect from '../components/CustomSelect';
 import Button from '../components/Button';
+import Pagination from '@mui/material/Pagination';
 
 const methodLabels = {
   DINHEIRO: 'Dinheiro',
@@ -72,8 +73,8 @@ const normalizeSummary = (payload) => {
 const formatDate = (value) => {
   if (!value) return '—';
   // Adiciona T00:00:00 para corrigir problema de fuso horário
-  const dateStr = typeof value === 'string' && value.match(/^\d{4}-\d{2}-\d{2}$/) 
-    ? `${value}T00:00:00` 
+  const dateStr = typeof value === 'string' && value.match(/^\d{4}-\d{2}-\d{2}$/)
+    ? `${value}T00:00:00`
     : value;
   const dateObj = new Date(dateStr);
   if (Number.isNaN(dateObj.getTime())) return value;
@@ -117,7 +118,7 @@ const getMonthRange = (value) => {
 
 function getTodayLocalDateStr() {
   const today = new Date();
-  today.setHours(0,0,0,0);
+  today.setHours(0, 0, 0, 0);
   const tzoffset = today.getTimezoneOffset() * 60000;
   const localISO = new Date(today - tzoffset).toISOString().split('T')[0];
   return localISO;
@@ -135,21 +136,31 @@ const Financeiro = () => {
   const [loadingSummary, setLoadingSummary] = useState(false);
   const [closing, setClosing] = useState(false);
   const [message, setMessage] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+  const [totalCount, setTotalCount] = useState(0);
 
   const personType = user?.person?.person_type?.type;
   const isAdministrator = personType === 'ADMINISTRADOR';
 
   const fetchSummary = useCallback(async () => {
     if (!isAdministrator) return;
-    
+
     setLoadingSummary(true);
     setMessage(null);
     try {
       const params = tab === 'today'
         ? { start_date: date, end_date: date }
         : getMonthRange(monthYear);
+      params.page = currentPage;
+      params.page_size = pageSize;
 
       const response = await getFinanceSummary(params);
+      setCurrentPage(response.page || currentPage);
+      setTotalPages(response.total_pages || 1);
+      setPageSize(response.page_size || pageSize);
+      setTotalCount(response.count || 0);
       setSummary(normalizeSummary(response));
     } catch (err) {
       console.error('Erro ao buscar resumo financeiro:', err);
@@ -158,13 +169,13 @@ const Financeiro = () => {
     } finally {
       setLoadingSummary(false);
     }
-  }, [date, monthYear, tab, isAdministrator]);
+  }, [date, monthYear, tab, isAdministrator, currentPage, pageSize]);
 
   useEffect(() => {
     if (isAdministrator) {
       fetchSummary();
     }
-  }, [fetchSummary, isAdministrator]);
+  }, [fetchSummary, isAdministrator, currentPage, pageSize]);
 
   const methodEntries = useMemo(() => {
     if (!summary?.totals_by_method) return [];
@@ -438,7 +449,7 @@ const Financeiro = () => {
               <input type="month" value={monthYear} onChange={(e) => setMonthYear(e.target.value)} />
             </label>
           )}
-          <Button 
+          <Button
             text="Lançar Pagamento Manual"
             onClick={handleOpenManualPayment}
             variant="primary"
@@ -511,32 +522,47 @@ const Financeiro = () => {
             )}
 
             {transactions.length ? (
-              <table className="transactions-table">
-                <thead>
-                  <tr>
-                    <th>OS</th>
-                    <th>Tipo</th>
-                    <th>Forma</th>
-                    <th>Valor</th>
-                    <th>Data</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {transactions.map((tx) => (
-                    <tr key={tx._internalId}>
-                      <td>#{tx.order_id ?? '—'}</td>
-                      <td>
-                        <span className={`chip ${tx.transaction_type}`}>
-                          {formatTransactionType(capitalizeText(tx.transaction_type))}
-                        </span>
-                      </td>
-                      <td>{ capitalizeText(tx.payment_method) || '—'}</td>
-                      <td>{formatCurrency(tx.amount)}</td>
-                      <td>{formatDate(tx.date)}</td>
+              <>
+                <table className="transactions-table">
+                  <thead>
+                    <tr>
+                      <th>OS</th>
+                      <th>Tipo</th>
+                      <th>Forma</th>
+                      <th>Valor</th>
+                      <th>Data</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {transactions.map((tx) => (
+                      <tr key={tx._internalId}>
+                        <td>#{tx.order_id ?? '—'}</td>
+                        <td>
+                          <span className={`chip ${tx.transaction_type}`}>
+                            {formatTransactionType(capitalizeText(tx.transaction_type))}
+                          </span>
+                        </td>
+                        <td>{capitalizeText(tx.payment_method) || '—'}</td>
+                        <td>{formatCurrency(tx.amount)}</td>
+                        <td>{formatDate(tx.date)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+                  <Pagination
+                    count={totalPages}
+                    page={currentPage}
+                    onChange={(e, value) => {
+                      setCurrentPage(value);
+                    }}
+                    color="primary"
+                    showFirstButton
+                    showLastButton
+                    disabled={loadingSummary}
+                  />
+                </div>
+              </>
             ) : (
               <div className="financeiro-empty">
                 <p>Nenhuma transação encontrada para o período selecionado.</p>
