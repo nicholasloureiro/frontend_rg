@@ -83,52 +83,33 @@ const normalizeAttendantMetricsData = (attendantMetricsData) => {
 export const useDashboard = (period = 'mes', customDate = null, customType = null) => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   const fetchDashboardData = async (selectedPeriod = period, selectedCustomDate = customDate, selectedCustomType = customType) => {
     try {
       setLoading(true);
-      setError(null);
-      
       // Buscar dados do dashboard principal e métricas de atendentes em paralelo
       const [dashboardResponse, attendantMetricsResponse] = await Promise.all([
         dashboardService.getDashboardData(selectedPeriod, selectedCustomDate, selectedCustomType),
         dashboardService.getAttendantMetrics(selectedPeriod)
       ]);
-      
-      console.log('📊 Resposta completa da API:', dashboardResponse);
-      console.log('📊 Dados do dashboard:', dashboardResponse.data);
-      console.log('👥 Métricas de atendentes:', attendantMetricsResponse);
-      
-      // Verificar se a resposta tem a estrutura esperada
+
+      // Normalização e atualização de dados (sem alterações)
       if (dashboardResponse && dashboardResponse.data) {
-        // Normalizar os dados de analytics
         const normalizedAnalytics = normalizeAnalyticsData(dashboardResponse.data);
-        
-        // Normalizar dados de métricas de atendentes
         const normalizedAttendantMetrics = normalizeAttendantMetricsData(attendantMetricsResponse);
-        
-        // Atualizar os dados de conversão com as métricas dos atendentes
         if (normalizedAnalytics && normalizedAttendantMetrics.length > 0) {
           normalizedAnalytics.conversao.atendentes = normalizedAttendantMetrics;
         }
-        
-        // Combinar os dados do dashboard com os analytics normalizados
         const combinedData = {
           ...dashboardResponse.data,
           analytics: normalizedAnalytics
         };
-        
-        console.log('📊 Dados normalizados:', combinedData);
-        console.log('👥 Atendentes normalizados:', normalizedAttendantMetrics);
         setDashboardData(combinedData);
       } else {
-        console.warn('⚠️ Resposta da API não tem a estrutura esperada:', dashboardResponse);
         setDashboardData(dashboardResponse || {});
       }
     } catch (err) {
-      console.error('❌ Erro no hook useDashboard:', err);
-      setError(err.message || 'Erro ao carregar dados do dashboard');
+      setDashboardData(null);
     } finally {
       setLoading(false);
     }
@@ -138,10 +119,6 @@ export const useDashboard = (period = 'mes', customDate = null, customType = nul
     fetchDashboardData();
   }, []);
 
-  const refetch = (selectedPeriod = period, selectedCustomDate = customDate, selectedCustomType = customType) => {
-    fetchDashboardData(selectedPeriod, selectedCustomDate, selectedCustomType);
-  };
-
   const changePeriod = (newPeriod, newCustomDate = null, newCustomType = null) => {
     fetchDashboardData(newPeriod, newCustomDate, newCustomType);
   };
@@ -149,12 +126,7 @@ export const useDashboard = (period = 'mes', customDate = null, customType = nul
   return {
     dashboardData,
     loading,
-    error,
-    refetch,
     changePeriod,
-    currentPeriod: period,
-    currentCustomDate: customDate,
-    currentCustomType: customType
   };
 };
 

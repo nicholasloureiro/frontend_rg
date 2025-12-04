@@ -29,43 +29,6 @@ export const dashboardService = {
   },
 
   /**
-   * Busca dados analíticos com filtros específicos
-   * @param {string} periodo - Período para filtrar os dados
-   * @param {string} dataInicio - Data de início (opcional)
-   * @param {string} dataFim - Data de fim (opcional)
-   * @param {string} customDate - Data customizada (opcional)
-   * @param {string} customType - Tipo de período customizado (opcional)
-   * @returns {Promise<Object>} Dados analíticos do dashboard
-   */
-  async getAnalyticsData(periodo = 'mes', dataInicio = null, dataFim = null, customDate = null, customType = null) {
-    try {
-      let url = `/api/v1/analytics/dashboard/?periodo=${periodo}`;
-      
-      if (dataInicio) {
-        url += `&data_inicio=${dataInicio}`;
-      }
-      
-      if (dataFim) {
-        url += `&data_fim=${dataFim}`;
-      }
-
-      if (customDate) {
-        url += `&data_customizada=${customDate}`;
-      }
-      
-      if (customType) {
-        url += `&tipo_customizado=${customType}`;
-      }
-
-      const response = await api.get(url);
-      return response.data;
-    } catch (error) {
-      console.error('Erro ao buscar dados analíticos:', error);
-      throw error;
-    }
-  },
-
-  /**
    * Busca métricas de atendentes
    * @param {string} periodo - Período para filtrar os dados (dia, semana, mes)
    * @returns {Promise<Object>} Dados de métricas dos atendentes
