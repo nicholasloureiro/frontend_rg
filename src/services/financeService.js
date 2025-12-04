@@ -23,8 +23,19 @@ export async function postCloseCash(payload) {
   return resp.data;
 }
 
+/**
+ * Lança um pagamento virtual manualmente.
+ * Endpoint: POST /api/v1/service-orders/virtual/
+ * Payload: { total_value, sinal: { amount, forma_pagamento, data }, restante: { amount, forma_pagamento, data } }
+ */
+export async function postVirtualPayment(payload) {
+  const resp = await api.post(`/api/v1/service-orders/virtual/`, payload);
+  return resp.data;
+}
+
 export default {
   getFinanceSummary,
   postCloseCash,
+  postVirtualPayment,
 };
 

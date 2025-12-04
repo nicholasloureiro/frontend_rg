@@ -1,10 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { formatCurrency } from '../utils/format';
 import '../styles/Financeiro.css';
-import { getFinanceSummary, postCloseCash } from '../services/financeService';
+import { getFinanceSummary, postCloseCash, postVirtualPayment } from '../services/financeService';
 import { useAuth } from '../hooks/useAuth';
 import Header from '../components/Header';
 import { capitalizeText } from '../utils/capitalizeText';
+import Swal from 'sweetalert2';
+import { createRoot } from 'react-dom/client';
+import CustomSelect from '../components/CustomSelect';
+import Button from '../components/Button';
 
 const methodLabels = {
   DINHEIRO: 'Dinheiro',
@@ -111,6 +115,14 @@ const getMonthRange = (value) => {
   };
 };
 
+function getTodayLocalDateStr() {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const tzoffset = today.getTimezoneOffset() * 60000;
+  const localISO = new Date(today - tzoffset).toISOString().split('T')[0];
+  return localISO;
+}
+
 const Financeiro = () => {
   const { user, isLoading } = useAuth();
   const [tab, setTab] = useState('today');
@@ -198,6 +210,204 @@ const Financeiro = () => {
   const averageAmount =
     summary?.total_transactions ? summary.total_amount / summary.total_transactions : 0;
 
+  const handleOpenManualPayment = () => {
+    // Criar um container para os componentes React
+    const formContainer = document.createElement('div');
+    formContainer.id = 'swal-form-container';
+    formContainer.style.cssText = 'text-align: left; padding: 10px 0;';
+
+    // Objeto para armazenar os valores do formulário
+    const formValues = {
+      tipoPagamento: '',
+      valor: '',
+      formaPagamento: '',
+      data: new Date().toISOString().split('T')[0]
+    };
+
+    // Componente de formulário que será renderizado dentro do Swal2
+    const PaymentForm = () => {
+      const [tipoPagamento, setTipoPagamento] = useState('');
+      const [valor, setValor] = useState('');
+      const [formaPagamento, setFormaPagamento] = useState('');
+      const [data, setData] = useState(formValues.data);
+
+      // Atualizar valores no objeto compartilhado
+      useEffect(() => {
+        formValues.tipoPagamento = tipoPagamento;
+        formValues.valor = valor;
+        formValues.formaPagamento = formaPagamento;
+        formValues.data = data;
+      }, [tipoPagamento, valor, formaPagamento, data]);
+
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', minWidth: '400px' }}>
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px' }}>
+              Tipo de Pagamento
+            </label>
+            <CustomSelect
+              value={tipoPagamento}
+              onChange={setTipoPagamento}
+              options={[
+                { value: '', label: 'Selecione o tipo' },
+                { value: 'sinal', label: 'Sinal' },
+                { value: 'restante', label: 'Restante' }
+              ]}
+              placeholder="Selecione o tipo"
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px' }}>
+              Valor
+            </label>
+            <input
+              type="text"
+              value={valor !== '' ? formatCurrency(Number(valor)) : ''}
+              onChange={(e) => {
+                let raw = e.target.value.replace(/[^\d]/g, '');
+                if (raw === '') raw = '0';
+                const valorFormatado = (Number(raw) / 100).toFixed(2);
+                setValor(valorFormatado);
+              }}
+              placeholder="R$ 0,00"
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: '2px solid var(--color-border)',
+                borderRadius: '8px',
+                fontSize: '14px'
+              }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px' }}>
+              Forma de Pagamento
+            </label>
+            <CustomSelect
+              value={formaPagamento}
+              onChange={setFormaPagamento}
+              options={[
+                { value: '', label: 'Selecione a forma' },
+                { value: 'credito', label: 'Crédito' },
+                { value: 'debito', label: 'Débito' },
+                { value: 'pix', label: 'PIX' },
+                { value: 'dinheiro', label: 'Dinheiro' },
+                { value: 'voucher', label: 'Voucher' }
+              ]}
+              placeholder="Selecione a forma"
+            />
+          </div>
+        </div>
+      );
+    };
+
+    let reactRoot = null;
+
+    Swal.fire({
+      title: 'Lançar Pagamento Manual',
+      html: formContainer,
+      showCancelButton: true,
+      confirmButtonText: 'Lançar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: 'var(--color-accent)',
+      cancelButtonColor: '#ffffff',
+      reverseButtons: true,
+      width: '500px',
+      didOpen: () => {
+        const container = document.getElementById('swal-form-container');
+        if (container) {
+          reactRoot = createRoot(container);
+          reactRoot.render(<PaymentForm />);
+        }
+      },
+      didClose: () => {
+        // Limpar o React root quando o modal fechar
+        if (reactRoot) {
+          const container = document.getElementById('swal-form-container');
+          if (container) {
+            reactRoot.unmount();
+            reactRoot = null;
+          }
+        }
+      },
+      preConfirm: async () => {
+        const tipoPagamento = formValues.tipoPagamento;
+        const valor = formValues.valor;
+        const formaPagamento = formValues.formaPagamento;
+
+        // Data local BR
+        const data = getTodayLocalDateStr();
+
+        // Validações
+        if (!tipoPagamento || tipoPagamento === '') {
+          Swal.showValidationMessage('Selecione o tipo de pagamento');
+          return false;
+        }
+
+        if (!valor || parseFloat(valor) <= 0) {
+          Swal.showValidationMessage('Informe um valor válido');
+          return false;
+        }
+
+        if (!formaPagamento || formaPagamento === '') {
+          Swal.showValidationMessage('Selecione a forma de pagamento');
+          return false;
+        }
+
+        if (!data) {
+          Swal.showValidationMessage('Informe a data');
+          return false;
+        }
+
+        // Formatar valor com 2 casas decimais
+        const valorFormatado = parseFloat(valor).toFixed(2);
+
+        // Criar data/hora no formato ISO (sempre 00:00:00)
+        const dataHoraISO = `${data}T00:00:00`;
+
+        // Montar payload conforme modelo especificado
+        const payload = {
+          total_value: valorFormatado,
+          [tipoPagamento]: {
+            amount: valorFormatado,
+            forma_pagamento: formaPagamento,
+            data: dataHoraISO
+          }
+        };
+
+        // Se for sinal, adicionar restante vazio (ou vice-versa)
+        if (tipoPagamento === 'sinal') {
+          payload.restante = null;
+        } else {
+          payload.sinal = null;
+        }
+
+        try {
+          await postVirtualPayment(payload);
+          return true;
+        } catch (error) {
+          Swal.showValidationMessage(error.response?.data?.message || 'Erro ao lançar pagamento. Tente novamente.');
+          return false;
+        }
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Sucesso!',
+          text: 'Pagamento lançado com sucesso!',
+          confirmButtonColor: '#CBA135',
+          timer: 2000,
+          showConfirmButton: false
+        });
+        // Recarregar dados
+        fetchSummary();
+      }
+    });
+  };
+
   return (
     <>
       <Header nomeHeader="Financeiro" />
@@ -216,7 +426,7 @@ const Financeiro = () => {
           </div>
         </div>
 
-        <div className="financeiro-controls enhanced">
+        <div className="financeiro-controls enhanced d-flex justify-content-between gap-2">
           {tab === 'today' ? (
             <label>
               <span style={{ fontSize: '16px', fontWeight: 'bold' }}>Data</span>
@@ -228,13 +438,12 @@ const Financeiro = () => {
               <input type="month" value={monthYear} onChange={(e) => setMonthYear(e.target.value)} />
             </label>
           )}
+          <Button 
+            text="Lançar Pagamento Manual"
+            onClick={handleOpenManualPayment}
+            variant="primary"
+          />
         </div>
-
-        {message && (
-          <div className={`financeiro-message ${message.type}`}>
-            {message.text}
-          </div>
-        )}
 
         <div className="financeiro-hero">
           <div className="metric-grid">
