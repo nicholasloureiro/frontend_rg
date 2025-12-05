@@ -1,114 +1,42 @@
 import { useState, useEffect } from 'react';
 import { dashboardService } from '../services/dashboardService';
 
-// Função para normalizar os dados da API (snake_case -> camelCase)
-const normalizeAnalyticsData = (apiData) => {
-  if (!apiData || !apiData.analytics) {
-    return null;
-  }
-
-  const analytics = apiData.analytics;
-
-  return {
-    vendasPorTipo: {
-      locacao: analytics.vendas_por_tipo?.locacao || 0,
-      venda: analytics.vendas_por_tipo?.venda || 0,
-      totalVendas: analytics.vendas_por_tipo?.total_vendas || 0,
-      percentualLocacao: analytics.vendas_por_tipo?.percentual_locacao || 0,
-      percentualVenda: analytics.vendas_por_tipo?.percentual_venda || 0
-    },
-    clientesAtendidos: {
-      total: analytics.clientes_atendidos?.total || 0,
-      novos: analytics.clientes_atendidos?.novos || 0,
-      recorrentes: analytics.clientes_atendidos?.recorrentes || 0,
-      porPeriodo: analytics.clientes_atendidos?.por_periodo || []
-    },
-    conversao: {
-      geral: analytics.conversao?.geral || 0,
-      loja: analytics.conversao?.loja || 0,
-      atendentes: analytics.conversao?.atendentes || []
-    },
-    ticketMedio: {
-      geral: analytics.ticket_medio?.geral || 0,
-      locacao: analytics.ticket_medio?.locacao || 0,
-      venda: analytics.ticket_medio?.venda || 0,
-      evolucao: analytics.ticket_medio?.evolucao || []
-    },
-    vendasPorCanal: analytics.vendas_por_canal || [],
-    tipoCliente: analytics.tipo_cliente || [],
-    motivosRecusa: analytics.motivos_recusa || [],
-    reclamacoes: {
-      total: analytics.reclamacoes?.total || 0,
-      resolvidas: analytics.reclamacoes?.resolvidas || 0,
-      pendentes: analytics.reclamacoes?.pendentes || 0,
-      porCategoria: analytics.reclamacoes?.por_categoria || [],
-      satisfacaoPos: analytics.reclamacoes?.satisfacao_pos || 0
-    },
-    resumo: {
-      ticketMedio: analytics.resumo?.ticket_medio || 0,
-      conversaoGeral: analytics.resumo?.conversao_geral || 0,
-      satisfacaoCliente: analytics.resumo?.satisfacao_cliente || 0,
-      nps: analytics.resumo?.nps || 0
-    }
-  };
-};
-
-// Função para normalizar dados de métricas de atendentes
-const normalizeAttendantMetricsData = (attendantMetricsData) => {
-  if (!attendantMetricsData || !attendantMetricsData.atendentes) {
-    return [];
-  }
-
-  return attendantMetricsData.atendentes.map(atendente => {
-    // Selecionar dados baseado no período (padrão: mês)
-    const periodoData = atendente.mes || atendente.semana || atendente.dia;
-    
-    return {
-      id: atendente.atendente_id,
-      nome: atendente.atendente_nome,
-      taxa: periodoData.conversao?.taxa_conversao || 0,
-      conversoes: periodoData.conversao?.concluidos_sucesso || 0,
-      atendimentos: periodoData.conversao?.atendimentos_iniciados || 0,
-      totalAtendimentos: periodoData.atendimentos?.total_atendimentos || 0,
-      finalizados: periodoData.atendimentos?.finalizados || 0,
-      cancelados: periodoData.atendimentos?.cancelados || 0,
-      emAndamento: periodoData.atendimentos?.em_andamento || 0,
-      totalVendido: periodoData.financeiro?.total_vendido || 0,
-      totalRecebido: periodoData.financeiro?.total_recebido || 0,
-      itensVendidos: periodoData.vendas?.itens_vendidos || 0
-    };
-  });
-};
-
-export const useDashboard = (period = 'mes', customDate = null, customType = null) => {
+export const useDashboard = (period = 'mes', customDate = null, customType = null, atendente = null, tipoCliente = null, formaPagamento = null, canalOrigem = null, dataInicio = null, dataFim = null) => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchDashboardData = async (selectedPeriod = period, selectedCustomDate = customDate, selectedCustomType = customType) => {
+  const fetchDashboardData = async (
+    selectedPeriod = period, 
+    selectedCustomDate = customDate, 
+    selectedCustomType = customType,
+    selectedAtendente = atendente,
+    selectedTipoCliente = tipoCliente,
+    selectedFormaPagamento = formaPagamento,
+    selectedCanalOrigem = canalOrigem,
+    selectedDataInicio = dataInicio,
+    selectedDataFim = dataFim
+  ) => {
     try {
       setLoading(true);
-      // Buscar dados do dashboard principal e métricas de atendentes em paralelo
-      const [dashboardResponse, attendantMetricsResponse] = await Promise.all([
-        dashboardService.getDashboardData(selectedPeriod, selectedCustomDate, selectedCustomType),
-        dashboardService.getAttendantMetrics(selectedPeriod)
-      ]);
+      const response = await dashboardService.getDashboardData(
+        selectedPeriod, 
+        selectedCustomDate, 
+        selectedCustomType,
+        selectedAtendente,
+        selectedTipoCliente,
+        selectedFormaPagamento,
+        selectedCanalOrigem,
+        selectedDataInicio,
+        selectedDataFim
+      );
 
-      // Normalização e atualização de dados (sem alterações)
-      if (dashboardResponse && dashboardResponse.data) {
-        const normalizedAnalytics = normalizeAnalyticsData(dashboardResponse.data);
-        const normalizedAttendantMetrics = normalizeAttendantMetricsData(attendantMetricsResponse);
-        if (normalizedAnalytics && normalizedAttendantMetrics.length > 0) {
-          normalizedAnalytics.conversao.atendentes = normalizedAttendantMetrics;
-        }
-        const combinedData = {
-          ...dashboardResponse.data,
-          analytics: normalizedAnalytics
-        };
-        setDashboardData(combinedData);
+      if (response && response.data) {
+        setDashboardData(response.data);
       } else {
-        setDashboardData(dashboardResponse || {});
+        setDashboardData(response || {});
       }
     } catch (err) {
+      console.error('Erro ao buscar dados do dashboard:', err);
       setDashboardData(null);
     } finally {
       setLoading(false);
@@ -119,8 +47,8 @@ export const useDashboard = (period = 'mes', customDate = null, customType = nul
     fetchDashboardData();
   }, []);
 
-  const changePeriod = (newPeriod, newCustomDate = null, newCustomType = null) => {
-    fetchDashboardData(newPeriod, newCustomDate, newCustomType);
+  const changePeriod = (newPeriod, newCustomDate = null, newCustomType = null, newAtendente = null, newTipoCliente = null, newFormaPagamento = null, newCanalOrigem = null, newDataInicio = null, newDataFim = null) => {
+    fetchDashboardData(newPeriod, newCustomDate, newCustomType, newAtendente, newTipoCliente, newFormaPagamento, newCanalOrigem, newDataInicio, newDataFim);
   };
 
   return {

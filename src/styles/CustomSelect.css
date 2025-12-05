@@ -26,6 +26,7 @@
   border: 2px solid var(--color-border);
   border-radius: 8px !important;
   width: 100% !important;
+  min-width: 220px !important;
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
   cursor: pointer;
 }

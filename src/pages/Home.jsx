@@ -3,6 +3,7 @@ import '../styles/Home.css';
 import Header from '../components/Header';
 import Card from '../components/Card';
 import PeriodFilter from '../components/PeriodFilter';
+import AnalyticsFilters from '../components/AnalyticsFiltersComponent';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faArrowRightLong, 
@@ -28,28 +29,62 @@ import setaDireitaBlue from '../assets/seta-direita-blue.png';
 import setaDireitaGreen from '../assets/seta-direita-green.png';
 import useDashboard from '../hooks/useDashboard';
 import {
-  VendasPorTipoChart,
-  ConversaoPorAtendenteChart,
-  VendasPorCanalChart,
+  TaxaConversaoChart,
+  TotalVendidoChart,
+  NumAtendimentosChart,
   TipoClienteChart,
-  MotivosRecusaChart,
-  TicketMedioChart,
-  ClientesAtendidosChart,
-  StatCard
-} from '../components/Charts';
+  TipoClienteAtendimentosChart,
+  CanalOrigemChart
+} from '../components/AnalyticsCharts';
 
 const Home = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('mes');
   const [customDate, setCustomDate] = useState(null);
   const [customType, setCustomType] = useState(null);
-  const { dashboardData, loading, changePeriod } = useDashboard(selectedPeriod, customDate, customType);
+  
+  // Obter data de hoje no formato YYYY-MM-DD
+  const getTodayDate = () => {
+    const today = new Date();
+    // Ajustar para o timezone local
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const [selectedFilters, setSelectedFilters] = useState({
+    atendente: null,
+    tipoCliente: null,
+    formaPagamento: null,
+    canalOrigem: null,
+    dataInicio: getTodayDate(),
+    dataFim: getTodayDate()
+  });
+
+  const { dashboardData, loading, changePeriod } = useDashboard(
+    selectedPeriod, 
+    customDate, 
+    customType,
+    selectedFilters.atendente,
+    selectedFilters.tipoCliente,
+    selectedFilters.formaPagamento,
+    selectedFilters.canalOrigem,
+    selectedFilters.dataInicio,
+    selectedFilters.dataFim
+  );
 
   // Função para lidar com mudança de período
   const handlePeriodChange = (newPeriod, newCustomDate = null, newCustomType = null) => {
     setSelectedPeriod(newPeriod);
     setCustomDate(newCustomDate);
     setCustomType(newCustomType);
-    changePeriod(newPeriod, newCustomDate, newCustomType);
+    changePeriod(newPeriod, newCustomDate, newCustomType, selectedFilters.atendente, selectedFilters.tipoCliente, selectedFilters.formaPagamento, selectedFilters.canalOrigem, selectedFilters.dataInicio, selectedFilters.dataFim);
+  };
+
+  // Função para lidar com mudança de filtros
+  const handleFilterChange = (newFilters) => {
+    setSelectedFilters(newFilters);
+    changePeriod(selectedPeriod, customDate, customType, newFilters.atendente, newFilters.tipoCliente, newFilters.formaPagamento, newFilters.canalOrigem, newFilters.dataInicio, newFilters.dataFim);
   };
 
   // Dados analíticos normalizados da API
@@ -275,6 +310,96 @@ const Home = () => {
               })}
             </div>
           ))}
+        </div>
+        <h2 className="pt-3 pb-4">Relatório de atendimentos</h2>
+          {/* Seção de KPIs */}
+        <div className="kpis-section">
+          <div className="kpis-grid">
+            <div className="kpi-card">
+              <p className="kpi-label">Total Recebido</p>
+              <p className="kpi-value">
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(dashboardData?.kpis?.total_recebido || 0)}
+              </p>
+            </div>
+            <div className="kpi-card">
+              <p className="kpi-label">Total Vendido</p>
+              <p className="kpi-value">
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(dashboardData?.kpis?.total_vendido || 0)}
+              </p>
+            </div>
+            <div className="kpi-card">
+              <p className="kpi-label">Total de Atend.</p>
+              <p className="kpi-value">{dashboardData?.kpis?.total_atendimentos || 0}</p>
+            </div>
+            <div className="kpi-card">
+              <p className="kpi-label">Atnd fechados</p>
+              <p className="kpi-value">{dashboardData?.kpis?.atendimentos_fechados || 0}</p>
+            </div>
+            <div className="kpi-card">
+              <p className="kpi-label">Atnd não fech.</p>
+              <p className="kpi-value">{dashboardData?.kpis?.atendimentos_nao_fechados || 0}</p>
+            </div>
+            <div className="kpi-card">
+              <p className="kpi-label">Tx. Conv</p>
+              <p className="kpi-value">{(dashboardData?.kpis?.taxa_conversao || 0).toFixed(2)}%</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Seção de Filtros */}
+        {dashboardData?.filtros_disponiveis && (
+          <AnalyticsFilters 
+            filters={dashboardData.filtros_disponiveis}
+            selectedFilters={selectedFilters}
+            onFilterChange={handleFilterChange}
+          />
+        )}
+
+        {/* Gráficos de Análise */}
+        <div className="charts-grid">
+          {/* Gráficos de Atendentes */}
+          <div className="chart-section">
+            <h3>Análise de Atendentes</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+              <div>
+                <h4 style={{ margin: "10px 0", fontSize: "14px", color: "#555" }}>Taxa de Conversão (%)</h4>
+                <TaxaConversaoChart data={dashboardData?.atendentes_taxa_conversao || []} />
+              </div>
+              <div>
+                <h4 style={{ margin: "10px 0", fontSize: "14px", color: "#555" }}>Número de Atendimentos</h4>
+                <NumAtendimentosChart data={dashboardData?.atendentes_taxa_conversao || []} />
+              </div>
+            </div>
+          </div>
+
+          {/* Gráfico de Total Vendido por Atendente */}
+          <div className="chart-section">
+            <h3>Total Vendido por Atendente</h3>
+            <h4 style={{ margin: "10px 0", fontSize: "14px", color: "#555" }}>Valor total vendido por cada atendente</h4>
+            <TotalVendidoChart data={dashboardData?.atendentes_total_vendido || []} />
+          </div>
+
+          {/* Gráfico de Tipo de Cliente */}
+          <div className="chart-section">
+            <h3>Análise por Tipo de Cliente</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+              <div>
+                <h4 style={{ margin: "10px 0", fontSize: "14px", color: "#555" }}>Total Vendido</h4>
+                <TipoClienteChart data={dashboardData?.grafico_tipo_cliente || []} />
+              </div>
+              <div>
+                <h4 style={{ margin: "10px 0", fontSize: "14px", color: "#555" }}>Atendimentos Fechados</h4>
+                <TipoClienteAtendimentosChart data={dashboardData?.grafico_tipo_cliente || []} />
+              </div>
+            </div>
+          </div>
+
+          {/* Gráfico de Canal de Origem */}
+          <div className="chart-section">
+            <h3>Análise por Canal de Origem</h3>
+            <h4 style={{ margin: "10px 0", fontSize: "14px", color: "#555" }}>Quantidade de atendimentos fechados por canal</h4>
+            <CanalOrigemChart data={dashboardData?.grafico_canal_origem || []} />
+          </div>
         </div>
       </div>
     </>
