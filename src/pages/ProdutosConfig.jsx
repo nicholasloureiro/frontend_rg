@@ -155,9 +155,8 @@ const ProdutosConfig = () => {
 
     if (result.isConfirmed) {
       try {
-        // TODO: Excluir marca na API
-        // await api.delete(`/marcas/${id}`);
-        setMarcas(prev => prev.filter(m => m.id !== id));
+        // Excluir marca na API
+        await brandService.deleteBrand(id);
         Swal.fire({
           icon: 'success',
           title: 'Excluída!',
@@ -165,7 +164,7 @@ const ProdutosConfig = () => {
           timer: 2000,
           showConfirmButton: false
         });
-        buscarMarcas(paginationMarcas.pageIndex, paginationMarcas.pageSize);
+        buscarMarcas(paginationMarcas.pageIndex, paginationMarcas.pageSize, debouncedSearchMarca);
       } catch (err) {
         console.error('Erro ao excluir marca:', err);
         Swal.fire({
@@ -176,7 +175,7 @@ const ProdutosConfig = () => {
         });
       }
     }
-  }, [buscarMarcas, paginationMarcas]);
+  }, [buscarMarcas, paginationMarcas, debouncedSearchMarca]);
 
   // ==================== CORES ====================
   // Carregar cores com useCallback

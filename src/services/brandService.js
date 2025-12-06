@@ -40,6 +40,15 @@ const brandService = {
     const response = await api.patch(`/api/v1/brands/${id}/`, { description });
     return response.data;
   },
+
+  /**
+   * Deleta uma marca
+   * @param {number} id - ID da marca
+   * @returns {Promise<void>}
+   */
+  async deleteBrand(id) {
+    await api.delete(`/api/v1/brands/${id}/`);
+  },
 };
 
 export default brandService;
