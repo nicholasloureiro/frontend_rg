@@ -698,7 +698,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
             <div className="search-toggle-btn-container mb-3">
                 <div className="search-toggle-btn-container-content d-flex justify-content-end">
                     <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-end', marginRight: 'auto' }}>
-                        <div style={{ width: 200 }}>
+                        <div>
                             <label>Modo de visualização</label>
                             <CustomSelect
                                 options={[

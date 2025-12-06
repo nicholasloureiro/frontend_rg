@@ -366,7 +366,7 @@
 
 .date-picker-container .react-datepicker__input-container input {
     width: 100%;
-    padding: 10px 12px;
+    padding: 5px 10px 5px 30px !important;
     border-radius: 6px;
     background-color: var(--color-bg-input);
     color: var(--color-text-primary);

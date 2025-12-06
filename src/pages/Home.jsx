@@ -362,11 +362,11 @@ const Home = () => {
             <h3>Análise de Atendentes</h3>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
               <div>
-                <h4 style={{ margin: "10px 0", fontSize: "14px", color: "#555" }}>Taxa de Conversão (%)</h4>
+                <h4 style={{ margin: "0 0 10px 0", fontSize: "14px", color: "#555" }}>Taxa de Conversão (%)</h4>
                 <TaxaConversaoChart data={dashboardData?.atendentes_taxa_conversao || []} />
               </div>
               <div>
-                <h4 style={{ margin: "10px 0", fontSize: "14px", color: "#555" }}>Número de Atendimentos</h4>
+                <h4 style={{ margin: "0 0 10px 0", fontSize: "14px", color: "#555" }}>Número de Atendimentos</h4>
                 <NumAtendimentosChart data={dashboardData?.atendentes_taxa_conversao || []} />
               </div>
             </div>
@@ -384,11 +384,11 @@ const Home = () => {
             <h3>Análise por Tipo de Cliente</h3>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
               <div>
-                <h4 style={{ margin: "10px 0", fontSize: "14px", color: "#555" }}>Total Vendido</h4>
+                <h4 style={{ margin: "0 0 10px 0", fontSize: "14px", color: "#555" }}>Total Vendido</h4>
                 <TipoClienteChart data={dashboardData?.grafico_tipo_cliente || []} />
               </div>
               <div>
-                <h4 style={{ margin: "10px 0", fontSize: "14px", color: "#555" }}>Atendimentos Fechados</h4>
+                <h4 style={{ margin: "0 0 10px 0", fontSize: "14px", color: "#555" }}>Atendimentos Fechados</h4>
                 <TipoClienteAtendimentosChart data={dashboardData?.grafico_tipo_cliente || []} />
               </div>
             </div>

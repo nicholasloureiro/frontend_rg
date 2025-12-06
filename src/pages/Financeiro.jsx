@@ -4,6 +4,7 @@ import '../styles/Financeiro.css';
 import { getFinanceSummary, postCloseCash, postVirtualPayment } from '../services/financeService';
 import { useAuth } from '../hooks/useAuth';
 import Header from '../components/Header';
+import InputDate from '../components/InputDate';
 import { capitalizeText } from '../utils/capitalizeText';
 import Swal from 'sweetalert2';
 import { createRoot } from 'react-dom/client';
@@ -441,12 +442,38 @@ const Financeiro = () => {
           {tab === 'today' ? (
             <label>
               <span style={{ fontSize: '16px', fontWeight: 'bold' }}>Data</span>
-              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+              <InputDate
+                selectedDate={date ? new Date(date + 'T00:00:00') : null}
+                onDateChange={(newDate) => {
+                  if (newDate) {
+                    const year = newDate.getFullYear();
+                    const month = String(newDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(newDate.getDate()).padStart(2, '0');
+                    setDate(`${year}-${month}-${day}`);
+                  } else {
+                    setDate('');
+                  }
+                }}
+                placeholderText="Selecione a data"
+              />
             </label>
           ) : (
             <label>
               <span style={{ fontSize: '16px', fontWeight: 'bold' }}>Mês</span>
-              <input type="month" value={monthYear} onChange={(e) => setMonthYear(e.target.value)} />
+              <InputDate
+                mode="month"
+                selectedDate={monthYear ? new Date(monthYear + '-01T00:00:00') : null}
+                onDateChange={(newMonth) => {
+                  if (newMonth) {
+                    const year = newMonth.getFullYear();
+                    const month = String(newMonth.getMonth() + 1).padStart(2, '0');
+                    setMonthYear(`${year}-${month}`);
+                  } else {
+                    setMonthYear('');
+                  }
+                }}
+                placeholderText="Selecione o mês"
+              />
             </label>
           )}
           <Button

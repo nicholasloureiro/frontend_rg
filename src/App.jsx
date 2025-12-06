@@ -16,6 +16,7 @@ import './App.css'
 import Triagem from './pages/Triagem'
 import OrdemServico from './pages/OrdemServico'
 import Produtos from './pages/Produtos'
+import ProdutosConfig from './pages/ProdutosConfig'
 import Eventos from './pages/Eventos'
 import EventoDetalhes from './pages/EventoDetalhes'
 import ClienteHistorico from './pages/ClienteHistorico'
@@ -150,6 +151,12 @@ function AppContent() {
           <Route path="/produtos" element={
             <ProtectedRoute>
               <Produtos />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/produtos-config" element={
+            <ProtectedRoute>
+              <ProdutosConfig />
             </ProtectedRoute>
           } />
           

@@ -19,7 +19,7 @@ export const TaxaConversaoChart = ({ data = [] }) => {
   const chartData = data.map((item) => ({
     nome: item.nome,
     "Taxa Conversão": item.taxa_conversao || 0,
-    Atendimentos: item.num_atendimentos || 0,
+    Atendimentos: item.num_fechados || 0,
     Fechados: item.num_fechados || 0,
   }));
 
@@ -121,7 +121,7 @@ export const TotalVendidoChart = ({ data = [] }) => {
   const chartData = data.map((item) => ({
     nome: item.nome,
     "Total Vendido": item.total_vendido || 0,
-    Atendimentos: item.num_atendimentos || 0,
+    Atendimentos: item.num_fechados || 0,
   }));
 
   const margins = isSmallScreen 
@@ -222,7 +222,7 @@ export const NumAtendimentosChart = ({ data = [] }) => {
 
   const chartData = data.map((item) => ({
     nome: item.nome,
-    "Atendimentos": item.num_atendimentos || 0,
+    "Atendimentos": item.num_fechados || 0,
   }));
 
   const margins = isSmallScreen 

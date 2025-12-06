@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/Produtos.css';
 import Header from '../components/Header';
 import Modal from '../components/Modal';
@@ -11,6 +12,7 @@ import calcaImg from '../assets/calca.png';
 import coleteImg from '../assets/colete.png';
 
 const Produtos = () => {
+  const navigate = useNavigate();
   const [produtos, setProdutos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -406,7 +408,14 @@ const Produtos = () => {
                     />
                   </div>
                   
-                  
+                  <Button
+                    text="Gerenciar Cores e Marcas"
+                    variant="primary"
+                    onClick={() => navigate('/produtos-config')}
+                    iconName="gear"
+                    iconPosition="left"
+                    style={{ marginLeft: 'auto' }}
+                  />
                 </div>
               </div>
             </div>
