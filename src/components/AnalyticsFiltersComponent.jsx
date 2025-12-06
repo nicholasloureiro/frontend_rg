@@ -46,6 +46,27 @@ const AnalyticsFilters = ({
   return (
     <div className="analytics-filters">
       <div className="filters-container">
+        
+        {/* Filtro de Data Início */}
+        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
+          <label>Data Início</label>
+          <InputDate
+            selectedDate={stringToDate(selectedFilters.dataInicio)}
+            onDateChange={(date) => handleDateChange("dataInicio", date)}
+            placeholderText="Data início"
+          />
+        </div>
+
+        {/* Filtro de Data Fim */}
+        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
+          <label>Data Fim</label>
+          <InputDate
+            selectedDate={stringToDate(selectedFilters.dataFim)}
+            onDateChange={(date) => handleDateChange("dataFim", date)}
+            placeholderText="Data fim"
+          />
+        </div>
+        <div style={{borderRight: '1px solid #ccc', width: '1px', height: '55px',}}></div>
         {/* Filtro de Atendente */}
         {filters.atendentes && filters.atendentes.length > 0 && (
           <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
@@ -121,26 +142,6 @@ const AnalyticsFilters = ({
             />
           </div>
         )}
-
-        {/* Filtro de Data Início */}
-        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
-          <label>Data Início</label>
-          <InputDate
-            selectedDate={stringToDate(selectedFilters.dataInicio)}
-            onDateChange={(date) => handleDateChange("dataInicio", date)}
-            placeholderText="Data início"
-          />
-        </div>
-
-        {/* Filtro de Data Fim */}
-        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
-          <label>Data Fim</label>
-          <InputDate
-            selectedDate={stringToDate(selectedFilters.dataFim)}
-            onDateChange={(date) => handleDateChange("dataFim", date)}
-            placeholderText="Data fim"
-          />
-        </div>
       </div>
     </div>
   );
