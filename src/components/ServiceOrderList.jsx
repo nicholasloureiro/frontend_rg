@@ -274,6 +274,19 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
 
     const handleEditOrder = (order, event) => {
         event.stopPropagation(); // Previne que o clique propague para o card
+        
+        // Verifica se o employee_name está vazio
+        if (!order.employee_name || order.employee_name.trim() === '') {
+            Swal.fire({
+                title: 'Atendente não definido',
+                text: 'Por favor, defina um atendente antes de editar esta ordem de serviço.',
+                icon: 'warning',
+                confirmButtonColor: '#0095e2',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+        
         // Navega para a rota de edição com o ID da ordem
         navigate(`/ordens/${order.id}`);
     };
