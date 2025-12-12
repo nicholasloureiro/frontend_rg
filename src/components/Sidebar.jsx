@@ -39,7 +39,7 @@ const Sidebar = ({ setSideOpen }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showModalPassword, setShowModalPassword] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 1000);
+  const [isMobile, setIsMobile] = useState();
   const [isSmallMobile, setIsSmallMobile] = useState(window.innerWidth < 650);
   const { user, logout, isLoading } = useAuth();
   const navigate = useNavigate();
@@ -94,7 +94,7 @@ const Sidebar = ({ setSideOpen }) => {
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth < 1000;
-      const smallMobile = window.innerWidth < 650;
+      const smallMobile = window.innerWidth < 690;
       setIsMobile(mobile);
       setIsSmallMobile(smallMobile);
       setVisibleLinksCount(getVisibleLinksCount());

@@ -480,6 +480,7 @@ const Financeiro = () => {
             text="Lançar Pagamento Manual"
             onClick={handleOpenManualPayment}
             variant="primary"
+            style={{ width: 'fit-content' }}
           />
         </div>
 

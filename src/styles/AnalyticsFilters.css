@@ -56,11 +56,19 @@
   padding: 4px;
 }
 
+@media (max-width: 1100px) {
+    .filters-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+  .dividerFilters {
+    display: none;
+  }
+}
+
 /* Responsivo */
 @media (max-width: 768px) {
-  .filters-container {
-    flex-direction: column;
-  }
+
 
   .filter-group {
     width: 100%;

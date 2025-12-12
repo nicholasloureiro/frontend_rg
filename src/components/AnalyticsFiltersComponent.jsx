@@ -66,7 +66,7 @@ const AnalyticsFilters = ({
             placeholderText="Data fim"
           />
         </div>
-        <div style={{borderRight: '1px solid #ccc', width: '1px', height: '55px',}}></div>
+        <div className="dividerFilters" style={{borderRight: '1px solid #ccc', width: '1px', height: '55px',}}></div>
         {/* Filtro de Atendente */}
         {filters.atendentes && filters.atendentes.length > 0 && (
           <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
