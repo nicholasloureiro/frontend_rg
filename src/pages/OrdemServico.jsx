@@ -1060,7 +1060,7 @@ const OrdemServico = () => {
       gravataCor: gravata.cor || "",
       cinto: !!cinto.tipo,
       cintoCor: cinto.cor || "",
-      cintoComprimento: cinto.comprimento || "",
+      cintoComprimento: cinto.numero || cinto.comprimento || "",
       cintoMarca: cinto.marca ? String(cinto.marca) : "",
       sapato: !!sapato.tipo,
       sapatoDescricao: sapato.descricao || "",
@@ -1260,7 +1260,7 @@ const OrdemServico = () => {
                   {
                     tipo: "cinto",
                     cor: formData.cintoCor,
-                    comprimento: formData.cintoComprimento,
+                    numero: formData.cintoComprimento,
                     marca: formData.cintoMarca,
                     venda: getItensVendidos().includes("cinto"),
                   },
