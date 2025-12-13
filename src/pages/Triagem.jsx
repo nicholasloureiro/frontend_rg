@@ -481,7 +481,7 @@ const Triagem = () => {
                     <form onSubmit={handleSubmit} className="triagem-form">
                         {/* Seção: Dados do Cliente */}
                         <div className="form-section">
-                            <h3 className="section-title">Dados do Cliente</h3>
+                            <h3 className="section-title mb-3">Dados do Cliente</h3>
 
                             {/* Primeira linha: CPF, Nome do Cliente, Telefone */}
                             <div className="form-row">
@@ -613,7 +613,7 @@ const Triagem = () => {
 
                         {/* Seção: Informações do Evento */}
                         <div className="form-section mb-0">
-                            <h3 className="section-title">Informações do Evento</h3>
+                            <h3 className="section-title mb-3">Informações do Evento</h3>
 
                             <div className="form-row">
                                 <div className="form-group">
