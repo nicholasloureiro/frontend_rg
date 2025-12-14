@@ -91,7 +91,8 @@ const ClienteHistorico = () => {
         
         const statusMap = {
             'PENDENTE': '#0095e2',
-            'AGUARDANDO_RETIRADA': '#e2d502',
+            'EM_PRODUCAO': '#4067a2',
+            'AGUARDANDO_RETIRADA': '#ffb800',
             'AGUARDANDO_DEVOLUCAO': '#1c3b4d',
             'ATRASADO': '#f44336',
             'RECUSADA': '#9e9e9e',
@@ -247,14 +248,6 @@ const ClienteHistorico = () => {
                                     </span>
                                 )}
                             </div>
-                            <button
-                                className="btn-refresh"
-                                onClick={loadServiceOrders}
-                                disabled={isLoadingOrders}
-                            >
-                                <i className="bi bi-arrow-clockwise"></i>
-                                Atualizar
-                            </button>
                         </div>
                     </div>
 

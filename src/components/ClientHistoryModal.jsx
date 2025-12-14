@@ -57,7 +57,8 @@ const ClientHistoryModal = ({ show, onClose, client }) => {
     
     const statusMap = {
       'PENDENTE': '#0095e2',
-      'AGUARDANDO_RETIRADA': '#e2d502',
+      'EM_PRODUCAO': '#4067a2',
+      'AGUARDANDO_RETIRADA': '#ffb800',
       'AGUARDANDO_DEVOLUCAO': '#1c3b4d',
       'ATRASADO': '#f44336',
       'RECUSADA': '#9e9e9e',

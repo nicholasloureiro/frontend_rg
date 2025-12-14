@@ -67,7 +67,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
 
     const tabs = [
         { key: 'PENDENTE', label: 'PENDENTES', color: '#0095e2' },
-        { key: 'EM_PRODUCAO', label: 'EM PRODUÇÃO', color: '#FCB017' },
+        { key: 'EM_PRODUCAO', label: 'EM PRODUÇÃO', color: '#4067a2' },
         { key: 'AGUARDANDO_RETIRADA', label: 'AGUARDANDO RETIRADA', color: '#e2d502' },
         { key: 'AGUARDANDO_DEVOLUCAO', label: 'AGUARDANDO DEVOLUÇÃO', color: '#1c3b4d' },
         { key: 'ATRASADO', label: 'ATRASADAS', color: '#f44336' },
