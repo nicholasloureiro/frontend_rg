@@ -1,26 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { mascaraCPF, mascaraTelefone, removerMascara, formatarTelefoneParaExibicao } from '../utils/Mascaras';
-import { capitalizeText } from '../utils/capitalizeText';
-import PhoneInput from 'react-phone-number-input';
-import ptBR from 'react-phone-number-input/locale/pt-BR';
-import Swal from 'sweetalert2';
-import '../styles/Funcionarios.css';
-import Header from '../components/Header';
-import Button from '../components/Button';
-import EmployeeCardSkeleton from '../components/EmployeeCardSkeleton';
-import { registerEmployee, getEmployees, updateEmployee, toggleEmployeeStatus } from '../services/employeeService';
+import React, { useState, useEffect } from "react";
+import {
+  mascaraCPF,
+  mascaraTelefone,
+  removerMascara,
+  formatarTelefoneParaExibicao,
+} from "../utils/Mascaras";
+import { capitalizeText } from "../utils/capitalizeText";
+import PhoneInput from "react-phone-number-input";
+import ptBR from "react-phone-number-input/locale/pt-BR";
+import Swal from "sweetalert2";
+import "../styles/Funcionarios.css";
+import Header from "../components/Header";
+import Button from "../components/Button";
+import EmployeeCardSkeleton from "../components/EmployeeCardSkeleton";
+import {
+  registerEmployee,
+  getEmployees,
+  updateEmployee,
+  toggleEmployeeStatus,
+} from "../services/employeeService";
+import CustomSelect from "../components/CustomSelect";
 
 const Funcionarios = () => {
   const [funcionarios, setFuncionarios] = useState([]);
   const [formData, setFormData] = useState({
-    name: '',
-    cpf: '',
-    phone: '',
-    email: '',
-    role: ''
+    name: "",
+    cpf: "",
+    phone: "",
+    email: "",
+    role: "",
   });
   const [editingId, setEditingId] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingEmployees, setIsLoadingEmployees] = useState(true);
   const [error, setError] = useState(null);
@@ -38,9 +49,10 @@ const Funcionarios = () => {
       // Garante que funcionarios sempre será um array
       setFuncionarios(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Erro ao carregar funcionários:', error);
-      setError('Não foi possível carregar a lista de funcionários. Tente novamente.');
-
+      console.error("Erro ao carregar funcionários:", error);
+      setError(
+        "Não foi possível carregar a lista de funcionários. Tente novamente."
+      );
     } finally {
       setIsLoadingEmployees(false);
     }
@@ -51,18 +63,18 @@ const Funcionarios = () => {
     let formattedValue = value;
 
     // Aplicar máscaras conforme o campo
-    if (name === 'cpf') {
+    if (name === "cpf") {
       formattedValue = mascaraCPF(value);
     }
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: formattedValue
+      [name]: formattedValue,
     }));
   };
 
   const handlePhoneChange = (value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       phone: value,
     }));
@@ -73,18 +85,18 @@ const Funcionarios = () => {
 
     // Validação básica
     const requiredFields = editingId
-      ? ['name', 'phone', 'email', 'role'] // Durante edição, CPF não é obrigatório
-      : ['name', 'cpf', 'phone', 'email', 'role']; // Durante cadastro, todos são obrigatórios
+      ? ["name", "phone", "email", "role"] // Durante edição, CPF não é obrigatório
+      : ["name", "cpf", "phone", "email", "role"]; // Durante cadastro, todos são obrigatórios
 
-    const missingFields = requiredFields.filter(field => !formData[field]);
+    const missingFields = requiredFields.filter((field) => !formData[field]);
 
     if (missingFields.length > 0) {
       Swal.fire({
-        icon: 'error',
-        title: 'Campos obrigatórios',
-        text: 'Por favor, preencha todos os campos obrigatórios.',
+        icon: "error",
+        title: "Campos obrigatórios",
+        text: "Por favor, preencha todos os campos obrigatórios.",
         timer: 2000,
-        showConfirmButton: false
+        showConfirmButton: false,
       });
       return;
     }
@@ -100,43 +112,43 @@ const Funcionarios = () => {
         const updateData = {
           name: formData.name,
           email: formData.email,
-          phone: formData.phone ? formData.phone.replace(/\D/g, '') : '',
-          role: formData.role
+          phone: formData.phone ? formData.phone.replace(/\D/g, "") : "",
+          role: formData.role,
         };
         await updateEmployee(editingId, updateData);
         setEditingId(null);
 
         Swal.fire({
-          icon: 'success',
-          title: 'Funcionário atualizado!',
-          text: 'Os dados do funcionário foram atualizados com sucesso.',
+          icon: "success",
+          title: "Funcionário atualizado!",
+          text: "Os dados do funcionário foram atualizados com sucesso.",
           timer: 2000,
-          showConfirmButton: false
+          showConfirmButton: false,
         });
       } else {
         // Adicionar novo funcionário
         // Remover máscaras do CPF e telefone
         const cpfSemMascara = removerMascara(formData.cpf);
-        
+
         const createData = {
           name: formData.name,
           cpf: cpfSemMascara,
           email: formData.email,
-          phone: formData.phone ? formData.phone.replace(/\D/g, '') : '',
-          role: formData.role
+          phone: formData.phone ? formData.phone.replace(/\D/g, "") : "",
+          role: formData.role,
         };
-        
+
         const response = await registerEmployee(createData);
 
         Swal.fire({
-          icon: 'success',
-          title: 'Funcionário cadastrado!',
+          icon: "success",
+          title: "Funcionário cadastrado!",
           html: `<p>O funcionário foi cadastrado com sucesso.</p>
                  <p style="font-weight:bold;color:#CBA135;font-size:18px;">Senha gerada: <span style="background:#fff3cd;padding:4px 8px;border-radius:4px;">${response.password}</span></p>
-                 <p style="color:#b91c1c;">Guarde esta senha com cuidado!<br/>Ela é exibida apenas agora e não poderá ser recuperada depois.</p>` ,
+                 <p style="color:#b91c1c;">Guarde esta senha com cuidado!<br/>Ela é exibida apenas agora e não poderá ser recuperada depois.</p>`,
           showConfirmButton: true,
-          confirmButtonText: 'Fechar',
-          confirmButtonColor: '#CBA135',
+          confirmButtonText: "Fechar",
+          confirmButtonColor: "#CBA135",
           allowOutsideClick: false,
           didOpen: () => {
             const btn = Swal.getConfirmButton();
@@ -148,11 +160,11 @@ const Funcionarios = () => {
               btn.textContent = `Fechar (${seconds})`;
               if (seconds <= 0) {
                 clearInterval(interval);
-                btn.textContent = 'Fechar';
+                btn.textContent = "Fechar";
                 btn.disabled = false;
               }
             }, 1000);
-          }
+          },
         });
       }
 
@@ -162,20 +174,20 @@ const Funcionarios = () => {
 
       // Limpar formulário
       setFormData({
-        name: '',
-        cpf: '',
-        phone: '',
-        email: '',
-        role: ''
+        name: "",
+        cpf: "",
+        phone: "",
+        email: "",
+        role: "",
       });
     } catch (error) {
-      console.error('Erro ao salvar funcionário:', error);
+      console.error("Erro ao salvar funcionário:", error);
       Swal.fire({
-        icon: 'error',
-        title: 'Erro ao salvar funcionário',
-        text: error.message || 'Ocorreu um erro ao salvar o funcionário.',
+        icon: "error",
+        title: "Erro ao salvar funcionário",
+        text: error.message || "Ocorreu um erro ao salvar o funcionário.",
         timer: 2000,
-        showConfirmButton: false
+        showConfirmButton: false,
       });
     } finally {
       setIsLoading(false);
@@ -186,27 +198,29 @@ const Funcionarios = () => {
     window.scrollTo(0, 0);
     // Mapear os dados do funcionário para o formato do formulário
     const funcionarioData = {
-      name: funcionario.name || '',
-      cpf: funcionario.cpf || '',
-      phone: funcionario.phone ? (funcionario.phone.startsWith('+') ? funcionario.phone : `+55${funcionario.phone.substring(2)}`) : '', // Remover 55 do início e adicionar +55
-      email: funcionario.email || '',
-      role: funcionario.role || ''
+      name: funcionario.name || "",
+      cpf: funcionario.cpf || "",
+      phone: funcionario.phone
+        ? funcionario.phone.startsWith("+")
+          ? funcionario.phone
+          : `+55${funcionario.phone.substring(2)}`
+        : "", // Remover 55 do início e adicionar +55
+      email: funcionario.email || "",
+      role: funcionario.role || "",
     };
     setFormData(funcionarioData);
     // Usar person_id se disponível, senão usar id
     setEditingId(funcionario.person_id || funcionario.id);
   };
 
-
-
   const handleCancelEdit = () => {
     setEditingId(null);
     setFormData({
-      name: '',
-      cpf: '',
-      phone: '',
-      email: '',
-      role: ''
+      name: "",
+      cpf: "",
+      phone: "",
+      email: "",
+      role: "",
     });
   };
 
@@ -216,15 +230,17 @@ const Funcionarios = () => {
 
     // Confirmação antes de alterar o status
     const result = await Swal.fire({
-      icon: 'question',
-      title: 'Confirmar alteração',
-      text: `Deseja ${newStatus ? 'ativar' : 'desativar'} o funcionário ${capitalizeText(funcionario.name)}?`,
+      icon: "question",
+      title: "Confirmar alteração",
+      text: `Deseja ${
+        newStatus ? "ativar" : "desativar"
+      } o funcionário ${capitalizeText(funcionario.name)}?`,
       showCancelButton: true,
-      cancelButtonText: 'Cancelar',
-      confirmButtonText: 'Sim',
-      confirmButtonColor: '#CBA135',
-      cancelButtonColor: 'transparent',
-
+      cancelButtonText: "Cancelar",
+      confirmButtonText: "Sim",
+      confirmButtonColor: "var(--color-accent)",
+      cancelButtonColor: "transparent",
+      reverseButtons: true,
     });
 
     // Se o usuário cancelou, não faz nada
@@ -236,59 +252,71 @@ const Funcionarios = () => {
       await toggleEmployeeStatus(personId, newStatus);
 
       Swal.fire({
-        icon: 'success',
-        title: 'Status alterado!',
-        text: `Funcionário ${newStatus ? 'ativado' : 'desativado'} com sucesso.`,
+        icon: "success",
+        title: "Status alterado!",
+        text: `Funcionário ${
+          newStatus ? "ativado" : "desativado"
+        } com sucesso.`,
         timer: 2000,
-        showConfirmButton: false
+        showConfirmButton: false,
       });
 
       // Recarregar lista de funcionários
       setIsLoadingEmployees(true);
       await loadEmployees();
     } catch (error) {
-      console.error('Erro ao alterar status do funcionário:', error);
+      console.error("Erro ao alterar status do funcionário:", error);
       Swal.fire({
-        icon: 'error',
-        title: 'Erro ao alterar status',
-        text: error.message || 'Ocorreu um erro ao alterar o status do funcionário.',
+        icon: "error",
+        title: "Erro ao alterar status",
+        text:
+          error.message ||
+          "Ocorreu um erro ao alterar o status do funcionário.",
         timer: 2000,
-        showConfirmButton: false
+        showConfirmButton: false,
       });
     }
   };
 
-  const filteredFuncionarios = funcionarios.filter(funcionario =>
-    funcionario.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    funcionario.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    funcionario.role.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredFuncionarios = funcionarios.filter(
+    (funcionario) =>
+      funcionario.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      funcionario.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      funcionario.role.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getCargoColor = (role) => {
     switch (role) {
-      case 'ADMINISTRADOR':
-        return '#ef4444';
-      case 'ATENDENTE':
-        return '#3b82f6';
-      case 'RECEPÇÃO':
-        return '#10b981';
+      case "ADMINISTRADOR":
+        return "#ef4444";
+      case "ATENDENTE":
+        return "#3b82f6";
+      case "RECEPÇÃO":
+        return "#10b981";
       default:
-        return '#6b7280';
+        return "#6b7280";
     }
   };
 
   return (
     <>
-      <Header nomeHeader={'Funcionários'} />
+      <Header nomeHeader={"Funcionários"} />
       <div className="funcionarios-container">
-
         {/* Formulário de Cadastro */}
-        <div className="form-section mb-4" style={{ backgroundColor: 'var(--color-bg-card)' }}>
+        <div
+          className="form-section mb-4"
+          style={{ backgroundColor: "var(--color-bg-card)" }}
+        >
           <div className="form-header">
-            <h2 style={{ fontSize: '18px' }}>{editingId ? 'Editar Funcionário' : 'Cadastrar Novo Funcionário'}</h2>
+            <h2 style={{ fontSize: "18px" }}>
+              {editingId ? "Editar Funcionário" : "Cadastrar Novo Funcionário"}
+            </h2>
             {isLoading && (
               <div className="loading-indicator">
-                <div className="spinner" style={{ color: 'var(--color-accent)'}}></div>
+                <div
+                  className="spinner"
+                  style={{ color: "var(--color-accent)" }}
+                ></div>
                 <span>Salvando...</span>
               </div>
             )}
@@ -305,7 +333,7 @@ const Funcionarios = () => {
                   onChange={handleInputChange}
                   required
                   placeholder="Digite o nome completo"
-                  style={{ height: '35px' }}
+                  style={{ height: "35px" }}
                   disabled={isLoading}
                 />
               </div>
@@ -319,7 +347,7 @@ const Funcionarios = () => {
                   onChange={handleInputChange}
                   required={!editingId}
                   placeholder="000.000.000-00"
-                  style={{ height: '35px' }}
+                  style={{ height: "35px" }}
                   disabled={isLoading || editingId}
                 />
               </div>
@@ -349,7 +377,7 @@ const Funcionarios = () => {
                   onChange={handleInputChange}
                   required
                   placeholder="email@exemplo.com"
-                  style={{ height: '35px' }}
+                  style={{ height: "35px" }}
                   disabled={isLoading}
                 />
               </div>
@@ -358,20 +386,21 @@ const Funcionarios = () => {
             <div className="form-row mb-0">
               <div className="form-group">
                 <label htmlFor="cargo">Cargo *</label>
-                <select
+                <CustomSelect
                   id="role"
                   name="role"
                   value={formData.role}
                   onChange={handleInputChange}
                   required
-                  style={{ height: '35px' }}
                   disabled={isLoading}
-                >
-                  <option value="">Selecione um cargo</option>
-                  <option value="ADMINISTRADOR">ADMINISTRADOR</option>
-                  <option value="ATENDENTE">ATENDENTE</option>
-                  <option value="RECEPÇÃO">RECEPÇÃO</option>
-                </select>
+                  options={[
+                    { value: "", label: "Selecione um cargo" },
+                    { value: "ADMINISTRADOR", label: "ADMINISTRADOR" },
+                    { value: "ATENDENTE", label: "ATENDENTE" },
+                    { value: "RECEPÇÃO", label: "RECEPÇÃO" },
+                  ]}
+                  style={{ height: "35px" }}
+                />
               </div>
               <div className="form-group"></div>
             </div>
@@ -384,17 +413,25 @@ const Funcionarios = () => {
                   variant="disabled"
                   onClick={handleCancelEdit}
                   disabled={isLoading}
-                  style={{ width: 'fit-content', marginLeft: 'auto' }}
+                  style={{ width: "fit-content", marginLeft: "auto" }}
                 />
               )}
               <Button
-                text={isLoading ? 'Salvando...' : (editingId ? 'Atualizar' : 'Cadastrar')}
+                text={
+                  isLoading
+                    ? "Salvando..."
+                    : editingId
+                    ? "Atualizar"
+                    : "Cadastrar"
+                }
                 type="submit"
                 variant="primary"
                 disabled={isLoading}
-                style={{ width: 'fit-content', marginLeft: editingId ? '10px' : 'auto' }}
+                style={{
+                  width: "fit-content",
+                  marginLeft: editingId ? "10px" : "auto",
+                }}
               />
-
             </div>
           </form>
         </div>
@@ -402,10 +439,19 @@ const Funcionarios = () => {
         {/* Listagem de Funcionários */}
         <div className="list-section">
           <div className="list-header">
-            <h2 style={{ fontSize: '18px', color: 'var(--color-text-primary)' }}>
+            <h2
+              style={{ fontSize: "18px", color: "var(--color-text-primary)" }}
+            >
               Funcionários Cadastrados
               {isLoadingEmployees && (
-                <span style={{ fontSize: '14px', color: 'var(--color-text-secondary)', marginLeft: '8px', fontWeight: 'normal' }}>
+                <span
+                  style={{
+                    fontSize: "14px",
+                    color: "var(--color-text-secondary)",
+                    marginLeft: "8px",
+                    fontWeight: "normal",
+                  }}
+                >
                   (Carregando...)
                 </span>
               )}
@@ -434,23 +480,40 @@ const Funcionarios = () => {
                 <i className="bi bi-exclamation-triangle"></i>
                 <h3>Erro ao carregar funcionários</h3>
                 <p>{error}</p>
-                <Button variant="primary" text="Tentar novamente" iconName="arrow-clockwise" iconPosition="left" onClick={loadEmployees} disabled={isLoadingEmployees} style={{ width: 'fit-content'}} />
+                <Button
+                  variant="primary"
+                  text="Tentar novamente"
+                  iconName="arrow-clockwise"
+                  iconPosition="left"
+                  onClick={loadEmployees}
+                  disabled={isLoadingEmployees}
+                  style={{ width: "fit-content" }}
+                />
               </div>
             ) : filteredFuncionarios.length === 0 ? (
               <div className="no-results">
-                <i className="bi bi-people" style={{ color: 'var(--color-accent)'}}></i>
+                <i
+                  className="bi bi-people"
+                  style={{ color: "var(--color-accent)" }}
+                ></i>
                 <p>Nenhum funcionário encontrado</p>
               </div>
             ) : (
-              filteredFuncionarios.map(funcionario => (
-                <div key={funcionario.id} className={`funcionario-card ${!funcionario.active ? 'inactive' : ''}`}>
+              filteredFuncionarios.map((funcionario) => (
+                <div
+                  key={funcionario.id}
+                  className={`funcionario-card ${
+                    !funcionario.active ? "inactive" : ""
+                  }`}
+                >
                   <div className="funcionario-header">
-
                     <div className="funcionario-info">
                       <h3>{capitalizeText(funcionario.name)}</h3>
                       <span
                         className="cargo-badge"
-                        style={{ backgroundColor: getCargoColor(funcionario.role) }}
+                        style={{
+                          backgroundColor: getCargoColor(funcionario.role),
+                        }}
                       >
                         {funcionario.role}
                       </span>
@@ -465,10 +528,18 @@ const Funcionarios = () => {
                       </button>
                       <button
                         onClick={() => handleToggleStatus(funcionario)}
-                        className={`btn-toggle-status ${funcionario.active ? 'deactivate' : 'activate'}`}
-                        title={funcionario.active ? 'Desativar' : 'Ativar'}
+                        className={`btn-toggle-status ${
+                          funcionario.active ? "deactivate" : "activate"
+                        }`}
+                        title={funcionario.active ? "Desativar" : "Ativar"}
                       >
-                        <i className={`bi ${funcionario.active ? 'bi-person-x' : 'bi-person-check'}`}></i>
+                        <i
+                          className={`bi ${
+                            funcionario.active
+                              ? "bi-person-x"
+                              : "bi-person-check"
+                          }`}
+                        ></i>
                       </button>
                     </div>
                   </div>
@@ -480,16 +551,26 @@ const Funcionarios = () => {
                     </div>
                     <div className="detail-item">
                       <i className="bi bi-telephone"></i>
-                      <span>{formatarTelefoneParaExibicao(funcionario.phone)}</span>
+                      <span>
+                        {formatarTelefoneParaExibicao(funcionario.phone)}
+                      </span>
                     </div>
                     <div className="detail-item">
                       <i className="bi bi-envelope"></i>
                       <span>{funcionario.email}</span>
                     </div>
                     <div className="detail-item">
-                      <i className={`bi ${funcionario.active ? 'bi-check-circle' : 'bi-x-circle'}`}></i>
-                      <span className={`status-text ${funcionario.active ? 'active' : 'inactive'}`}>
-                        {funcionario.active ? 'Ativo' : 'Inativo'}
+                      <i
+                        className={`bi ${
+                          funcionario.active ? "bi-check-circle" : "bi-x-circle"
+                        }`}
+                      ></i>
+                      <span
+                        className={`status-text ${
+                          funcionario.active ? "active" : "inactive"
+                        }`}
+                      >
+                        {funcionario.active ? "Ativo" : "Inativo"}
                       </span>
                     </div>
                   </div>
@@ -503,4 +584,4 @@ const Funcionarios = () => {
   );
 };
 
-export default Funcionarios; 
+export default Funcionarios;
