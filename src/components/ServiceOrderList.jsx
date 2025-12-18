@@ -342,7 +342,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
             text: `Deseja marcar a ordem de serviço #${order.id} como produzida?`,
             icon: 'question',
             showCancelButton: true,
-            confirmButtonColor: '#FCB017',
+            confirmButtonColor: 'var(--color-accent)',
             cancelButtonColor: '#ffff',
             cancelButtonText: 'Cancelar',
             confirmButtonText: 'Sim, marcar como produzida',
@@ -358,7 +358,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
                     title: 'Sucesso!',
                     text: 'Ordem de serviço marcada como produzida.',
                     icon: 'success',
-                    confirmButtonColor: '#FCB017'
+                    confirmButtonColor: 'var(--color-accent)'
                 });
 
                 // Recarrega a lista de ordens
@@ -1214,7 +1214,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
                                 <div style={{
                                     fontSize: '20px',
                                     fontWeight: 'bold',
-                                    color: '#cba135',
+                                    color: '#f44336',
                                     marginBottom: '12px'
                                 }}>
                                     {formatCurrency(pickupOrder.remaining_payment)}
@@ -1270,7 +1270,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
                                 onClick={handlePickupSubmit}
                                 disabled={isProcessingPickup}
                                 style={{
-                                    background: 'linear-gradient(135deg, #CBA135 0%, #e2d502 100%)',
+                                    background: '#CBA135',
                                     border: 'none'
                                 }}
                             />
