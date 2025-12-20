@@ -673,6 +673,9 @@ const OrdemServico = () => {
         timer: 2000,
         showConfirmButton: false,
       });
+      setTimeout(() => {
+        handleBackToList();
+      }, 1000);
     } finally {
       setLoading(false);
     }
@@ -687,7 +690,9 @@ const OrdemServico = () => {
       const listaFuncionarios = Array.isArray(funcionarios) ? funcionarios : [];
       // Filtrar apenas funcionários com role ATENDENTE ou ADMINISTRADOR e que estejam ativos
       const atendentesFiltrados = listaFuncionarios.filter(
-        (func) => (func.role === "ATENDENTE" || func.role === "ADMINISTRADOR") && func.active === true
+        (func) =>
+          (func.role === "ATENDENTE" || func.role === "ADMINISTRADOR") &&
+          func.active === true
       );
       setAtendentes(atendentesFiltrados);
     } catch (error) {
@@ -3202,7 +3207,6 @@ const OrdemServico = () => {
                   options={[
                     { value: "Aluguel", label: "Aluguel" },
                     { value: "Venda", label: "Venda" },
-                    { value: "Aluguel + Venda", label: "Aluguel + Venda" },
                   ]}
                   placeholder="Selecione a modalidade"
                   searchPlaceholder="Pesquisar modalidade..."
@@ -3673,53 +3677,63 @@ const OrdemServico = () => {
             />
           </div>
 
-          <div className="ordem-servico-content">
-            <div className="form-section">
-              {/* Steps Navigation */}
-              <div className="steps-navigation">
-                <StepProgressBar steps={steps} currentStep={currentStep} />
-              </div>
-              {/* Informações do responsável removidas daqui — atribuição passa a ser feita na lista de ordens */}
+          <div
+            className="ordem-servico-content"
+            style={{
+              display: "grid",
+              gridTemplateColumns: selectedOrder?.data_finalizado
+                ? "1fr"
+                : "50% 1fr",
+            }}
+          >
+            {!selectedOrder?.data_finalizado && (
+              <div className="form-section">
+                {/* Steps Navigation */}
+                <div className="steps-navigation">
+                  <StepProgressBar steps={steps} currentStep={currentStep} />
+                </div>
+                {/* Informações do responsável removidas daqui — atribuição passa a ser feita na lista de ordens */}
 
-              {/* Form Content */}
-              <div className="form-content">
-                {renderStepContent()}
-                <ValidationError errors={validationErrors} />
+                {/* Form Content */}
+                <div className="form-content">
+                  {renderStepContent()}
+                  <ValidationError errors={validationErrors} />
 
-                <div className="form-actions">
-                  {currentStep > 0 && (
-                    <Button
-                      text="Anterior"
-                      onClick={prevStep}
-                      variant="disabled"
-                      className="action-btn1"
-                      disabled={loading}
-                    />
-                  )}
-                  {currentStep < steps.length - 1 ? (
-                    <Button
-                      text="Próximo"
-                      onClick={nextStep}
-                      variant="primary"
-                      className="action-btn1"
-                      disabled={loading}
-                      style={{ marginLeft: "auto" }}
-                    />
-                  ) : (
-                    !selectedOrder?.data_finalizado && (
+                  <div className="form-actions">
+                    {currentStep > 0 && (
                       <Button
-                        text={loading ? "Salvando..." : "Finalizar OS"}
-                        onClick={handleFinalizeOS}
+                        text="Anterior"
+                        onClick={prevStep}
+                        variant="disabled"
+                        className="action-btn1"
+                        disabled={loading}
+                      />
+                    )}
+                    {currentStep < steps.length - 1 ? (
+                      <Button
+                        text="Próximo"
+                        onClick={nextStep}
                         variant="primary"
                         className="action-btn1"
                         disabled={loading}
-                        style={{ width: "fit-content" }}
+                        style={{ marginLeft: "auto" }}
                       />
-                    )
-                  )}
+                    ) : (
+                      !selectedOrder?.data_finalizado && (
+                        <Button
+                          text={loading ? "Salvando..." : "Finalizar OS"}
+                          onClick={handleFinalizeOS}
+                          variant="primary"
+                          className="action-btn1"
+                          disabled={loading}
+                          style={{ width: "fit-content" }}
+                        />
+                      )
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Preview Section */}
             <div className="preview-section">
@@ -4093,44 +4107,87 @@ const OrdemServico = () => {
                 </div>
 
                 {/* Contrato de Locação */}
-                <div className="preview-section-group contract-section">
-                  <h4 style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}>
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      style={{ marginRight: "8px", verticalAlign: "middle" }}
+                {!selectedOrder?.data_finalizado && (
+                  <div className="preview-section-group contract-section">
+                    <h4
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        marginBottom: "15px",
+                      }}
                     >
-                      <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
-                    </svg>
-                    CONTRATO DE LOCAÇÃO
-                  </h4>
-                  <div className="contract-content">
-                    <p><strong>Cláusula 1ª.</strong> É objeto do presente contrato a locação dos trajes e acessórios descritos acima.</p>
-                    
-                    <p><strong>Cláusula 2ª.</strong> A LOCADORA se compromete a entregar os trajes e seus respectivos acessórios devidamente lavados e passados e em perfeito estado de conservação e uso, na data estabelecida no contrato.</p>
-                    
-                    <p><strong>Cláusula 3ª.</strong> A desistência do aluguel, seja por qualquer motivo, acarretará em um crédito do valor integral pago para o locatário que poderá ser usado durante o período de 12 meses a partir da assinatura do mesmo. A desistência feita com antecedência menor de 30 dias da retirada, será cobrada uma taxa de 30% do valor da locação.</p>
-                    
-                    <p><strong>Cláusula 4ª.</strong> Pedimos para NÃO PASSAR, NÃO LAVAR AS ROUPAS, se houver danos, perdas, sob pena da lei 8245 de 18/10/91 de arcar com todos prejuízos. Em caso de dano irreparável ou perda na devolução, a locatária deverá pagar 4 (quatro) vezes o valor do aluguel referente aos mesmos.</p>
-                    
-                    <p><strong>Cláusula 5ª.</strong> Caso os trajes e/ou acessórios sejam devolvidos com excesso de sujeira ou manchas que não saiam facilmente, será cobrada uma taxa de 100 (cem) reais para a limpeza das peças.</p>
-                    
-                    <p><strong>Cláusula 6ª.</strong> As não devoluções dos trajes e/ou acessórios na data estipulada serão cobradas 20% do aluguel, por dia de atraso.</p>
-                    
-                    <p className="contract-declaration">
-                      Declaro que todos os itens da locação foram entregues em perfeito estado de uso e que devolverei os produtos locados em perfeita ordem na data estipulada:
-                    </p>
-                    
-                    <div className="signature-area">
-                      <div className="signature-line-contract">
-                        <span>Assinatura:</span>
-                        <div className="signature-box-contract"></div>
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        style={{ marginRight: "8px", verticalAlign: "middle" }}
+                      >
+                        <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+                      </svg>
+                      CONTRATO DE LOCAÇÃO
+                    </h4>
+                    <div className="contract-content">
+                      <p>
+                        <strong>Cláusula 1ª.</strong> É objeto do presente
+                        contrato a locação dos trajes e acessórios descritos
+                        acima.
+                      </p>
+
+                      <p>
+                        <strong>Cláusula 2ª.</strong> A LOCADORA se compromete a
+                        entregar os trajes e seus respectivos acessórios
+                        devidamente lavados e passados e em perfeito estado de
+                        conservação e uso, na data estabelecida no contrato.
+                      </p>
+
+                      <p>
+                        <strong>Cláusula 3ª.</strong> A desistência do aluguel,
+                        seja por qualquer motivo, acarretará em um crédito do
+                        valor integral pago para o locatário que poderá ser
+                        usado durante o período de 12 meses a partir da
+                        assinatura do mesmo. A desistência feita com
+                        antecedência menor de 30 dias da retirada, será cobrada
+                        uma taxa de 30% do valor da locação.
+                      </p>
+
+                      <p>
+                        <strong>Cláusula 4ª.</strong> Pedimos para NÃO PASSAR,
+                        NÃO LAVAR AS ROUPAS, se houver danos, perdas, sob pena
+                        da lei 8245 de 18/10/91 de arcar com todos prejuízos. Em
+                        caso de dano irreparável ou perda na devolução, a
+                        locatária deverá pagar 4 (quatro) vezes o valor do
+                        aluguel referente aos mesmos.
+                      </p>
+
+                      <p>
+                        <strong>Cláusula 5ª.</strong> Caso os trajes e/ou
+                        acessórios sejam devolvidos com excesso de sujeira ou
+                        manchas que não saiam facilmente, será cobrada uma taxa
+                        de 100 (cem) reais para a limpeza das peças.
+                      </p>
+
+                      <p>
+                        <strong>Cláusula 6ª.</strong> As não devoluções dos
+                        trajes e/ou acessórios na data estipulada serão cobradas
+                        20% do aluguel, por dia de atraso.
+                      </p>
+
+                      <p className="contract-declaration">
+                        Declaro que todos os itens da locação foram entregues em
+                        perfeito estado de uso e que devolverei os produtos
+                        locados em perfeita ordem na data estipulada:
+                      </p>
+
+                      <div className="signature-area">
+                        <div className="signature-line-contract">
+                          <span>Assinatura:</span>
+                          <div className="signature-box-contract"></div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>

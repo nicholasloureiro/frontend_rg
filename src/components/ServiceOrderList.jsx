@@ -230,6 +230,8 @@ const ServiceOrderList = ({
     }
 
     try {
+      
+      closeRefusalModal();
       await serviceOrderService.refuseServiceOrder(
         selectedOrder.id,
         refusalJustification.trim() || null,
@@ -244,7 +246,6 @@ const ServiceOrderList = ({
         confirmButtonColor: "#f44336",
       });
 
-      closeRefusalModal();
       // Recarrega a lista de ordens
       fetchOrders(activeTab);
     } catch (error) {
