@@ -588,7 +588,7 @@ const ServiceOrderList = ({
     if (result.isConfirmed) {
       try {
         await serviceOrderService.returnToPending(order.id);
-        
+
         Swal.fire({
           title: "Sucesso!",
           text: "Ordem retornada para PENDENTE.",
@@ -603,7 +603,9 @@ const ServiceOrderList = ({
         console.error("Erro ao retornar ordem para pendente:", error);
         Swal.fire({
           title: "Erro",
-          text: error.response?.data?.message || "Erro ao retornar ordem para pendente.",
+          text:
+            error.response?.data?.message ||
+            "Erro ao retornar ordem para pendente.",
           confirmButtonColor: "#d33",
           icon: "error",
         });
@@ -1493,6 +1495,15 @@ const ServiceOrderList = ({
                           </svg>
                         </button>
                       </>
+                    )}
+                    {activeTab == "FINALIZADO" && (
+                      <button
+                        className="action-btn edit"
+                        onClick={(e) => handleEditOrder(order, e)}
+                        title="Visualizar ordem de serviço"
+                      >
+                        <i className="bi bi-eye" style={{}}></i>
+                      </button>
                     )}
                   </div>
                 </div>

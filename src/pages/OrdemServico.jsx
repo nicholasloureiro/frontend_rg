@@ -3706,14 +3706,16 @@ const OrdemServico = () => {
                       style={{ marginLeft: "auto" }}
                     />
                   ) : (
-                    <Button
-                      text={loading ? "Salvando..." : "Finalizar OS"}
-                      onClick={handleFinalizeOS}
-                      variant="primary"
-                      className="action-btn1"
-                      disabled={loading}
-                      style={{ width: "fit-content" }}
-                    />
+                    !selectedOrder?.data_finalizado && (
+                      <Button
+                        text={loading ? "Salvando..." : "Finalizar OS"}
+                        onClick={handleFinalizeOS}
+                        variant="primary"
+                        className="action-btn1"
+                        disabled={loading}
+                        style={{ width: "fit-content" }}
+                      />
+                    )
                   )}
                 </div>
               </div>
