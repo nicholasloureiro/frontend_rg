@@ -325,6 +325,9 @@ const ClienteHistorico = () => {
                                                     <span className="label">Atendente:</span>
                                                     <span className="value">{capitalizeText(order.attendant_name || '-')}</span>
                                                 </div>
+                                                <div className="detail-row">
+                                             <Button text="Ver Detalhes" onClick={() => navigate(`/ordens/${order.id}`)} />
+                                                </div>
                                             </div>
 
                                             {/* Conteúdo expandível */}
