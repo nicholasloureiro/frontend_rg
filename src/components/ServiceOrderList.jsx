@@ -494,7 +494,7 @@ const ServiceOrderList = ({ onSelectOrder, onCreateNew, isLoading, error, onRetr
         try {
             const funcionarios = await getEmployees();
             const listaFuncionarios = Array.isArray(funcionarios) ? funcionarios : [];
-            const atendentes = listaFuncionarios.filter(func => func.role === 'ATENDENTE' || func.role === 'ADMINISTRADOR');
+            const atendentes = listaFuncionarios.filter(func => (func.role === 'ATENDENTE' || func.role === 'ADMINISTRADOR') && func.active === true);
             setAtendentesAssign(atendentes);
         } catch (err) {
             console.error('Erro ao carregar atendentes para atribuição:', err);

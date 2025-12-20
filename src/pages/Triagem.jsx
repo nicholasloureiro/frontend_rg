@@ -54,8 +54,10 @@ const Triagem = () => {
             const funcionarios = await getEmployees();
             // Garante que funcionarios sempre será um array
             const listaFuncionarios = Array.isArray(funcionarios) ? funcionarios : [];
-            // Filtrar apenas funcionários com role ATENDENTE
-            const atendentesFiltrados = listaFuncionarios.filter(func => func.role === 'ATENDENTE' || func.role === 'ADMINISTRADOR');
+            // Filtrar apenas funcionários com role ATENDENTE ou ADMINISTRADOR e que estejam ativos
+            const atendentesFiltrados = listaFuncionarios.filter(func => 
+                (func.role === 'ATENDENTE' || func.role === 'ADMINISTRADOR') && func.active === true
+            );
             setAtendentes(atendentesFiltrados);
         } catch (error) {
             console.error('Erro ao carregar atendentes:', error);
