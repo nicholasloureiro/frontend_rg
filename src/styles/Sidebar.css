@@ -1,8 +1,10 @@
 .sidebar {
     width: var(--sidebar-width);
-    height: -webkit-fill-available;
+    height: 100vh !important;
     background-color: #1E1E1E;
     transition: all 0.3s ease-in-out !important;
+    display: flex !important;
+    flex-direction: column !important;
 }
 
 .sidebar.collapsed {
@@ -17,6 +19,9 @@
     margin: 4px 16px;
     white-space: nowrap;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    padding: 10px !important;
 
     i {
         margin-right: 15px;
@@ -71,7 +76,7 @@
 .profile-section {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-
+    flex-shrink: 0;
 }
 
 #logout-button {
@@ -81,6 +86,7 @@
 .toggle-sidebar {
     margin-left: 10px;
     margin-right: 10px;
+    flex-shrink: 0;
 }
 
 .toggle-sidebar.collapsed {
@@ -200,6 +206,60 @@
     transition: all 0.2s ease-in-out !important
 }
 
+/* Área de navegação com scroll - desktop */
+.sidebar-options.flex-column {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column !important;
+    padding-bottom: 8px;
+    flex-wrap: nowrap;
+}
+
+.sidebar-options.flex-column::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-options.flex-column::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    margin: 8px 0;
+}
+
+.sidebar-options.flex-column::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+
+.sidebar-options.flex-column::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Footer fixo no sidebar desktop */
+.sidebar-footer {
+    flex-shrink: 0;
+    padding: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Garantir que no desktop o sidebar funcione corretamente */
+@media (min-width: 1000px) {
+    .sidebar:not(.mobile-footer) {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+    
+    .sidebar:not(.mobile-footer) .sidebar-options.flex-column {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto !important;
+        overflow-x: hidden;
+    }
+}
+
 .dropdown-item {
     color: white !important;
     padding: 0 !important;
@@ -273,7 +333,7 @@
 
     .sidebar.mobile-footer .nav.flex-row {
         display: flex;
-        flex-direction: row;
+        flex-direction: row !important;
         align-items: center;
         justify-content: space-evenly;
         flex: 1;
@@ -283,6 +343,7 @@
         scrollbar-width: none;
         -ms-overflow-style: none;
         height: 100%;
+        min-height: 0 !important;
     }
 
     .sidebar.mobile-footer .nav.flex-row::-webkit-scrollbar {

@@ -26,7 +26,7 @@ const SidebarLink = ({ to, label, onClick, iconBoot }) => {
     <Link
       to={to}
       onClick={handleClick}
-      className={`sidebar-link text-decoration-none p-3 ${location.pathname.includes(to) ? 'active' : ''
+      className={`sidebar-link text-decoration-none ${location.pathname.includes(to) ? 'active' : ''
         }`}
     >
       {iconBoot && <i className={`bi bi-${iconBoot}`}></i>}
@@ -238,7 +238,7 @@ const Sidebar = ({ setSideOpen }) => {
 
         {/* logo - oculto em mobile */}
         {!isMobile && (
-          <div className="d-flex px-4 pb-2" style={{ justifyContent: 'center' }}>
+          <div className="d-flex px-4 pb-2" style={{ justifyContent: 'center', flexShrink: 0 }}>
             <img src={logo} alt="Logo" style={{ width: !isCollapsed ? '50%' : '100%', margin: '0 auto', marginTop: '10px', transition: 'width 0.3s ease-in-out' }} />
           </div>
         )}
@@ -291,7 +291,7 @@ const Sidebar = ({ setSideOpen }) => {
         )}
 
         {/* links */}
-        <div className={`nav ${isMobile ? 'flex-row' : 'flex-column'}`} style={{ height: isMobile ? 'auto' : '100%' }}>
+        <div className={`nav sidebar-options ${isMobile ? 'flex-row' : 'flex-column'}`}>
           {isSmallMobile ? (
             <>
               {navLinks.slice(0, visibleLinksCount).map((link) => (
@@ -360,14 +360,14 @@ const Sidebar = ({ setSideOpen }) => {
               ))}
             </>
           )}
-          
-          {!isMobile && (
-            <div className="mt-auto mb-3" style={{ width: '100%', justifyContent: 'center', display: 'flex' }}>
-              <span className="version" style=
-                {{ color: 'white', fontSize: '12px', textAlign: 'center', cursor: 'default' }} >Roupa de Gala® - 2026</span>
-            </div>
-          )}
         </div>
+        
+        {/* Footer fixo no desktop */}
+        {!isMobile && (
+          <div className="sidebar-footer">
+            <span className="version" style={{ color: 'white', fontSize: '12px', textAlign: 'center', cursor: 'default', display: 'block' }}>Roupa de Gala® - 2026</span>
+          </div>
+        )}
 
         {/* Perfil em mobile */}
         {isMobile && (
