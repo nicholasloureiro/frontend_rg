@@ -1010,10 +1010,11 @@ export const AluguelVendaTicketMedioChart = ({ data = [] }) => {
           legend: "Ticket Médio (R$)",
           legendPosition: "middle",
           legendOffset: -70,
-          format: (value) => `R$ ${(value / 1000).toFixed(1)}k`,
+          format: (value) => `R$ ${(value / 1000).toFixed(2)}k`,
         }}
         labelSkipWidth={12}
         labelSkipHeight={12}
+        valueFormat={(value) => value.toFixed(2)}
         theme={{
           axis: {
             domain: {
