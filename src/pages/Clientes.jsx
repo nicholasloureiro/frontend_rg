@@ -162,8 +162,8 @@ const Clientes = () => {
 
     // Validação básica
     const requiredFields = editingId
-      ? ['nome', 'telefone', 'email'] // Durante edição, CPF não é obrigatório
-      : ['nome', 'cpf', 'telefone', 'email']; // Durante cadastro, todos são obrigatórios
+      ? ['nome', 'telefone'] // Durante edição, CPF não é obrigatório
+      : ['nome', 'cpf', 'telefone']; // Durante cadastro, email e CEP não são obrigatórios
 
     const missingFields = requiredFields.filter(field => !formData[field]);
 
@@ -400,14 +400,13 @@ const Clientes = () => {
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="email">E-mail *</label>
+                <label htmlFor="email">E-mail</label>
                 <input
                   type="email"
                   id="email"
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  required
                   placeholder="email@exemplo.com"
                   style={{ height: '35px' }}
                   disabled={isLoading}
@@ -417,7 +416,7 @@ const Clientes = () => {
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="cep">CEP *</label>
+                <label htmlFor="cep">CEP</label>
                 <div className="cep-input-container">
                   <input
                     type="text"
