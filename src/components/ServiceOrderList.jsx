@@ -376,17 +376,30 @@ const ServiceOrderList = ({
   const handleOrderingChange = (newOrdering) => {
     setOrdering(newOrdering);
     setCurrentPage(1);
-    const filters = buildFiltersFromState();
-    fetchOrders(activeTab, { ...filters, ordering: newOrdering }, 1, newOrdering);
+    // Constrói filtros manualmente para garantir valores atuais
+    const filters = {
+      ordering: newOrdering,
+    };
+    if (searchText?.trim()) filters.search = searchText.trim();
+    if (initialDate) filters.initial_date = formatDateForApi(initialDate);
+    if (endDate) filters.end_date = formatDateForApi(endDate);
+    if (dateFilter) filters.filter_date = formatDateForApi(dateFilter);
+    fetchOrders(activeTab, filters, 1, newOrdering);
   };
 
   // Handler para mudança do filtro de data
   const handleDateFilterChange = (newDate) => {
     setDateFilter(newDate);
     setCurrentPage(1);
-    const filters = buildFiltersFromState();
-    const filterDate = formatDateForApi(newDate);
-    fetchOrders(activeTab, { ...filters, filter_date: filterDate }, 1);
+    // Constrói filtros manualmente para garantir valores atuais
+    const filters = {
+      ordering: ordering,
+    };
+    if (searchText?.trim()) filters.search = searchText.trim();
+    if (initialDate) filters.initial_date = formatDateForApi(initialDate);
+    if (endDate) filters.end_date = formatDateForApi(endDate);
+    if (newDate) filters.filter_date = formatDateForApi(newDate);
+    fetchOrders(activeTab, filters, 1);
   };
 
   const handleSearch = async () => {
