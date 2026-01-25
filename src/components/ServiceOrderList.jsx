@@ -889,9 +889,9 @@ const ServiceOrderList = ({
         header: "Devolução",
       },
       {
-        accessorFn: (row) => capitalizeText(row.attendant_name) || "-",
-        id: "recepcionista",
-        header: "Recepcionista",
+        accessorFn: (row) => capitalizeText(row.renter_role) || "-",
+        id: "papel_evento",
+        header: "Papel no Evento",
       },
       {
         accessorFn: (row) =>
@@ -1291,12 +1291,14 @@ const ServiceOrderList = ({
                         </span>
                       </div>
                     )}
-                    <div className="info-row">
-                      <span className="label">Recepcionista:</span>
-                      <span className="value">
-                        {capitalizeText(order.attendant_name)}
-                      </span>
-                    </div>
+                    {order.renter_role && (
+                      <div className="info-row">
+                        <span className="label">Papel no Evento:</span>
+                        <span className="value">
+                          {capitalizeText(order.renter_role)}
+                        </span>
+                      </div>
+                    )}
                     {order.employee_name && (
                       <div className="info-row">
                         <span className="label">Atendente Responsável:</span>
