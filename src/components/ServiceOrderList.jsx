@@ -74,12 +74,12 @@ const ServiceOrderList = ({
   // Filtro de data ao lado do select de modo de visualização (todos | hoje)
   const [dateFilter, setDateFilter] = useState("todos");
   // Ordenação
-  const [ordering, setOrdering] = useState("-order_date");
+  const [ordering, setOrdering] = useState("-id");
 
   // Opções de ordenação
   const orderingOptions = [
-    { value: "-order_date", label: "Mais recentes" },
-    { value: "order_date", label: "Mais antigos" },
+    { value: "-id", label: "Mais recentes" },
+    { value: "id", label: "Mais antigos" },
     { value: "-total_value", label: "Maior valor" },
     { value: "total_value", label: "Menor valor" },
     { value: "renter__name", label: "Cliente A-Z" },
@@ -310,7 +310,7 @@ const ServiceOrderList = ({
     setInitialDate(null);
     setEndDate(null);
     setDateFilter("todos");
-    setOrdering("-order_date");
+    setOrdering("-id");
   };
 
   // Handler para mudança de ordenação
