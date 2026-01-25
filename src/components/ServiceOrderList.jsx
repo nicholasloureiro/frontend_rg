@@ -71,8 +71,8 @@ const ServiceOrderList = ({
   const [isSearching, setIsSearching] = useState(false);
   // Modo de visualização: 'cards' (padrão) ou 'table'
   const [viewMode, setViewMode] = useState("cards");
-  // Filtro de data ao lado do select de modo de visualização (todos | hoje)
-  const [dateFilter, setDateFilter] = useState("todos");
+  // Filtro de data ao lado do select de modo de visualização (null = todos)
+  const [dateFilter, setDateFilter] = useState(null);
   // Ordenação
   const [ordering, setOrdering] = useState("-id");
 
@@ -309,7 +309,7 @@ const ServiceOrderList = ({
     setSearchText("");
     setInitialDate(null);
     setEndDate(null);
-    setDateFilter("todos");
+    setDateFilter(null);
     setOrdering("-id");
   };
 
@@ -758,11 +758,10 @@ const ServiceOrderList = ({
     }
   };
 
-  // Lista de ordens exibidas considerando filtros locais (ex: filtro por dia na aba PENDENTE)
+  // Lista de ordens exibidas considerando filtros locais (ex: filtro por dia)
   const displayedOrders = useMemo(() => {
-    if (dateFilter === "todos") return orders;
+    if (!dateFilter) return orders;
 
-    const today = new Date();
     const isSameDay = (dateString) => {
       if (!dateString) return false;
       const normalized = dateString.includes("T")
@@ -770,9 +769,9 @@ const ServiceOrderList = ({
         : `${dateString}T00:00:00`;
       const d = new Date(normalized);
       return (
-        d.getFullYear() === today.getFullYear() &&
-        d.getMonth() === today.getMonth() &&
-        d.getDate() === today.getDate()
+        d.getFullYear() === dateFilter.getFullYear() &&
+        d.getMonth() === dateFilter.getMonth() &&
+        d.getDate() === dateFilter.getDate()
       );
     };
 
@@ -1058,14 +1057,10 @@ const ServiceOrderList = ({
               activeTab === "ATRASADO") && (
               <div style={{ width: 160 }}>
                 <label>Filtro de data</label>
-                <CustomSelect
-                  options={[
-                    { value: "todos", label: "Todos" },
-                    { value: "hoje", label: "Hoje" },
-                  ]}
-                  value={dateFilter}
-                  onChange={setDateFilter}
-                  placeholder="Filtrar por data"
+                <InputDate
+                  selectedDate={dateFilter}
+                  onDateChange={setDateFilter}
+                  placeholderText="Todas as datas"
                 />
               </div>
             )}
