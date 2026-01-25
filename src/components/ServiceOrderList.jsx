@@ -157,22 +157,31 @@ const ServiceOrderList = ({
     { key: "FINALIZADO", label: "FINALIZADAS", color: "#4caf50" },
   ];
 
+  // Formata data para YYYY-MM-DD usando data local (evita problemas de timezone)
+  const formatDateForApi = (date) => {
+    if (!date) return null;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   const buildFiltersFromState = () => {
     const filters = {};
     if (searchText && searchText.trim()) {
       filters.search = searchText.trim();
     }
     if (initialDate) {
-      filters.initial_date = initialDate.toISOString().split("T")[0];
+      filters.initial_date = formatDateForApi(initialDate);
     }
     if (endDate) {
-      filters.end_date = endDate.toISOString().split("T")[0];
+      filters.end_date = formatDateForApi(endDate);
     }
     if (ordering) {
       filters.ordering = ordering;
     }
     if (dateFilter) {
-      filters.filter_date = dateFilter.toISOString().split("T")[0];
+      filters.filter_date = formatDateForApi(dateFilter);
     }
     return filters;
   };
@@ -376,7 +385,7 @@ const ServiceOrderList = ({
     setDateFilter(newDate);
     setCurrentPage(1);
     const filters = buildFiltersFromState();
-    const filterDate = newDate ? newDate.toISOString().split("T")[0] : undefined;
+    const filterDate = formatDateForApi(newDate);
     fetchOrders(activeTab, { ...filters, filter_date: filterDate }, 1);
   };
 
