@@ -137,6 +137,10 @@ export const serviceOrderService = {
             if (filters.ordering) {
                 params.append('ordering', filters.ordering);
             }
+            // filtro de data
+            if (filters.filter_date) {
+                params.append('filter_date', filters.filter_date);
+            }
 
             const queryString = params.toString();
             const url = `/api/v1/service-orders/v2/phase/${phase}/${queryString ? `?${queryString}` : ''}`;

@@ -88,6 +88,17 @@ const ServiceOrderList = ({
     { value: "-retirada_date", label: "Retirada (decrescente)" },
   ];
 
+  // Mapeamento de fase para label do filtro de data (para deixar claro o que está sendo filtrado)
+  const dateFilterLabels = {
+    PENDENTE: "Data do Pedido",
+    EM_PRODUCAO: "Data de Produção",
+    AGUARDANDO_RETIRADA: "Data de Retirada",
+    AGUARDANDO_DEVOLUCAO: "Data de Devolução",
+    ATRASADO: "Data de Retirada",
+    FINALIZADO: "Data de Finalização",
+    RECUSADA: "Data de Recusa",
+  };
+
   // Ref para o scroll dos tabs
   const tabsContainerRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -154,6 +165,9 @@ const ServiceOrderList = ({
     }
     if (ordering) {
       filters.ordering = ordering;
+    }
+    if (dateFilter) {
+      filters.filter_date = dateFilter.toISOString().split("T")[0];
     }
     return filters;
   };
@@ -319,6 +333,15 @@ const ServiceOrderList = ({
     setCurrentPage(1);
     const filters = buildFiltersFromState();
     fetchOrders(activeTab, { ...filters, ordering: newOrdering }, 1, newOrdering);
+  };
+
+  // Handler para mudança do filtro de data
+  const handleDateFilterChange = (newDate) => {
+    setDateFilter(newDate);
+    setCurrentPage(1);
+    const filters = buildFiltersFromState();
+    const filterDate = newDate ? newDate.toISOString().split("T")[0] : undefined;
+    fetchOrders(activeTab, { ...filters, filter_date: filterDate }, 1);
   };
 
   const handleSearch = async () => {
@@ -758,44 +781,8 @@ const ServiceOrderList = ({
     }
   };
 
-  // Lista de ordens exibidas considerando filtros locais (ex: filtro por dia)
-  const displayedOrders = useMemo(() => {
-    if (!dateFilter) return orders;
-
-    const isSameDay = (dateString) => {
-      if (!dateString) return false;
-      const normalized = dateString.includes("T")
-        ? dateString
-        : `${dateString}T00:00:00`;
-      const d = new Date(normalized);
-      return (
-        d.getFullYear() === dateFilter.getFullYear() &&
-        d.getMonth() === dateFilter.getMonth() &&
-        d.getDate() === dateFilter.getDate()
-      );
-    };
-
-    // Filtra por data_pedido na aba PENDENTE, por retirada_date na aba AGUARDANDO_RETIRADA
-    if (activeTab === "PENDENTE") {
-      return orders.filter((o) =>
-        isSameDay(o.data_pedido || o.order_date || o.orderDate)
-      );
-    }
-
-    if (activeTab === "AGUARDANDO_RETIRADA") {
-      return orders.filter((o) => isSameDay(o.retirada_date));
-    }
-
-    if (activeTab === "EM_PRODUCAO") {
-      return orders.filter((o) => isSameDay(o.production_date));
-    }
-
-    if (activeTab === "AGUARDANDO_DEVOLUCAO") {
-      return orders.filter((o) => isSameDay(o.devolucao_date));
-    }
-
-    return orders;
-  }, [orders, dateFilter, activeTab]);
+  // Lista de ordens exibidas (filtro de data agora é feito no backend)
+  const displayedOrders = orders;
 
   // Tabela memoizada com MaterialReactTable (hook chamado no topo do componente)
   const materialTable = useMemo(() => {
@@ -1050,20 +1037,14 @@ const ServiceOrderList = ({
                 placeholder="Visualização"
               />
             </div>
-            {(activeTab === "PENDENTE" ||
-              activeTab === "EM_PRODUCAO" ||
-              activeTab === "AGUARDANDO_RETIRADA" ||
-              activeTab === "AGUARDANDO_DEVOLUCAO" ||
-              activeTab === "ATRASADO") && (
-              <div style={{ width: 160 }}>
-                <label>Filtro de data</label>
-                <InputDate
-                  selectedDate={dateFilter}
-                  onDateChange={setDateFilter}
-                  placeholderText="Todas as datas"
-                />
-              </div>
-            )}
+            <div style={{ width: 180 }}>
+              <label>{dateFilterLabels[activeTab] || "Filtro de data"}</label>
+              <InputDate
+                selectedDate={dateFilter}
+                onDateChange={handleDateFilterChange}
+                placeholderText="Todas as datas"
+              />
+            </div>
             <div style={{ width: 180 }}>
               <label>Ordenar por</label>
               <CustomSelect
