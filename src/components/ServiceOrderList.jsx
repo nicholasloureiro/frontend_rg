@@ -86,6 +86,8 @@ const ServiceOrderList = ({
     { value: "-renter__name", label: "Cliente Z-A" },
     { value: "retirada_date", label: "Retirada (crescente)" },
     { value: "-retirada_date", label: "Retirada (decrescente)" },
+    { value: "devolucao_date", label: "Devolução (crescente)" },
+    { value: "-devolucao_date", label: "Devolução (decrescente)" },
   ];
 
   // Mapeamento de fase para label do filtro de data (para deixar claro o que está sendo filtrado)
