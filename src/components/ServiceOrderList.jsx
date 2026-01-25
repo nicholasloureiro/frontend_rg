@@ -106,6 +106,9 @@ const ServiceOrderList = ({
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
+  // Contagem de ordens por fase (para exibir nos tabs)
+  const [tabCounts, setTabCounts] = useState({});
+
   // Função para verificar se pode scrollar
   const checkTabsScroll = () => {
     const container = tabsContainerRef.current;
@@ -223,6 +226,25 @@ const ServiceOrderList = ({
     }
   };
 
+  // Busca contagem de ordens para cada fase (para exibir nos tabs)
+  const fetchTabCounts = async () => {
+    const phases = ["PENDENTE", "EM_PRODUCAO", "AGUARDANDO_RETIRADA", "AGUARDANDO_DEVOLUCAO", "ATRASADO", "RECUSADA", "FINALIZADO"];
+    try {
+      const results = await Promise.all(
+        phases.map(phase =>
+          serviceOrderService.searchServiceOrders(phase, { page: 1, page_size: 1 })
+        )
+      );
+      const counts = {};
+      phases.forEach((phase, index) => {
+        counts[phase] = results[index]?.count || 0;
+      });
+      setTabCounts(counts);
+    } catch (err) {
+      console.error("Erro ao carregar contagem de ordens:", err);
+    }
+  };
+
   // Converte os motivos de recusa para o formato do CustomSelect
   const refusalReasonOptions = refusalReasons.map((reason) => ({
     value: reason.id.toString(),
@@ -292,6 +314,18 @@ const ServiceOrderList = ({
     fetchOrders(activeTab);
     fetchRefusalReasons();
   }, [activeTab]);
+
+  // Busca contagem de todas as fases ao montar o componente
+  useEffect(() => {
+    fetchTabCounts();
+  }, []);
+
+  // Atualiza a contagem do tab atual quando totalCount muda
+  useEffect(() => {
+    if (totalCount !== undefined) {
+      setTabCounts(prev => ({ ...prev, [activeTab]: totalCount }));
+    }
+  }, [totalCount, activeTab]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "-";
@@ -1005,6 +1039,9 @@ const ServiceOrderList = ({
               }}
             >
               {tab.label}
+              {tabCounts[tab.key] !== undefined && (
+                <span className="tab-count">({tabCounts[tab.key]})</span>
+              )}
             </button>
           ))}
         </div>

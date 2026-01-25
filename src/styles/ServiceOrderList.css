@@ -249,6 +249,17 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+.tab-count {
+  margin-left: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.tab.active .tab-count {
+  opacity: 1;
+}
+
 /* Responsividade para tabs - mostrar setas em telas menores */
 @media (max-width: 1450px) {
   .tabs-nav-btn {
