@@ -431,8 +431,8 @@ const ServiceOrderList = ({
   const handleEditOrder = (order, event) => {
     event.stopPropagation(); // Previne que o clique propague para o card
 
-    // Verifica se o attendant_name está vazio
-    if (!order.attendant_name || order.attendant_name.trim() === "") {
+    // Verifica se o employee_name está vazio
+    if (!order.employee_name || order.employee_name.trim() === "") {
       Swal.fire({
         title: "Atendente não definido",
         text: "Por favor, defina um atendente antes de editar esta ordem de serviço.",
@@ -895,7 +895,7 @@ const ServiceOrderList = ({
       },
       {
         accessorFn: (row) =>
-          row.attendant_name ? capitalizeText(row.attendant_name) : "-",
+          row.employee_name ? capitalizeText(row.employee_name) : "-",
         id: "atendente",
         header: "Atendente",
       },
@@ -1299,11 +1299,11 @@ const ServiceOrderList = ({
                         </span>
                       </div>
                     )}
-                    {order.attendant_name && (
+                    {order.employee_name && (
                       <div className="info-row">
                         <span className="label">Atendente Responsável:</span>
                         <span className="value">
-                          {capitalizeText(order.attendant_name)}
+                          {capitalizeText(order.employee_name)}
                         </span>
                       </div>
                     )}
