@@ -73,6 +73,20 @@ const ServiceOrderList = ({
   const [viewMode, setViewMode] = useState("cards");
   // Filtro de data ao lado do select de modo de visualização (todos | hoje)
   const [dateFilter, setDateFilter] = useState("todos");
+  // Ordenação
+  const [ordering, setOrdering] = useState("-order_date");
+
+  // Opções de ordenação
+  const orderingOptions = [
+    { value: "-order_date", label: "Mais recentes" },
+    { value: "order_date", label: "Mais antigos" },
+    { value: "-total_value", label: "Maior valor" },
+    { value: "total_value", label: "Menor valor" },
+    { value: "renter__name", label: "Cliente A-Z" },
+    { value: "-renter__name", label: "Cliente Z-A" },
+    { value: "retirada_date", label: "Retirada (crescente)" },
+    { value: "-retirada_date", label: "Retirada (decrescente)" },
+  ];
 
   // Ref para o scroll dos tabs
   const tabsContainerRef = useRef(null);
@@ -138,33 +152,28 @@ const ServiceOrderList = ({
     if (endDate) {
       filters.end_date = endDate.toISOString().split("T")[0];
     }
+    if (ordering) {
+      filters.ordering = ordering;
+    }
     return filters;
   };
 
-  const fetchOrders = async (phase, filters = {}, page = 1) => {
+  const fetchOrders = async (phase, filters = {}, page = 1, orderingParam = null) => {
     setLoading(true);
     setInternalError(null);
     try {
       let data;
-      const hasFilters = filters && Object.keys(filters).length > 0;
-      if (hasFilters) {
-        // Quando há filtros, usa endpoint de busca com query params que suporta paginação
-        const effectiveFilters = { ...filters, page, page_size: pageSize };
-        data = await serviceOrderService.searchServiceOrders(
-          phase,
-          effectiveFilters
-        );
-      } else {
-        // Quando não há filtros, usa endpoint v2 com paginação
-        const params = new URLSearchParams();
-        params.append("page", page);
-        params.append("page_size", pageSize);
-        const queryString = params.toString();
-        const response = await api.get(
-          `/api/v1/service-orders/v2/phase/${phase}/?${queryString}`
-        );
-        data = response.data;
-      }
+      // Usa endpoint de busca que suporta paginação e ordenação
+      const effectiveFilters = {
+        ...filters,
+        page,
+        page_size: pageSize,
+        ordering: orderingParam || ordering,
+      };
+      data = await serviceOrderService.searchServiceOrders(
+        phase,
+        effectiveFilters
+      );
 
       // Se a API retornou objeto paginado
       if (data && typeof data === "object" && Array.isArray(data.results)) {
@@ -301,6 +310,15 @@ const ServiceOrderList = ({
     setInitialDate(null);
     setEndDate(null);
     setDateFilter("todos");
+    setOrdering("-order_date");
+  };
+
+  // Handler para mudança de ordenação
+  const handleOrderingChange = (newOrdering) => {
+    setOrdering(newOrdering);
+    setCurrentPage(1);
+    const filters = buildFiltersFromState();
+    fetchOrders(activeTab, { ...filters, ordering: newOrdering }, 1, newOrdering);
   };
 
   const handleSearch = async () => {
@@ -316,7 +334,8 @@ const ServiceOrderList = ({
     setInitialDate(null);
     setEndDate(null);
     setCurrentPage(1);
-    await fetchOrders(activeTab, {}, 1);
+    // Mantém a ordenação ao limpar a busca
+    await fetchOrders(activeTab, { ordering }, 1);
   };
 
   const toggleSearchPanel = () => {
@@ -1050,6 +1069,15 @@ const ServiceOrderList = ({
                 />
               </div>
             )}
+            <div style={{ width: 180 }}>
+              <label>Ordenar por</label>
+              <CustomSelect
+                options={orderingOptions}
+                value={ordering}
+                onChange={handleOrderingChange}
+                placeholder="Ordenar por"
+              />
+            </div>
           </div>
           <Button
             variant="primary"

@@ -115,7 +115,7 @@ export const serviceOrderService = {
     searchServiceOrders: async (phase, filters = {}) => {
         try {
             const params = new URLSearchParams();
-            
+
             // Adiciona filtros se fornecidos
             if (filters.search) {
                 params.append('search', filters.search);
@@ -133,10 +133,14 @@ export const serviceOrderService = {
             if (filters.page_size) {
                 params.append('page_size', filters.page_size);
             }
+            // ordenação
+            if (filters.ordering) {
+                params.append('ordering', filters.ordering);
+            }
 
             const queryString = params.toString();
             const url = `/api/v1/service-orders/v2/phase/${phase}/${queryString ? `?${queryString}` : ''}`;
-            
+
             const response = await api.get(url);
             return response.data;
         } catch (error) {
