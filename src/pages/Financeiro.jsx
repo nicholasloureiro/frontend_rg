@@ -331,126 +331,156 @@ const Financeiro = () => {
             />
           </div>
 
-          {isIndenizacao && (
-            <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px' }}>
-                Cliente
-              </label>
-              {selectedClient ? (
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '8px 12px',
-                  border: '2px solid var(--color-accent)',
-                  borderRadius: '8px',
-                  backgroundColor: '#f8f9fa'
-                }}>
-                  <span style={{ fontSize: '14px' }}>{selectedClient.label}</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedClient(null);
-                      setClientSearch('');
-                    }}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: '18px',
-                      color: '#666',
-                      padding: '0 4px'
-                    }}
-                  >
-                    ×
-                  </button>
-                </div>
-              ) : (
-                <div style={{ position: 'relative' }}>
-                  <input
-                    type="text"
-                    value={clientSearch}
-                    onChange={(e) => setClientSearch(e.target.value)}
-                    placeholder="Digite para buscar cliente..."
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '2px solid var(--color-border)',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                  />
-                  {loadingClients && (
-                    <div style={{
-                      position: 'absolute',
-                      right: '12px',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      fontSize: '12px',
-                      color: '#666'
-                    }}>
-                      Buscando...
-                    </div>
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px' }}>
+              Cliente
+            </label>
+            {selectedClient ? (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '8px 12px',
+                border: '2px solid var(--color-accent)',
+                borderRadius: '8px',
+                backgroundColor: '#f8f9fa'
+              }}>
+                <span style={{ fontSize: '14px' }}>
+                  {selectedClient.label}
+                  {selectedClient.isCustom && (
+                    <span style={{ marginLeft: '8px', fontSize: '12px', color: '#666' }}>(nome manual)</span>
                   )}
-                  {clientOptions.length > 0 && !selectedClient && (
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedClient(null);
+                    setClientSearch('');
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '18px',
+                    color: '#666',
+                    padding: '0 4px'
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            ) : (
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="text"
+                  value={clientSearch}
+                  onChange={(e) => setClientSearch(e.target.value)}
+                  placeholder="Digite para buscar cliente..."
+                  style={{
+                    width: '100%',
+                    padding: '8px 12px',
+                    border: '2px solid var(--color-border)',
+                    borderRadius: '8px',
+                    fontSize: '14px'
+                  }}
+                />
+                {loadingClients && (
+                  <div style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    fontSize: '12px',
+                    color: '#666'
+                  }}>
+                    Buscando...
+                  </div>
+                )}
+                {clientOptions.length > 0 && !selectedClient && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    right: 0,
+                    backgroundColor: 'white',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: '8px',
+                    marginTop: '4px',
+                    maxHeight: '200px',
+                    overflowY: 'auto',
+                    zIndex: 1000,
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                  }}>
+                    {clientOptions.map((option) => (
+                      <div
+                        key={option.value}
+                        onClick={() => {
+                          setSelectedClient(option);
+                          setClientSearch('');
+                          setClientOptions([]);
+                        }}
+                        style={{
+                          padding: '10px 12px',
+                          cursor: 'pointer',
+                          borderBottom: '1px solid #eee',
+                          fontSize: '14px'
+                        }}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = '#f5f5f5'}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+                      >
+                        {option.label}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {clientSearch.length >= 2 && clientOptions.length === 0 && !loadingClients && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    right: 0,
+                    backgroundColor: 'white',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: '8px',
+                    marginTop: '4px',
+                    zIndex: 1000,
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                  }}>
                     <div style={{
-                      position: 'absolute',
-                      top: '100%',
-                      left: 0,
-                      right: 0,
-                      backgroundColor: 'white',
-                      border: '1px solid var(--color-border)',
-                      borderRadius: '8px',
-                      marginTop: '4px',
-                      maxHeight: '200px',
-                      overflowY: 'auto',
-                      zIndex: 1000,
-                      boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                    }}>
-                      {clientOptions.map((option) => (
-                        <div
-                          key={option.value}
-                          onClick={() => {
-                            setSelectedClient(option);
-                            setClientSearch('');
-                            setClientOptions([]);
-                          }}
-                          style={{
-                            padding: '10px 12px',
-                            cursor: 'pointer',
-                            borderBottom: '1px solid #eee',
-                            fontSize: '14px'
-                          }}
-                          onMouseEnter={(e) => e.target.style.backgroundColor = '#f5f5f5'}
-                          onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
-                        >
-                          {option.label}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {clientSearch.length >= 2 && clientOptions.length === 0 && !loadingClients && (
-                    <div style={{
-                      position: 'absolute',
-                      top: '100%',
-                      left: 0,
-                      right: 0,
-                      backgroundColor: 'white',
-                      border: '1px solid var(--color-border)',
-                      borderRadius: '8px',
-                      marginTop: '4px',
                       padding: '10px 12px',
                       fontSize: '14px',
                       color: '#666',
-                      zIndex: 1000
+                      borderBottom: '1px solid #eee'
                     }}>
                       Nenhum cliente encontrado
                     </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
+                    <div
+                      onClick={() => {
+                        setSelectedClient({
+                          value: null,
+                          label: clientSearch.trim(),
+                          isCustom: true
+                        });
+                        setClientSearch('');
+                        setClientOptions([]);
+                      }}
+                      style={{
+                        padding: '10px 12px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        color: 'var(--color-accent)',
+                        fontWeight: '500'
+                      }}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = '#f5f5f5'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+                    >
+                      Usar '{clientSearch.trim()}' como nome do cliente
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px' }}>
@@ -565,12 +595,10 @@ const Financeiro = () => {
           return false;
         }
 
-        // Validações específicas para indenização
-        if (tipoPagamento === 'indenizacao') {
-          if (!selectedClient) {
-            Swal.showValidationMessage('Selecione um cliente');
-            return false;
-          }
+        // Cliente é obrigatório para todos os tipos de pagamento
+        if (!selectedClient) {
+          Swal.showValidationMessage('Selecione ou informe um cliente');
+          return false;
         }
 
         if (!valor || parseFloat(valor) <= 0) {
@@ -600,10 +628,15 @@ const Financeiro = () => {
 
         let payload;
 
+        // Base do payload com cliente (registrado ou nome manual)
+        const clientPayload = selectedClient.isCustom
+          ? { client_name: selectedClient.label }
+          : { renter_id: selectedClient.value };
+
         if (tipoPagamento === 'indenizacao') {
           // Payload específico para indenização
           payload = {
-            renter_id: selectedClient.value,
+            ...clientPayload,
             total_value: valorFormatado,
             indenizacao: {
               amount: valorFormatado,
@@ -615,6 +648,7 @@ const Financeiro = () => {
         } else {
           // Payload padrão para sinal/restante
           payload = {
+            ...clientPayload,
             total_value: valorFormatado,
             [tipoPagamento]: {
               amount: valorFormatado,
