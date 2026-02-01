@@ -292,7 +292,7 @@ const Financeiro = () => {
           setLoadingClients(true);
           try {
             const response = await clientService.listarTodos({ search: clientSearch, page_size: 10 });
-            const clients = response.results || response || [];
+            const clients = response.clients || response.results || response || [];
             setClientOptions(clients.map(client => ({
               value: client.id,
               label: client.name || client.full_name || `${client.first_name || ''} ${client.last_name || ''}`.trim(),
