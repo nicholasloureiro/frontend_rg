@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { formatCurrency } from '../utils/format';
 import '../styles/Financeiro.css';
 import { getFinanceSummary, postCloseCash, postVirtualPayment } from '../services/financeService';
+import { clientService } from '../services/clientService';
 import { useAuth } from '../hooks/useAuth';
 import Header from '../components/Header';
 import InputDate from '../components/InputDate';
@@ -95,6 +96,14 @@ const formatTransactionType = (type) => {
 
 const formatTime = (value) => {
   if (!value) return '—';
+  // Se for apenas data (YYYY-MM-DD), não tem informação de hora
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return '—';
+  }
+  // Se tiver T00:00:00 (meia-noite), provavelmente não tem hora real
+  if (typeof value === 'string' && value.includes('T00:00:00')) {
+    return '—';
+  }
   const dateObj = new Date(value);
   if (Number.isNaN(dateObj.getTime())) return '—';
   return dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -247,7 +256,7 @@ const Financeiro = () => {
       valor: '',
       formaPagamento: '',
       data: new Date().toISOString().split('T')[0],
-      clientName: '',
+      selectedClient: null,
       observacoes: ''
     };
 
@@ -257,7 +266,10 @@ const Financeiro = () => {
       const [valor, setValor] = useState('');
       const [formaPagamento, setFormaPagamento] = useState('');
       const [data, setData] = useState(formValues.data);
-      const [clientName, setClientName] = useState('');
+      const [selectedClient, setSelectedClient] = useState(null);
+      const [clientSearch, setClientSearch] = useState('');
+      const [clientOptions, setClientOptions] = useState([]);
+      const [loadingClients, setLoadingClients] = useState(false);
       const [observacoes, setObservacoes] = useState('');
 
       // Atualizar valores no objeto compartilhado
@@ -266,9 +278,37 @@ const Financeiro = () => {
         formValues.valor = valor;
         formValues.formaPagamento = formaPagamento;
         formValues.data = data;
-        formValues.clientName = clientName;
+        formValues.selectedClient = selectedClient;
         formValues.observacoes = observacoes;
-      }, [tipoPagamento, valor, formaPagamento, data, clientName, observacoes]);
+      }, [tipoPagamento, valor, formaPagamento, data, selectedClient, observacoes]);
+
+      // Buscar clientes quando o usuário digita
+      useEffect(() => {
+        const searchClients = async () => {
+          if (clientSearch.length < 2) {
+            setClientOptions([]);
+            return;
+          }
+          setLoadingClients(true);
+          try {
+            const response = await clientService.listarTodos({ search: clientSearch, page_size: 10 });
+            const clients = response.results || response || [];
+            setClientOptions(clients.map(client => ({
+              value: client.id,
+              label: client.name || client.full_name || `${client.first_name || ''} ${client.last_name || ''}`.trim(),
+              client
+            })));
+          } catch (error) {
+            console.error('Erro ao buscar clientes:', error);
+            setClientOptions([]);
+          } finally {
+            setLoadingClients(false);
+          }
+        };
+
+        const debounceTimer = setTimeout(searchClients, 300);
+        return () => clearTimeout(debounceTimer);
+      }, [clientSearch]);
 
       const isIndenizacao = tipoPagamento === 'indenizacao';
 
@@ -294,21 +334,121 @@ const Financeiro = () => {
           {isIndenizacao && (
             <div>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px' }}>
-                Nome do Cliente
+                Cliente
               </label>
-              <input
-                type="text"
-                value={clientName}
-                onChange={(e) => setClientName(e.target.value)}
-                placeholder="Digite o nome do cliente"
-                style={{
-                  width: '100%',
+              {selectedClient ? (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
                   padding: '8px 12px',
-                  border: '2px solid var(--color-border)',
+                  border: '2px solid var(--color-accent)',
                   borderRadius: '8px',
-                  fontSize: '14px'
-                }}
-              />
+                  backgroundColor: '#f8f9fa'
+                }}>
+                  <span style={{ fontSize: '14px' }}>{selectedClient.label}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedClient(null);
+                      setClientSearch('');
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '18px',
+                      color: '#666',
+                      padding: '0 4px'
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ) : (
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="text"
+                    value={clientSearch}
+                    onChange={(e) => setClientSearch(e.target.value)}
+                    placeholder="Digite para buscar cliente..."
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      border: '2px solid var(--color-border)',
+                      borderRadius: '8px',
+                      fontSize: '14px'
+                    }}
+                  />
+                  {loadingClients && (
+                    <div style={{
+                      position: 'absolute',
+                      right: '12px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      fontSize: '12px',
+                      color: '#666'
+                    }}>
+                      Buscando...
+                    </div>
+                  )}
+                  {clientOptions.length > 0 && !selectedClient && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      right: 0,
+                      backgroundColor: 'white',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: '8px',
+                      marginTop: '4px',
+                      maxHeight: '200px',
+                      overflowY: 'auto',
+                      zIndex: 1000,
+                      boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                    }}>
+                      {clientOptions.map((option) => (
+                        <div
+                          key={option.value}
+                          onClick={() => {
+                            setSelectedClient(option);
+                            setClientSearch('');
+                            setClientOptions([]);
+                          }}
+                          style={{
+                            padding: '10px 12px',
+                            cursor: 'pointer',
+                            borderBottom: '1px solid #eee',
+                            fontSize: '14px'
+                          }}
+                          onMouseEnter={(e) => e.target.style.backgroundColor = '#f5f5f5'}
+                          onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+                        >
+                          {option.label}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {clientSearch.length >= 2 && clientOptions.length === 0 && !loadingClients && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      right: 0,
+                      backgroundColor: 'white',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: '8px',
+                      marginTop: '4px',
+                      padding: '10px 12px',
+                      fontSize: '14px',
+                      color: '#666',
+                      zIndex: 1000
+                    }}>
+                      Nenhum cliente encontrado
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -413,7 +553,7 @@ const Financeiro = () => {
         const tipoPagamento = formValues.tipoPagamento;
         const valor = formValues.valor;
         const formaPagamento = formValues.formaPagamento;
-        const clientName = formValues.clientName;
+        const selectedClient = formValues.selectedClient;
         const observacoes = formValues.observacoes;
 
         // Data local BR
@@ -427,8 +567,8 @@ const Financeiro = () => {
 
         // Validações específicas para indenização
         if (tipoPagamento === 'indenizacao') {
-          if (!clientName || clientName.trim() === '') {
-            Swal.showValidationMessage('Informe o nome do cliente');
+          if (!selectedClient) {
+            Swal.showValidationMessage('Selecione um cliente');
             return false;
           }
         }
@@ -463,7 +603,7 @@ const Financeiro = () => {
         if (tipoPagamento === 'indenizacao') {
           // Payload específico para indenização
           payload = {
-            client_name: clientName.trim(),
+            renter_id: selectedClient.value,
             total_value: valorFormatado,
             indenizacao: {
               amount: valorFormatado,
@@ -663,7 +803,7 @@ const Financeiro = () => {
                     {transactions.map((tx) => (
                       <tr key={tx._internalId}>
                         <td>{tx.order_id ? `#${tx.order_id}` : '—'}</td>
-                        <td>{tx.client_name || '—'}</td>
+                        <td>{tx.client_name || tx.renter_name || tx.customer_name || '—'}</td>
                         <td>
                           <span className={`chip ${tx.transaction_type}`}>
                             {formatTransactionType(tx.transaction_type)}
