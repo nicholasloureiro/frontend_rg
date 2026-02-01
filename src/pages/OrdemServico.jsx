@@ -450,6 +450,12 @@ const OrdemServico = () => {
       [field]: value,
     }));
 
+    // Clear date fields when switching to Venda
+    if (field === "tipoPagamento" && value === "Venda") {
+      handleInputChange("dataEvento", "");
+      handleInputChange("dataDevolucao", "");
+    }
+
     // Limpar erro do campo quando uma opção válida é selecionada
     if (value && validationErrors[field]) {
       setValidationErrors((prev) => {
@@ -606,7 +612,13 @@ const OrdemServico = () => {
     // 1. Há uma data de evento
     // 2. A data de devolução está vazia (para não sobrescrever dados da API)
     // 3. Não está em modo de carregamento
-    if (inputValues.dataEvento && !inputValues.dataDevolucao && !loading) {
+    // 4. Modalidade não é "Venda" (Venda não precisa de datas de evento/devolução)
+    if (
+      inputValues.dataEvento &&
+      !inputValues.dataDevolucao &&
+      !loading &&
+      inputValues.tipoPagamento !== "Venda"
+    ) {
       // Pequeno delay para garantir que os dados da API foram carregados
       const timer = setTimeout(() => {
         const devolucao = addBusinessDays(
@@ -626,7 +638,7 @@ const OrdemServico = () => {
 
       return () => clearTimeout(timer);
     }
-  }, [inputValues.dataEvento, inputValues.dataDevolucao, loading]);
+  }, [inputValues.dataEvento, inputValues.dataDevolucao, loading, inputValues.tipoPagamento]);
 
   // Função para carregar ordens de serviço
   const loadOrders = async () => {
@@ -1619,15 +1631,22 @@ const OrdemServico = () => {
       case 5: // Pagamento
         if (!inputValues.dataPedido.trim())
           errors.dataPedido = "Data do pedido é obrigatória";
-        if (!inputValues.dataEvento.trim())
-          errors.dataEvento = "Data do evento é obrigatória";
+        // Event and Return date fields only required for non-Venda
+        if (inputValues.tipoPagamento !== "Venda") {
+          if (!inputValues.dataEvento.trim())
+            errors.dataEvento = "Data do evento é obrigatória";
+          if (!inputValues.dataDevolucao.trim())
+            errors.dataDevolucao = "Data da devolução é obrigatória";
+        }
         if (!inputValues.dataRetirada.trim())
           errors.dataRetirada = "Data da retirada é obrigatória";
-        if (!inputValues.dataDevolucao.trim())
-          errors.dataDevolucao = "Data da devolução é obrigatória";
 
-        // Validar que a data de retirada não pode ser maior que a data do evento
-        if (inputValues.dataEvento.trim() && inputValues.dataRetirada.trim()) {
+        // Validar que a data de retirada não pode ser maior que a data do evento (only for non-Venda)
+        if (
+          inputValues.tipoPagamento !== "Venda" &&
+          inputValues.dataEvento.trim() &&
+          inputValues.dataRetirada.trim()
+        ) {
           const dataEvento = new Date(inputValues.dataEvento + "T00:00:00");
           const dataRetirada = new Date(inputValues.dataRetirada + "T00:00:00");
 
@@ -3050,6 +3069,7 @@ const OrdemServico = () => {
         );
 
       case 5: // Pagamento
+        const isVenda = inputValues.tipoPagamento === "Venda";
         return (
           <div className="step-content">
             <h3>Informações de Pagamento</h3>
@@ -3080,42 +3100,44 @@ const OrdemServico = () => {
                   </div>
                 )}
               </div>
-              <div className="form-group">
-                <label>
-                  Data do Evento <span style={{ color: "red" }}>*</span>
-                </label>
-                <InputDate
-                  selectedDate={
-                    inputValues.dataEvento
-                      ? new Date(inputValues.dataEvento + "T00:00:00")
-                      : null
-                  }
-                  onDateChange={(date) => {
-                    const isoDate = date
-                      ? date.toISOString().split("T")[0]
-                      : "";
-                    handleInputChange("dataEvento", isoDate);
-                    handleInputBlur("dataEvento", isoDate);
-
-                    // Preencher dataDevolucao automaticamente se estiver vazia
-                    if (!inputValues.dataDevolucao && date) {
-                      const devolucao = addBusinessDays(date, 2);
-                      const devolucaoIso = devolucao
-                        .toISOString()
-                        .split("T")[0];
-                      handleInputChange("dataDevolucao", devolucaoIso);
-                      handleInputBlur("dataDevolucao", devolucaoIso);
+              {!isVenda && (
+                <div className="form-group">
+                  <label>
+                    Data do Evento <span style={{ color: "red" }}>*</span>
+                  </label>
+                  <InputDate
+                    selectedDate={
+                      inputValues.dataEvento
+                        ? new Date(inputValues.dataEvento + "T00:00:00")
+                        : null
                     }
-                  }}
-                  placeholderText="Selecione a data do evento"
-                  className={validationErrors.dataEvento ? "error" : ""}
-                />
-                {validationErrors.dataEvento && (
-                  <div className="error-message">
-                    {validationErrors.dataEvento}
-                  </div>
-                )}
-              </div>
+                    onDateChange={(date) => {
+                      const isoDate = date
+                        ? date.toISOString().split("T")[0]
+                        : "";
+                      handleInputChange("dataEvento", isoDate);
+                      handleInputBlur("dataEvento", isoDate);
+
+                      // Preencher dataDevolucao automaticamente se estiver vazia
+                      if (!inputValues.dataDevolucao && date) {
+                        const devolucao = addBusinessDays(date, 2);
+                        const devolucaoIso = devolucao
+                          .toISOString()
+                          .split("T")[0];
+                        handleInputChange("dataDevolucao", devolucaoIso);
+                        handleInputBlur("dataDevolucao", devolucaoIso);
+                      }
+                    }}
+                    placeholderText="Selecione a data do evento"
+                    className={validationErrors.dataEvento ? "error" : ""}
+                  />
+                  {validationErrors.dataEvento && (
+                    <div className="error-message">
+                      {validationErrors.dataEvento}
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="form-group">
                 <label>
                   Data da Retirada <span style={{ color: "red" }}>*</span>
@@ -3160,36 +3182,38 @@ const OrdemServico = () => {
                   placeholderText="Selecione a data da prova"
                 />
               </div>
-              <div
-                className={`form-group ${
-                  validationErrors.dataDevolucao ? "error" : ""
-                }`}
-              >
-                <label>
-                  Data da Devolução <span style={{ color: "red" }}>*</span>
-                </label>
-                <InputDate
-                  selectedDate={
-                    inputValues.dataDevolucao
-                      ? new Date(inputValues.dataDevolucao + "T00:00:00")
-                      : null
-                  }
-                  onDateChange={(date) => {
-                    const isoDate = date
-                      ? date.toISOString().split("T")[0]
-                      : "";
-                    handleInputChange("dataDevolucao", isoDate);
-                    handleInputBlur("dataDevolucao", isoDate);
-                  }}
-                  placeholderText="Selecione a data da devolução"
-                  className={validationErrors.dataDevolucao ? "error" : ""}
-                />
-                {validationErrors.dataDevolucao && (
-                  <div className="error-message">
-                    {validationErrors.dataDevolucao}
-                  </div>
-                )}
-              </div>
+              {!isVenda && (
+                <div
+                  className={`form-group ${
+                    validationErrors.dataDevolucao ? "error" : ""
+                  }`}
+                >
+                  <label>
+                    Data da Devolução <span style={{ color: "red" }}>*</span>
+                  </label>
+                  <InputDate
+                    selectedDate={
+                      inputValues.dataDevolucao
+                        ? new Date(inputValues.dataDevolucao + "T00:00:00")
+                        : null
+                    }
+                    onDateChange={(date) => {
+                      const isoDate = date
+                        ? date.toISOString().split("T")[0]
+                        : "";
+                      handleInputChange("dataDevolucao", isoDate);
+                      handleInputBlur("dataDevolucao", isoDate);
+                    }}
+                    placeholderText="Selecione a data da devolução"
+                    className={validationErrors.dataDevolucao ? "error" : ""}
+                  />
+                  {validationErrors.dataDevolucao && (
+                    <div className="error-message">
+                      {validationErrors.dataDevolucao}
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="form-group">
                 <label>
