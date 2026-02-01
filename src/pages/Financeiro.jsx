@@ -82,9 +82,22 @@ const formatDate = (value) => {
   return new Intl.DateTimeFormat('pt-BR').format(dateObj);
 };
 
+const typeLabels = {
+  sinal: 'Sinal',
+  restante: 'Restante',
+  indenizacao: 'Indenização',
+};
+
 const formatTransactionType = (type) => {
   if (!type) return '—';
-  return type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+  return typeLabels[type.toLowerCase()] || type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+};
+
+const formatTime = (value) => {
+  if (!value) return '—';
+  const dateObj = new Date(value);
+  if (Number.isNaN(dateObj.getTime())) return '—';
+  return dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 };
 
 const formatISODate = (dateObj) => {
@@ -233,7 +246,9 @@ const Financeiro = () => {
       tipoPagamento: '',
       valor: '',
       formaPagamento: '',
-      data: new Date().toISOString().split('T')[0]
+      data: new Date().toISOString().split('T')[0],
+      clientName: '',
+      observacoes: ''
     };
 
     // Componente de formulário que será renderizado dentro do Swal2
@@ -242,6 +257,8 @@ const Financeiro = () => {
       const [valor, setValor] = useState('');
       const [formaPagamento, setFormaPagamento] = useState('');
       const [data, setData] = useState(formValues.data);
+      const [clientName, setClientName] = useState('');
+      const [observacoes, setObservacoes] = useState('');
 
       // Atualizar valores no objeto compartilhado
       useEffect(() => {
@@ -249,7 +266,11 @@ const Financeiro = () => {
         formValues.valor = valor;
         formValues.formaPagamento = formaPagamento;
         formValues.data = data;
-      }, [tipoPagamento, valor, formaPagamento, data]);
+        formValues.clientName = clientName;
+        formValues.observacoes = observacoes;
+      }, [tipoPagamento, valor, formaPagamento, data, clientName, observacoes]);
+
+      const isIndenizacao = tipoPagamento === 'indenizacao';
 
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', minWidth: '400px' }}>
@@ -263,11 +284,33 @@ const Financeiro = () => {
               options={[
                 { value: '', label: 'Selecione o tipo' },
                 { value: 'sinal', label: 'Sinal' },
-                { value: 'restante', label: 'Restante' }
+                { value: 'restante', label: 'Restante' },
+                { value: 'indenizacao', label: 'Indenização' }
               ]}
               placeholder="Selecione o tipo"
             />
           </div>
+
+          {isIndenizacao && (
+            <div>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px' }}>
+                Nome do Cliente
+              </label>
+              <input
+                type="text"
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+                placeholder="Digite o nome do cliente"
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: '2px solid var(--color-border)',
+                  borderRadius: '8px',
+                  fontSize: '14px'
+                }}
+              />
+            </div>
+          )}
 
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px' }}>
@@ -311,6 +354,28 @@ const Financeiro = () => {
               placeholder="Selecione a forma"
             />
           </div>
+
+          {isIndenizacao && (
+            <div>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px' }}>
+                Observações
+              </label>
+              <textarea
+                value={observacoes}
+                onChange={(e) => setObservacoes(e.target.value)}
+                placeholder="Descreva o motivo da indenização"
+                rows={3}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: '2px solid var(--color-border)',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  resize: 'vertical'
+                }}
+              />
+            </div>
+          )}
         </div>
       );
     };
@@ -348,6 +413,8 @@ const Financeiro = () => {
         const tipoPagamento = formValues.tipoPagamento;
         const valor = formValues.valor;
         const formaPagamento = formValues.formaPagamento;
+        const clientName = formValues.clientName;
+        const observacoes = formValues.observacoes;
 
         // Data local BR
         const data = getTodayLocalDateStr();
@@ -356,6 +423,14 @@ const Financeiro = () => {
         if (!tipoPagamento || tipoPagamento === '') {
           Swal.showValidationMessage('Selecione o tipo de pagamento');
           return false;
+        }
+
+        // Validações específicas para indenização
+        if (tipoPagamento === 'indenizacao') {
+          if (!clientName || clientName.trim() === '') {
+            Swal.showValidationMessage('Informe o nome do cliente');
+            return false;
+          }
         }
 
         if (!valor || parseFloat(valor) <= 0) {
@@ -376,24 +451,44 @@ const Financeiro = () => {
         // Formatar valor com 2 casas decimais
         const valorFormatado = parseFloat(valor).toFixed(2);
 
-        // Criar data/hora no formato ISO (sempre 00:00:00)
-        const dataHoraISO = `${data}T00:00:00`;
+        // Criar data/hora no formato ISO com hora atual
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const dataHoraISO = `${data}T${hours}:${minutes}:${seconds}`;
 
-        // Montar payload conforme modelo especificado
-        const payload = {
-          total_value: valorFormatado,
-          [tipoPagamento]: {
-            amount: valorFormatado,
-            forma_pagamento: formaPagamento,
-            data: dataHoraISO
-          }
-        };
+        let payload;
 
-        // Se for sinal, adicionar restante vazio (ou vice-versa)
-        if (tipoPagamento === 'sinal') {
-          payload.restante = null;
+        if (tipoPagamento === 'indenizacao') {
+          // Payload específico para indenização
+          payload = {
+            client_name: clientName.trim(),
+            total_value: valorFormatado,
+            indenizacao: {
+              amount: valorFormatado,
+              forma_pagamento: formaPagamento,
+              data: dataHoraISO
+            },
+            observations: observacoes.trim() || null
+          };
         } else {
-          payload.sinal = null;
+          // Payload padrão para sinal/restante
+          payload = {
+            total_value: valorFormatado,
+            [tipoPagamento]: {
+              amount: valorFormatado,
+              forma_pagamento: formaPagamento,
+              data: dataHoraISO
+            }
+          };
+
+          // Se for sinal, adicionar restante vazio (ou vice-versa)
+          if (tipoPagamento === 'sinal') {
+            payload.restante = null;
+          } else {
+            payload.sinal = null;
+          }
         }
 
         try {
@@ -555,24 +650,30 @@ const Financeiro = () => {
                   <thead>
                     <tr>
                       <th>OS</th>
+                      <th>Cliente</th>
                       <th>Tipo</th>
                       <th>Forma</th>
                       <th>Valor</th>
                       <th>Data</th>
+                      <th>Hora</th>
+                      <th>Descrição</th>
                     </tr>
                   </thead>
                   <tbody>
                     {transactions.map((tx) => (
                       <tr key={tx._internalId}>
-                        <td>#{tx.order_id ?? '—'}</td>
+                        <td>{tx.order_id ? `#${tx.order_id}` : '—'}</td>
+                        <td>{tx.client_name || '—'}</td>
                         <td>
                           <span className={`chip ${tx.transaction_type}`}>
-                            {formatTransactionType(capitalizeText(tx.transaction_type))}
+                            {formatTransactionType(tx.transaction_type)}
                           </span>
                         </td>
                         <td>{capitalizeText(tx.payment_method) || '—'}</td>
                         <td>{formatCurrency(tx.amount)}</td>
                         <td>{formatDate(tx.date)}</td>
+                        <td>{formatTime(tx.date)}</td>
+                        <td>{tx.description || '—'}</td>
                       </tr>
                     ))}
                   </tbody>
