@@ -1329,7 +1329,7 @@ const OrdemServico = () => {
         cliente: {
           nome: formData.nome,
           cpf: formData.isInfant ? null : (formData.cpf ? formData.cpf.replace(/\D/g, "") : ""),
-          is_infant: formData.isInfant,
+          is_infant: formData.isInfant === true,
           email: formData.email,
           contatos: [
             {
