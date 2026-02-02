@@ -112,11 +112,17 @@ const ClientHistoryModal = ({ show, onClose, client }) => {
     });
   };
 
+  // Detectar se é cliente criança
+  const isInfant = client?.is_infant === true || client?.cpf?.startsWith('CRIANCA-');
+
   const modalBody = (
     <div className="client-history-modal">
       <div className="client-info">
-        <h4>{capitalizeText(client?.name || 'Cliente')}</h4>
-        <p>CPF: {client?.cpf || '-'}</p>
+        <h4 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {capitalizeText(client?.name || 'Cliente')}
+          {isInfant && <span className="badge-infant">Criança</span>}
+        </h4>
+        <p>CPF: {isInfant ? 'Criança' : (client?.cpf || '-')}</p>
       </div>
 
       {isLoading ? (

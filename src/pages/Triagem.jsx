@@ -21,6 +21,7 @@ const Triagem = () => {
         nomeCliente: '',
         telefone: '',
         cpf: '',
+        isInfant: false,
         cep: '',
         rua: '',
         bairro: '',
@@ -204,8 +205,8 @@ const Triagem = () => {
             novosErros.papelNoEvento = 'Papel no evento é obrigatório';
         }
 
-        // Validações opcionais (só validam se o campo estiver preenchido)
-        if (formData.cpf && !cpfValido) {
+        // Validações opcionais (só validam se o campo estiver preenchido e não for criança)
+        if (!formData.isInfant && formData.cpf && !cpfValido) {
             novosErros.cpf = 'CPF inválido';
         }
 
@@ -230,7 +231,8 @@ const Triagem = () => {
             cliente_nome: formData.nomeCliente.toUpperCase(),
             telefone: formData.telefone ? formData.telefone.replace(/\D/g, '') : null,
             email: formData.email || null,
-            cpf: formData.cpf ? removerMascara(formData.cpf) : null,
+            is_infant: formData.isInfant,
+            cpf: formData.isInfant ? null : (formData.cpf ? removerMascara(formData.cpf) : null),
             atendente_id: formData.atendenteResponsavel ? parseInt(formData.atendenteResponsavel) : null,
             origem: formData.origem ? formData.origem.toUpperCase() : null,
             event_id: formData.event_id ? parseInt(formData.event_id) : null,
@@ -273,6 +275,7 @@ const Triagem = () => {
                 nomeCliente: '',
                 telefone: '',
                 cpf: '',
+                isInfant: false,
                 cep: '',
                 rua: '',
                 bairro: '',
@@ -324,6 +327,23 @@ const Triagem = () => {
         // Resetar validação do email quando o campo for limpo
         if (field === 'email' && !value) {
             setEmailValido(true);
+        }
+
+        // Quando marcar como criança, limpar CPF e resetar validação
+        if (field === 'isInfant' && value === true) {
+            setFormData(prev => ({
+                ...prev,
+                cpf: '',
+                isInfant: true
+            }));
+            setCpfValido(true);
+            if (errors.cpf) {
+                setErrors(prev => ({
+                    ...prev,
+                    cpf: ''
+                }));
+            }
+            return;
         }
     };
 
@@ -381,6 +401,9 @@ const Triagem = () => {
 
     // Função para aplicar máscara de CPF e validar
     const handleCPFChange = (e) => {
+        // Se for criança, não processar CPF
+        if (formData.isInfant) return;
+
         const value = e.target.value;
         const maskedValue = mascaraCPF(value);
         handleInputChange('cpf', maskedValue);
@@ -494,12 +517,12 @@ const Triagem = () => {
                                             type="text"
                                             id="cpf"
                                             className={`form-input ${errors.cpf ? 'error' : ''}`}
-                                            value={formData.cpf}
+                                            value={formData.isInfant ? '' : formData.cpf}
                                             onChange={handleCPFChange}
-                                            placeholder="000.000.000-00"
+                                            placeholder={formData.isInfant ? 'Criança (sem CPF)' : '000.000.000-00'}
                                             autoComplete="off"
                                             maxLength="14"
-                                            disabled={buscandoCliente}
+                                            disabled={buscandoCliente || formData.isInfant}
                                         />
                                         {buscandoCliente && (
                                             <div className="cpf-loading">
@@ -510,9 +533,20 @@ const Triagem = () => {
                                     {errors.cpf && (
                                         <span className="error-message">{errors.cpf}</span>
                                     )}
-                                    {formData.cpf && !cpfValido && (
+                                    {formData.cpf && !cpfValido && !formData.isInfant && (
                                         <small className="error-message">CPF inválido</small>
                                     )}
+                                    <div className="infant-checkbox" style={{ marginTop: '8px' }}>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '12px', color: 'var(--color-text-secondary)' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.isInfant}
+                                                onChange={(e) => handleInputChange('isInfant', e.target.checked)}
+                                                style={{ cursor: 'pointer' }}
+                                            />
+                                            Cliente é criança (sem CPF)
+                                        </label>
+                                    </div>
                                 </div>
 
                                 {renderInput('nomeCliente', 'Nome do Cliente', 'text', 'Digite o nome completo', true)}

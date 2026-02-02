@@ -605,7 +605,9 @@ const Clientes = () => {
                   <div className="header-cell">Endereço</div>
                   <div className="header-cell">Editar/Histórico</div>
                 </div>
-                {clientes.map(cliente => (
+                {clientes.map(cliente => {
+                  const isInfant = cliente?.is_infant === true || cliente?.cpf?.startsWith('CRIANCA-');
+                  return (
                   <div key={cliente.id} className="table-row">
                                          <div className="table-cell">
                        <div className="cliente-info">
@@ -613,10 +615,11 @@ const Clientes = () => {
                              {cliente.name ? cliente.name.charAt(0).toUpperCase() : '?'}
                            </div>
                          <span className="cliente-nome">{cliente.name ? capitalizeText(cliente.name) : '-'}</span>
+                         {isInfant && <span className="badge-infant">Criança</span>}
                        </div>
                      </div>
                      <div className="table-cell">
-                       {cliente.cpf ? mascaraCPF(removerMascara(cliente.cpf)) : '-'}
+                       {isInfant ? 'Criança' : (cliente.cpf ? mascaraCPF(removerMascara(cliente.cpf)) : '-')}
                      </div>
                      <div className="table-cell">
                        {formatarTelefoneParaExibicao(cliente.phone)}
@@ -628,7 +631,7 @@ const Clientes = () => {
                        {formatAddress(cliente.address)}
                      </div>
                     <div className="table-cell">
-                      <div className="cliente-actions">        
+                      <div className="cliente-actions">
                         <button
                           onClick={() => handleEdit(cliente)}
                           className="btn-edit-profile"
@@ -646,7 +649,8 @@ const Clientes = () => {
                       </div>
                     </div>
                   </div>
-                ))}
+                );
+                })}
               </div>
               
               {/* Paginação */}

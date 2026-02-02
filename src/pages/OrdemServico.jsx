@@ -47,6 +47,7 @@ const OrdemServico = () => {
     telefone: "",
     email: "",
     cpf: "",
+    isInfant: false,
     cep: "",
     rua: "",
     numero: "",
@@ -132,6 +133,7 @@ const OrdemServico = () => {
     telefone: "",
     email: "",
     cpf: "",
+    isInfant: false,
     cep: "",
     rua: "",
     numero: "",
@@ -797,6 +799,7 @@ const OrdemServico = () => {
       telefone: "",
       email: "",
       cpf: "",
+      isInfant: false,
       cep: "",
       rua: "",
       numero: "",
@@ -867,6 +870,7 @@ const OrdemServico = () => {
       telefone: "",
       email: "",
       cpf: "",
+      isInfant: false,
       cep: "",
       rua: "",
       numero: "",
@@ -1000,12 +1004,16 @@ const OrdemServico = () => {
           ]
         : [];
 
+    // Detectar se é cliente criança (CPF começa com CRIANCA- ou is_infant é true)
+    const isInfantClient = client.is_infant === true || (client.cpf && client.cpf.startsWith('CRIANCA-'));
+
     // Mapear dados do cliente
     const clientData = {
       nome: client.name || "",
       telefone: telefoneFormatado,
       email: contact.email || "",
-      cpf: client.cpf || "",
+      cpf: isInfantClient ? "" : (client.cpf || ""),
+      isInfant: isInfantClient,
       cep: address.cep || "",
       rua: address.rua || "",
       numero: address.numero || "",
@@ -1320,7 +1328,8 @@ const OrdemServico = () => {
         },
         cliente: {
           nome: formData.nome,
-          cpf: formData.cpf ? formData.cpf.replace(/\D/g, "") : "",
+          cpf: formData.isInfant ? null : (formData.cpf ? formData.cpf.replace(/\D/g, "") : ""),
+          is_infant: formData.isInfant,
           email: formData.email,
           contatos: [
             {
@@ -1399,7 +1408,8 @@ const OrdemServico = () => {
         return (
           inputValues.nome.trim() !== "" &&
           inputValues.telefone.trim() !== "" &&
-          inputValues.cpf.trim() !== "" &&
+          // CPF só é obrigatório se não for criança
+          (inputValues.isInfant || inputValues.cpf.trim() !== "") &&
           inputValues.rua.trim() !== "" &&
           inputValues.numero.trim() !== "" &&
           inputValues.bairro.trim() !== "" &&
@@ -1520,7 +1530,8 @@ const OrdemServico = () => {
         if (!inputValues.nome.trim()) errors.nome = "Nome é obrigatório";
         if (!inputValues.telefone.trim())
           errors.telefone = "Telefone é obrigatório";
-        if (!inputValues.cpf.trim()) errors.cpf = "CPF é obrigatório";
+        // CPF só é obrigatório se não for criança
+        if (!inputValues.isInfant && !inputValues.cpf.trim()) errors.cpf = "CPF é obrigatório";
         if (!inputValues.rua.trim()) errors.rua = "Endereço é obrigatório";
         if (!inputValues.numero.trim()) errors.numero = "Número é obrigatório";
         if (!inputValues.bairro.trim()) errors.bairro = "Bairro é obrigatório";
@@ -1773,19 +1784,51 @@ const OrdemServico = () => {
               </div>
               <div className="form-group">
                 <label>
-                  CPF <span style={{ color: "red" }}>*</span>
+                  CPF {!inputValues.isInfant && <span style={{ color: "red" }}>*</span>}
                 </label>
                 <input
                   type="text"
-                  value={mascaraCPF(inputValues.cpf)}
+                  value={inputValues.isInfant ? "" : mascaraCPF(inputValues.cpf)}
                   onChange={(e) => handleInputChange("cpf", e.target.value)}
                   onBlur={(e) => handleInputBlur("cpf", e.target.value)}
-                  placeholder="000.000.000-00"
+                  placeholder={inputValues.isInfant ? "Criança (sem CPF)" : "000.000.000-00"}
                   className={validationErrors.cpf ? "error" : ""}
+                  disabled={inputValues.isInfant}
                 />
                 {validationErrors.cpf && (
                   <div className="error-message">{validationErrors.cpf}</div>
                 )}
+                <div className="infant-checkbox" style={{ marginTop: "8px" }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "12px", color: "var(--color-text-secondary)" }}>
+                    <input
+                      type="checkbox"
+                      checked={inputValues.isInfant}
+                      onChange={(e) => {
+                        const isChecked = e.target.checked;
+                        setInputValues(prev => ({
+                          ...prev,
+                          isInfant: isChecked,
+                          cpf: isChecked ? "" : prev.cpf
+                        }));
+                        setFormData(prev => ({
+                          ...prev,
+                          isInfant: isChecked,
+                          cpf: isChecked ? "" : prev.cpf
+                        }));
+                        // Limpar erro do CPF quando marcar como criança
+                        if (isChecked && validationErrors.cpf) {
+                          setValidationErrors(prev => {
+                            const newErrors = { ...prev };
+                            delete newErrors.cpf;
+                            return newErrors;
+                          });
+                        }
+                      }}
+                      style={{ cursor: "pointer" }}
+                    />
+                    Cliente é criança (sem CPF)
+                  </label>
+                </div>
               </div>
               <div className="form-group">
                 <label>
@@ -3781,8 +3824,11 @@ const OrdemServico = () => {
                   <div className="info-grid">
                     <div className="info-item">
                       <span className="label">Nome:</span>
-                      <span className="value">
+                      <span className="value" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         {capitalizeText(formData.nome)}
+                        {formData.isInfant && (
+                          <span className="badge-infant">Criança</span>
+                        )}
                       </span>
                     </div>
                     <div className="info-item">
@@ -3797,7 +3843,7 @@ const OrdemServico = () => {
                     </div>
                     <div className="info-item">
                       <span className="label">CPF:</span>
-                      <span className="value">{mascaraCPF(formData.cpf)}</span>
+                      <span className="value">{formData.isInfant ? "Criança" : mascaraCPF(formData.cpf)}</span>
                     </div>
                     <div className="info-item">
                       <span className="label">CEP:</span>
