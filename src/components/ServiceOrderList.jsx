@@ -18,9 +18,11 @@ import CheckIcon from "@mui/icons-material/Check";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import AssignmentReturnedIcon from "@mui/icons-material/AssignmentReturned";
 import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
 import Modal from "./Modal";
 import Swal from "sweetalert2";
 import { getEmployees } from "../services/employeeService";
+import { useAuth } from "../hooks/useAuth";
 
 const ServiceOrderList = ({
   onSelectOrder,
@@ -30,6 +32,8 @@ const ServiceOrderList = ({
   onRetry,
 }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdministrator = user?.person?.person_type?.type === 'ADMINISTRADOR';
   const [activeTab, setActiveTab] = useState("PENDENTE");
   const [orders, setOrders] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -713,6 +717,56 @@ const ServiceOrderList = ({
     }
   };
 
+  // Handler para deletar ordem de serviço (apenas admin)
+  const handleDeleteOrder = async (order, event) => {
+    event.stopPropagation();
+
+    const result = await Swal.fire({
+      title: "Deletar Ordem de Serviço",
+      text: `Tem certeza que deseja deletar permanentemente a ordem de serviço #${order.id}? Esta ação não pode ser desfeita.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#ffffff",
+      confirmButtonText: "Sim, deletar",
+      cancelButtonText: "Cancelar",
+      reverseButtons: true,
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await serviceOrderService.deleteServiceOrder(order.id);
+
+        Swal.fire({
+          title: "Deletada!",
+          text: `A ordem de serviço #${order.id} foi deletada com sucesso.`,
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+
+        // Recarrega a lista
+        fetchOrders(activeTab);
+      } catch (error) {
+        console.error("Erro ao deletar ordem de serviço:", error);
+
+        let errorMessage = "Não foi possível deletar a ordem de serviço. Tente novamente.";
+        if (error.response?.status === 403) {
+          errorMessage = "Você não tem permissão para deletar esta ordem de serviço.";
+        } else if (error.response?.status === 400) {
+          errorMessage = error.response?.data?.message || "Esta ordem de serviço não pode ser deletada.";
+        }
+
+        Swal.fire({
+          title: "Erro",
+          text: errorMessage,
+          confirmButtonColor: "#d33",
+          icon: "error",
+        });
+      }
+    }
+  };
+
   // Funções helper para gerenciar formas de pagamento do valor restante
   const parseCurrencyValue = (rawStr) => {
     const numStr = rawStr.replace(/[^0-9,]/g, "").replace(",", ".");
@@ -994,6 +1048,19 @@ const ServiceOrderList = ({
                 <AssignmentReturnedIcon fontSize="small" />
               </IconButton>
             )}
+            {isAdministrator && activeTab !== "RECUSADA" && (
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteOrder(row.original, e);
+                }}
+                title="Deletar ordem"
+                sx={{ color: "#d33" }}
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            )}
           </Box>
         ),
       },
@@ -1012,7 +1079,7 @@ const ServiceOrderList = ({
         />
       </div>
     );
-  }, [displayedOrders, activeTab]);
+  }, [displayedOrders, activeTab, isAdministrator]);
 
   return (
     <div className="service-order-list-container">
@@ -1404,6 +1471,16 @@ const ServiceOrderList = ({
                             <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
                           </svg>
                         </button>
+                        {isAdministrator && (
+                          <button
+                            className="action-btn delete"
+                            onClick={(e) => handleDeleteOrder(order, e)}
+                            title="Deletar ordem"
+                            style={{ color: "#d33" }}
+                          >
+                            <i className="bi bi-trash" style={{ fontSize: "14px" }}></i>
+                          </button>
+                        )}
                       </>
                     )}
                     {activeTab === "EM_PRODUCAO" && (
@@ -1451,6 +1528,16 @@ const ServiceOrderList = ({
                             <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                           </svg>
                         </button>
+                        {isAdministrator && (
+                          <button
+                            className="action-btn delete"
+                            onClick={(e) => handleDeleteOrder(order, e)}
+                            title="Deletar ordem"
+                            style={{ color: "#d33" }}
+                          >
+                            <i className="bi bi-trash" style={{ fontSize: "14px" }}></i>
+                          </button>
+                        )}
                       </>
                     )}
                     {activeTab === "AGUARDANDO_RETIRADA" && (
@@ -1490,23 +1577,45 @@ const ServiceOrderList = ({
                         >
                           <i className="bi bi-box-arrow-right"></i>
                         </button>
+                        {isAdministrator && (
+                          <button
+                            className="action-btn delete"
+                            onClick={(e) => handleDeleteOrder(order, e)}
+                            title="Deletar ordem"
+                            style={{ color: "#d33" }}
+                          >
+                            <i className="bi bi-trash" style={{ fontSize: "14px" }}></i>
+                          </button>
+                        )}
                       </>
                     )}
                     {activeTab === "AGUARDANDO_DEVOLUCAO" && (
-                      <button
-                        className="action-btn return"
-                        onClick={(e) => handleMarkAsReturned(order, e)}
-                        title="Marcar como devolvida"
-                      >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
+                      <>
+                        <button
+                          className="action-btn return"
+                          onClick={(e) => handleMarkAsReturned(order, e)}
+                          title="Marcar como devolvida"
                         >
-                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                        </svg>
-                      </button>
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                          </svg>
+                        </button>
+                        {isAdministrator && (
+                          <button
+                            className="action-btn delete"
+                            onClick={(e) => handleDeleteOrder(order, e)}
+                            title="Deletar ordem"
+                            style={{ color: "#d33" }}
+                          >
+                            <i className="bi bi-trash" style={{ fontSize: "14px" }}></i>
+                          </button>
+                        )}
+                      </>
                     )}
                     {activeTab === "RECUSADA" && (
                       <button
@@ -1561,16 +1670,38 @@ const ServiceOrderList = ({
                             <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                           </svg>
                         </button>
+                        {isAdministrator && (
+                          <button
+                            className="action-btn delete"
+                            onClick={(e) => handleDeleteOrder(order, e)}
+                            title="Deletar ordem"
+                            style={{ color: "#d33" }}
+                          >
+                            <i className="bi bi-trash" style={{ fontSize: "14px" }}></i>
+                          </button>
+                        )}
                       </>
                     )}
                     {activeTab == "FINALIZADO" && (
-                      <button
-                        className="action-btn edit"
-                        onClick={(e) => handleEditOrder(order, e)}
-                        title="Visualizar ordem de serviço"
-                      >
-                        <i className="bi bi-eye" style={{}}></i>
-                      </button>
+                      <>
+                        <button
+                          className="action-btn edit"
+                          onClick={(e) => handleEditOrder(order, e)}
+                          title="Visualizar ordem de serviço"
+                        >
+                          <i className="bi bi-eye" style={{}}></i>
+                        </button>
+                        {isAdministrator && (
+                          <button
+                            className="action-btn delete"
+                            onClick={(e) => handleDeleteOrder(order, e)}
+                            title="Deletar ordem"
+                            style={{ color: "#d33" }}
+                          >
+                            <i className="bi bi-trash" style={{ fontSize: "14px" }}></i>
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>

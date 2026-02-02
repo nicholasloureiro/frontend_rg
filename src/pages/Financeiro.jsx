@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { formatCurrency } from '../utils/format';
 import '../styles/Financeiro.css';
 import { getFinanceSummary, postCloseCash, postVirtualPayment } from '../services/financeService';
+import { serviceOrderService } from '../services/serviceOrderService';
 import { clientService } from '../services/clientService';
 import { useAuth } from '../hooks/useAuth';
 import Header from '../components/Header';
@@ -689,6 +690,60 @@ const Financeiro = () => {
     });
   };
 
+  const handleDeleteTransaction = async (tx) => {
+    const isVirtual = tx.is_virtual;
+    const orderType = isVirtual ? 'lançamento' : 'ordem de serviço';
+
+    const result = await Swal.fire({
+      title: `Deletar ${orderType}`,
+      text: `Tem certeza que deseja deletar permanentemente ${isVirtual ? 'este lançamento' : `a ordem de serviço #${tx.order_id}`}? Esta ação não pode ser desfeita.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#ffffff',
+      confirmButtonText: 'Sim, deletar',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true,
+    });
+
+    if (result.isConfirmed) {
+      try {
+        if (isVirtual) {
+          await serviceOrderService.deleteVirtualServiceOrder(tx.order_id);
+        } else {
+          await serviceOrderService.deleteServiceOrder(tx.order_id);
+        }
+
+        Swal.fire({
+          title: 'Deletado!',
+          text: `${isVirtual ? 'O lançamento' : `A ordem de serviço #${tx.order_id}`} foi deletado com sucesso.`,
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false,
+        });
+
+        // Recarregar dados
+        fetchSummary();
+      } catch (error) {
+        console.error('Erro ao deletar:', error);
+
+        let errorMessage = 'Não foi possível deletar. Tente novamente.';
+        if (error.response?.status === 403) {
+          errorMessage = 'Você não tem permissão para deletar este registro.';
+        } else if (error.response?.status === 400) {
+          errorMessage = error.response?.data?.message || 'Este registro não pode ser deletado.';
+        }
+
+        Swal.fire({
+          title: 'Erro',
+          text: errorMessage,
+          confirmButtonColor: '#d33',
+          icon: 'error',
+        });
+      }
+    }
+  };
+
   return (
     <>
       <Header nomeHeader="Financeiro" />
@@ -831,6 +886,7 @@ const Financeiro = () => {
                       <th>Data</th>
                       <th>Hora</th>
                       <th>Descrição</th>
+                      <th>Ações</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -848,6 +904,25 @@ const Financeiro = () => {
                         <td>{formatDate(tx.date)}</td>
                         <td>{formatTime(tx.date)}</td>
                         <td>{tx.description || '—'}</td>
+                        <td>
+                          <button
+                            onClick={() => handleDeleteTransaction(tx)}
+                            title="Deletar"
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              color: '#d33',
+                              padding: '4px 8px',
+                              borderRadius: '4px',
+                              transition: 'background-color 0.2s',
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#fee2e2'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                          >
+                            <i className="bi bi-trash" style={{ fontSize: '16px' }}></i>
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>

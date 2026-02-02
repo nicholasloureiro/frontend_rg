@@ -195,5 +195,16 @@ export const serviceOrderService = {
             console.error('Erro ao retornar ordem para pendente:', error);
             throw error;
         }
+    },
+
+    // Deletar lançamento (ordem de serviço virtual)
+    deleteVirtualServiceOrder: async (id) => {
+        try {
+            const response = await api.delete(`/api/v1/service-orders/virtual/${id}/`);
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao deletar lançamento:', error);
+            throw error;
+        }
     }
 }; 
