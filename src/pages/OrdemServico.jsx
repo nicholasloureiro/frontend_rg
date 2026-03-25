@@ -1416,16 +1416,33 @@ const OrdemServico = () => {
     if (!selectedOrder) return;
     setLoading(true);
     try {
+      const vendidos = getItensVendidos();
       const payload = {
         ordem_servico: {
-          data_pedido: formData.dataPedido,
-          data_evento: formData.dataEvento,
-          data_retirada: formData.dataRetirada,
-          data_prova: formData.dataProva,
-          data_devolucao: formData.dataDevolucao,
-          ocasiao: formData.ocasiao,
-          modalidade: formData.tipoPagamento,
+          data_pedido: formData.dataPedido || undefined,
+          data_evento: formData.dataEvento || undefined,
+          data_retirada: formData.dataRetirada || undefined,
+          data_prova: formData.dataProva || undefined,
+          data_devolucao: formData.dataDevolucao || undefined,
+          ocasiao: formData.ocasiao || undefined,
+          modalidade: formData.tipoPagamento || undefined,
           employee_id: formData.employeeId || undefined,
+          is_partnership: formData.isPartnership || false,
+          partnership_type: formData.partnershipType || "",
+          itens: [
+            ...(formData.incluirPaleto ? [{ tipo: "paleto", numero: formData.paletoNumero, cor: formData.paletoCor, manga: formData.paletoManga, marca: formData.paletoMarca, ajuste: formData.paletoAjuste ? formData.paletoAjusteValor : "", extras: formData.paletoExtras, venda: vendidos.includes("paleto") }] : []),
+            ...(formData.incluirCamisa ? [{ tipo: "camisa", numero: formData.camisaNumero, cor: formData.camisaCor, manga: formData.camisaManga, marca: formData.camisaMarca, extras: formData.camisaExtras, venda: vendidos.includes("camisa") }] : []),
+            ...(formData.incluirCalca ? [{ tipo: "calca", numero: formData.calcaNumero, cor: formData.calcaCor, cintura: formData.calcaCintura, perna: formData.calcaPerna, marca: formData.calcaMarca, ajuste_cintura: formData.calcaAjusteCos ? formData.calcaAjusteCosValor : "", ajuste_comprimento: formData.calcaAjusteComprimento ? formData.calcaAjusteComprimentoValor : "", extras: formData.calcaExtras, venda: vendidos.includes("calca") }] : []),
+          ],
+          acessorios: [
+            ...(formData.suspensorio ? [{ tipo: "suspensorio", cor: formData.suspensorioCor, venda: vendidos.includes("suspensorio") }] : []),
+            ...(formData.passante ? [{ tipo: "passante", cor: formData.passanteCor, extensor: formData.passanteExtensor, venda: vendidos.includes("passante") }] : []),
+            ...(formData.lenco ? [{ tipo: "lenco", cor: formData.lencoCor, venda: vendidos.includes("lenco") }] : []),
+            ...(formData.gravata ? [{ tipo: "gravata", cor: formData.gravataCor, descricao: formData.gravataDescricao, venda: vendidos.includes("gravata") }] : []),
+            ...(formData.cinto ? [{ tipo: "cinto", cor: formData.cintoCor, numero: formData.cintoComprimento, marca: formData.cintoMarca, venda: vendidos.includes("cinto") }] : []),
+            ...(formData.sapato ? [{ tipo: "sapato", cor: formData.sapatoCor, descricao: formData.sapatoDescricao, marca: formData.sapatoMarca, numero: formData.sapatoNumero, venda: vendidos.includes("sapato") }] : []),
+            ...(formData.colete ? [{ tipo: "colete", cor: formData.coleteCor, descricao: formData.coleteDescricao, venda: vendidos.includes("colete") }] : []),
+          ],
           pagamento: {
             total: formData.total
               ? parseFloat(formData.total.toString().replace(/\D/g, "")) / 100
@@ -1434,12 +1451,12 @@ const OrdemServico = () => {
               total: formData.sinal
                 ? parseFloat(formData.sinal.toString().replace(/\D/g, "")) / 100
                 : 0,
-              pagamentos: formData.sinalForms?.map((f) => ({
+              pagamentos: (sinalForms || []).map((f) => ({
                 amount: f.amount
                   ? parseFloat(f.amount.toString().replace(/\D/g, "")) / 100
                   : 0,
-                forma_pagamento: f.forma_pagamento,
-              })) || [],
+                forma_pagamento: f.forma_pagamento || "",
+              })),
             },
             restante: formData.restante
               ? parseFloat(formData.restante.toString().replace(/\D/g, "")) / 100
