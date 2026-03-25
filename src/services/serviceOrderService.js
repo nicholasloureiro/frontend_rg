@@ -241,4 +241,15 @@ export const serviceOrderService = {
             throw error;
         }
     },
+
+    // Planilha (spreadsheet view)
+    getPlanilha: async (filters = {}) => {
+        try {
+            const response = await api.get('/api/v1/service-orders/planilha/', { params: filters });
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao buscar dados da planilha:', error);
+            throw error;
+        }
+    },
 };

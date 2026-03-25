@@ -21,6 +21,7 @@ import Eventos from './pages/Eventos'
 import EventoDetalhes from './pages/EventoDetalhes'
 import ClienteHistorico from './pages/ClienteHistorico'
 import Financeiro from './pages/Financeiro'
+import Planilha from './pages/Planilha'
 
 function AppContent() {
   const { theme } = useTheme();
@@ -165,7 +166,13 @@ function AppContent() {
               <Financeiro />
             </ProtectedRoute>
           } />
-          
+
+          <Route path="/planilha" element={
+            <ProtectedRoute>
+              <Planilha />
+            </ProtectedRoute>
+          } />
+
           {/* Rota para qualquer caminho não encontrado */}
           <Route path="*" element={
             <ProtectedRoute>

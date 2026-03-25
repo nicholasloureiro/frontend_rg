@@ -66,6 +66,7 @@ const Sidebar = ({ setSideOpen }) => {
     { to: "/clientes", iconBoot: "people", label: "Clientes" },
     { to: "/funcionarios", iconBoot: "person-lines-fill", label: "Funcionários" },
     { to: "/produtos", iconBoot: "box", label: "Produtos" },
+    { to: "/planilha", iconBoot: "table", label: "Planilha" },
     { to: "/financeiro", iconBoot: "currency-dollar", label: "Financeiro" },
   ];
 
