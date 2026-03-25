@@ -221,15 +221,15 @@ const Planilha = () => {
               sx: { maxHeight: "calc(100vh - 380px)" },
             }}
             muiTableBodyRowProps={({ row }) => {
-              const fase = row.original.fase;
+              const fech = row.original.fechamento;
               let bgColor = undefined;
-              if (fase === "FINALIZADO") bgColor = "#e8f5e9";
-              else if (fase === "RECUSADA") bgColor = "#ffebee";
+              if (fech === "SIM") bgColor = "#e8f5e9";
+              else if (fech === "NÃO") bgColor = "#ffebee";
               return {
                 sx: {
                   backgroundColor: bgColor,
                   "&:hover": {
-                    backgroundColor: fase === "FINALIZADO" ? "#c8e6c9" : fase === "RECUSADA" ? "#ffcdd2" : "#e8f0fe",
+                    backgroundColor: fech === "SIM" ? "#c8e6c9" : fech === "NÃO" ? "#ffcdd2" : "#e8f0fe",
                   },
                 },
               };
