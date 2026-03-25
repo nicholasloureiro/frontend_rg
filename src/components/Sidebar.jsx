@@ -72,8 +72,8 @@ const Sidebar = ({ setSideOpen }) => {
 
   // Filtra os links baseado na role do usuário
   const navLinks = allNavLinks.filter(link => {
-    // Financeiro só pode ser visto por ADMINISTRADOR
-    if (link.to === "/financeiro") {
+    // Financeiro e Planilha só podem ser vistos por ADMINISTRADOR
+    if (link.to === "/financeiro" || link.to === "/planilha") {
       return getPersonType() === 'ADMINISTRADOR';
     }
     return true;

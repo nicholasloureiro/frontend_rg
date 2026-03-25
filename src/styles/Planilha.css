@@ -9,9 +9,43 @@
   padding: 16px;
 }
 
-.planilha-filters {
+/* Totalizer cards */
+.planilha-totals {
   display: flex;
   gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.total-card {
+  flex: 1 1 160px;
+  background: var(--color-bg-secondary, #f5f7fa);
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 1px solid var(--color-border, #e0e0e0);
+}
+
+.total-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--color-text-secondary, #888);
+  letter-spacing: 0.5px;
+}
+
+.total-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text-primary, #333);
+}
+
+/* Filters */
+.planilha-filters {
+  display: flex;
+  gap: 10px;
   align-items: flex-end;
   margin-bottom: 16px;
   flex-wrap: wrap;
@@ -24,15 +58,27 @@
 }
 
 .planilha-filters .filter-group label {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--color-text-secondary, #666);
   text-transform: uppercase;
 }
 
-.planilha-filters .filter-group input {
+.planilha-select {
   height: 36px;
   font-size: 13px;
+  border: 1px solid var(--color-border, #ccc);
+  border-radius: 6px;
+  padding: 0 10px;
+  background: var(--color-bg-card, #fff);
+  color: var(--color-text-primary, #333);
+  outline: none;
+  min-width: 120px;
+}
+
+.planilha-select:focus {
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
 }
 
 .planilha-filters .result-count {
@@ -42,6 +88,7 @@
   padding-bottom: 8px;
 }
 
+/* Table */
 .planilha-table-wrapper {
   border: 1px solid #e0e0e0;
   border-radius: 4px;
