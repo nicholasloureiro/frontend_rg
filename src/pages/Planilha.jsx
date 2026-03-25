@@ -21,7 +21,7 @@ const Planilha = () => {
   const [availableFilters, setAvailableFilters] = useState({ canais: [], atendentes: [] });
 
   // Filtros
-  const [startDate, setStartDate] = useState(null);
+  const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(null);
   const [search, setSearch] = useState("");
   const [searchDebounced, setSearchDebounced] = useState("");
