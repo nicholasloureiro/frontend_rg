@@ -49,6 +49,8 @@
   align-items: flex-end;
   margin-bottom: 16px;
   flex-wrap: wrap;
+  position: relative;
+  z-index: 10;
 }
 
 .planilha-filters .filter-group {
