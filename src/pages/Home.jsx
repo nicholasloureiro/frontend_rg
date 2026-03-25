@@ -537,6 +537,67 @@ const Home = () => {
             </div>
           ))}
         </div>
+        {/* OS do Dia */}
+        {dashboardData?.os_do_dia && (
+          <div className="os-do-dia-section" style={{ marginBottom: 24 }}>
+            <h2 className="pt-3 pb-3">OS do Dia</h2>
+            <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+              {[
+                { key: "pendentes", label: "Pendentes", color: "#0095e2" },
+                { key: "em_producao", label: "Em Produção", color: "#4067a2" },
+                { key: "aguardando_retirada", label: "Aguardando Retirada", color: "#e2d502" },
+                { key: "aguardando_devolucao", label: "Aguardando Devolução", color: "#1c3b4d" },
+                { key: "finalizadas", label: "Finalizadas", color: "#4caf50" },
+                { key: "recusadas", label: "Recusadas", color: "#9e9e9e" },
+              ].map(({ key, label, color }) => {
+                const items = dashboardData.os_do_dia[key] || [];
+                if (items.length === 0) return null;
+                return (
+                  <div
+                    key={key}
+                    style={{
+                      flex: "1 1 300px",
+                      background: "var(--color-bg-card)",
+                      borderRadius: 8,
+                      padding: 16,
+                      borderLeft: `4px solid ${color}`,
+                    }}
+                  >
+                    <h4 style={{ margin: "0 0 8px", fontSize: 14, color }}>
+                      {label} ({items.length})
+                    </h4>
+                    {items.map((os) => (
+                      <div
+                        key={os.id}
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          padding: "6px 0",
+                          borderBottom: "1px solid var(--color-border)",
+                          fontSize: 13,
+                        }}
+                      >
+                        <span>
+                          <strong>#{os.id}</strong> — {os.client_name}
+                        </span>
+                        <span>
+                          {new Intl.NumberFormat("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                          }).format(os.total_value || 0)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+            <p style={{ fontSize: 13, color: "var(--color-text-secondary)", marginTop: 8 }}>
+              Total do dia: {dashboardData.os_do_dia.total_do_dia || 0} OS
+            </p>
+          </div>
+        )}
+
         <h2 className="pt-3 pb-4">Relatório de atendimentos</h2>
         {/* Seção de KPIs */}
         <div className="kpis-section">

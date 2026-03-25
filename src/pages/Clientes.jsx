@@ -10,9 +10,12 @@ import '../styles/Clientes.css';
 import Header from '../components/Header';
 import Button from '../components/Button';
 import { clientService } from '../services/clientService';
+import { useAuth } from '../hooks/useAuth';
 
 const Clientes = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdministrator = user?.person?.person_type?.type === 'ADMINISTRADOR';
   const [clientes, setClientes] = useState([]);
   const [formData, setFormData] = useState({
     nome: '',
@@ -194,6 +197,17 @@ const Clientes = () => {
           cidade: formData.cidade
         };
         await clientService.atualizar(editingId, updateData);
+
+        // Se admin alterou o CPF, atualizar via endpoint dedicado
+        if (isAdministrator && cpfSemMascara) {
+          try {
+            await clientService.atualizarCPF(editingId, cpfSemMascara);
+          } catch (cpfError) {
+            // CPF update failed but client data was saved
+            console.error('Erro ao atualizar CPF:', cpfError);
+          }
+        }
+
         setEditingId(null);
 
         Swal.fire({
@@ -301,6 +315,30 @@ const Clientes = () => {
     navigate(`/clientes/${cliente.id}/historico`);
   };
 
+  const handleDeleteClient = async (cliente) => {
+    const result = await Swal.fire({
+      title: 'Excluir Cliente',
+      text: `Tem certeza que deseja excluir "${cliente.name}"? As ordens de serviço vinculadas serão mantidas.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#fff',
+      confirmButtonText: 'Sim, excluir',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true,
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await clientService.excluir(cliente.id);
+        Swal.fire({ title: 'Excluído!', text: 'Cliente excluído com sucesso.', icon: 'success', timer: 2000, showConfirmButton: false });
+        fetchClientes(currentPage);
+      } catch (error) {
+        Swal.fire({ title: 'Erro', text: error.response?.data?.error || 'Erro ao excluir cliente.', icon: 'error' });
+      }
+    }
+  };
+
   // Função para formatar o endereço
   const formatAddress = (address) => {
     if (!address) return '-';
@@ -375,7 +413,7 @@ const Clientes = () => {
                   required={!editingId}
                   placeholder="000.000.000-00"
                   style={{ height: '35px' }}
-                  disabled={isLoading || editingId}
+                  disabled={isLoading || (editingId && !isAdministrator)}
                 />
               </div>
             </div>
@@ -646,6 +684,16 @@ const Clientes = () => {
                         >
                           <i className="bi bi-box-arrow-up-right"></i>
                         </button>
+                        {isAdministrator && (
+                          <button
+                            onClick={() => handleDeleteClient(cliente)}
+                            className="btn-edit-profile"
+                            title="Excluir cliente"
+                            style={{ color: '#d33' }}
+                          >
+                            <i className="bi bi-trash"></i>
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>

@@ -26,10 +26,13 @@ import html2canvas from "html2canvas";
 import useColors from "../hooks/useColors";
 import useBrands from "../hooks/useBrands";
 import CustomSelect from "../components/CustomSelect";
+import { useAuth } from "../hooks/useAuth";
 
 const OrdemServico = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdministrator = user?.person?.person_type?.type === 'ADMINISTRADOR';
   const [currentStep, setCurrentStep] = useState(0);
   const [showForm, setShowForm] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -124,6 +127,9 @@ const OrdemServico = () => {
     dataRetirada: "",
     dataProva: "",
     dataDevolucao: "",
+    // Parceria
+    isPartnership: false,
+    partnershipType: "",
   });
 
   // Estado para controlar os valores dos inputs em tempo real
@@ -1143,6 +1149,9 @@ const OrdemServico = () => {
       // Data da prova (opcional)
       dataProva: os.data_prova || null,
       dataDevolucao: os.data_devolucao || order.devolucao_date || "",
+      // Parceria
+      isPartnership: os.is_partnership || false,
+      partnershipType: os.partnership_type || "",
     };
 
     setFormData(mappedData);
@@ -1190,6 +1199,8 @@ const OrdemServico = () => {
           data_devolucao: formData.dataDevolucao,
           ocasiao: formData.ocasiao,
           modalidade: formData.tipoPagamento,
+          is_partnership: formData.isPartnership || false,
+          partnership_type: formData.partnershipType || "",
           itens: [
             ...(formData.incluirPaleto
               ? [
@@ -1393,6 +1404,86 @@ const OrdemServico = () => {
         icon: "error",
         title: "Erro!",
         text: "Não foi possível salvar a ordem de serviço. Verifique sua conexão e tente novamente.",
+        timer: 3000,
+        showConfirmButton: false,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    if (!selectedOrder) return;
+    setLoading(true);
+    try {
+      const payload = {
+        ordem_servico: {
+          data_pedido: formData.dataPedido,
+          data_evento: formData.dataEvento,
+          data_retirada: formData.dataRetirada,
+          data_prova: formData.dataProva,
+          data_devolucao: formData.dataDevolucao,
+          ocasiao: formData.ocasiao,
+          modalidade: formData.tipoPagamento,
+          employee_id: formData.employeeId || undefined,
+          pagamento: {
+            total: formData.total
+              ? parseFloat(formData.total.toString().replace(/\D/g, "")) / 100
+              : 0,
+            sinal: {
+              total: formData.sinal
+                ? parseFloat(formData.sinal.toString().replace(/\D/g, "")) / 100
+                : 0,
+              pagamentos: formData.sinalForms?.map((f) => ({
+                amount: f.amount
+                  ? parseFloat(f.amount.toString().replace(/\D/g, "")) / 100
+                  : 0,
+                forma_pagamento: f.forma_pagamento,
+              })) || [],
+            },
+            restante: formData.restante
+              ? parseFloat(formData.restante.toString().replace(/\D/g, "")) / 100
+              : 0,
+          },
+        },
+        cliente: {
+          nome: formData.nome,
+          cpf: formData.isInfant ? null : (formData.cpf ? formData.cpf.replace(/\D/g, "") : ""),
+          is_infant: formData.isInfant === true,
+          email: formData.email,
+          contatos: [
+            {
+              tipo: "telefone",
+              valor: formData.telefone ? formData.telefone.replace(/\D/g, "") : "",
+            },
+          ],
+          enderecos: [
+            {
+              cep: formData.cep,
+              rua: formData.rua,
+              numero: formData.numero,
+              bairro: formData.bairro,
+              complemento: formData.complemento,
+              cidade: formData.cidade,
+            },
+          ],
+        },
+      };
+
+      await serviceOrderService.updateServiceOrder(selectedOrder.id, payload, true);
+      Swal.fire({
+        icon: "success",
+        title: "Rascunho salvo!",
+        text: "Os dados foram salvos sem alterar a fase da OS.",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      console.error("Erro ao salvar rascunho:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Erro!",
+        text: "Não foi possível salvar o rascunho.",
         timer: 3000,
         showConfirmButton: false,
       });
@@ -3326,9 +3417,44 @@ const OrdemServico = () => {
                   )}
                 </div>
               )}
+              {isAdministrator && (
+                <div className="form-group" style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", margin: 0 }}>
+                    <input
+                      type="checkbox"
+                      checked={formData.isPartnership}
+                      onChange={(e) => {
+                        handleInputChange("isPartnership", e.target.checked);
+                        handleInputBlur("isPartnership", e.target.checked);
+                        if (!e.target.checked) {
+                          handleInputChange("partnershipType", "");
+                          handleInputBlur("partnershipType", "");
+                        }
+                      }}
+                    />
+                    Parceria
+                  </label>
+                  {formData.isPartnership && (
+                    <select
+                      value={formData.partnershipType}
+                      onChange={(e) => {
+                        handleInputChange("partnershipType", e.target.value);
+                        handleInputBlur("partnershipType", e.target.value);
+                      }}
+                      className="form-control"
+                      style={{ width: 150 }}
+                    >
+                      <option value="">Tipo</option>
+                      <option value="PARCERIA">Parceria</option>
+                      <option value="VOUCHER">Voucher</option>
+                      <option value="LINK">Link</option>
+                    </select>
+                  )}
+                </div>
+              )}
               <div className="form-group">
                 <label>
-                  Total <span style={{ color: "red" }}>*</span>
+                  Total {!formData.isPartnership && <span style={{ color: "red" }}>*</span>}
                 </label>
                 <input
                   type="text"
@@ -3783,14 +3909,26 @@ const OrdemServico = () => {
                       />
                     ) : (
                       !selectedOrder?.data_finalizado && !selectedOrder?.data_recusa && (
-                        <Button
-                          text={loading ? "Salvando..." : "Finalizar OS"}
-                          onClick={handleFinalizeOS}
-                          variant="primary"
-                          className="action-btn1"
-                          disabled={loading}
-                          style={{ width: "fit-content" }}
-                        />
+                        <div style={{ display: "flex", gap: "10px", marginLeft: "auto" }}>
+                          {selectedOrder && (
+                            <Button
+                              text={loading ? "Salvando..." : "Salvar Rascunho"}
+                              onClick={handleSaveDraft}
+                              variant="secondary"
+                              className="action-btn1"
+                              disabled={loading}
+                              style={{ width: "fit-content" }}
+                            />
+                          )}
+                          <Button
+                            text={loading ? "Salvando..." : "Finalizar OS"}
+                            onClick={handleFinalizeOS}
+                            variant="primary"
+                            className="action-btn1"
+                            disabled={loading}
+                            style={{ width: "fit-content" }}
+                          />
+                        </div>
                       )
                     )}
                   </div>

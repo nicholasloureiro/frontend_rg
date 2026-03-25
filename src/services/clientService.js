@@ -61,5 +61,27 @@ export const clientService = {
             console.error('Erro ao atualizar cliente:', error);
             throw error;
         }
-    }
-}; 
+    },
+
+    // Excluir cliente (admin only)
+    excluir: async (personId) => {
+        try {
+            const response = await api.delete(`/api/v1/clients/${personId}/delete/`);
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao excluir cliente:', error);
+            throw error;
+        }
+    },
+
+    // Atualizar CPF do cliente (admin only)
+    atualizarCPF: async (personId, cpf) => {
+        try {
+            const response = await api.put(`/api/v1/clients/${personId}/update-cpf/`, { cpf });
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao atualizar CPF:', error);
+            throw error;
+        }
+    },
+};

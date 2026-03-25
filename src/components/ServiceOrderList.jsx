@@ -67,6 +67,26 @@ const ServiceOrderList = ({
   const [loadingAtendentesAssign, setLoadingAtendentesAssign] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
 
+  // Estados para o modal de estorno (admin)
+  const [showRefundModal, setShowRefundModal] = useState(false);
+  const [refundOrder, setRefundOrder] = useState(null);
+  const [refundAmount, setRefundAmount] = useState("");
+  const [refundMethod, setRefundMethod] = useState("");
+  const [refundMotivo, setRefundMotivo] = useState("");
+  const [isProcessingRefund, setIsProcessingRefund] = useState(false);
+
+  // Estados para o modal de pagamento parcial
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentOrder, setPaymentOrder] = useState(null);
+  const [paymentForms, setPaymentForms] = useState([{ amount: "", forma_pagamento: "" }]);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
+  // Estados para o modal de alterar fase (admin)
+  const [showPhaseModal, setShowPhaseModal] = useState(false);
+  const [phaseOrder, setPhaseOrder] = useState(null);
+  const [targetPhase, setTargetPhase] = useState("");
+  const [isProcessingPhase, setIsProcessingPhase] = useState(false);
+
   // Estados para busca
   const [showSearchPanel, setShowSearchPanel] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -714,6 +734,104 @@ const ServiceOrderList = ({
         // Recarrega a lista
           fetchOrders(activeTab);
       }
+    }
+  };
+
+  // Handler para abrir modal de estorno
+  const openRefundModal = (order, event) => {
+    event.stopPropagation();
+    setRefundOrder(order);
+    setRefundAmount("");
+    setRefundMethod("");
+    setRefundMotivo("");
+    setShowRefundModal(true);
+  };
+
+  const handleRefundSubmit = async () => {
+    if (!refundAmount || parseFloat(refundAmount) <= 0) {
+      Swal.fire({ title: "Valor inválido", text: "Informe o valor do estorno.", icon: "warning" });
+      return;
+    }
+    setIsProcessingRefund(true);
+    try {
+      await serviceOrderService.refundServiceOrder(refundOrder.id, {
+        amount: parseFloat(refundAmount),
+        forma_pagamento: refundMethod,
+        motivo: refundMotivo,
+      });
+      setShowRefundModal(false);
+      Swal.fire({ title: "Estorno lançado!", icon: "success", timer: 2000, showConfirmButton: false });
+      fetchOrders(activeTab);
+    } catch (error) {
+      Swal.fire({ title: "Erro", text: error.response?.data?.error || "Erro ao lançar estorno.", icon: "error" });
+    } finally {
+      setIsProcessingRefund(false);
+    }
+  };
+
+  // Handler para abrir modal de pagamento parcial
+  const openPaymentModal = (order, event) => {
+    event.stopPropagation();
+    setPaymentOrder(order);
+    setPaymentForms([{ amount: "", forma_pagamento: "" }]);
+    setShowPaymentModal(true);
+  };
+
+  const handleAddPaymentSubmit = async () => {
+    const validPayments = paymentForms.filter((f) => f.amount && parseFloat(f.amount) > 0 && f.forma_pagamento);
+    if (validPayments.length === 0) {
+      Swal.fire({ title: "Dados incompletos", text: "Adicione pelo menos um pagamento com valor e forma.", icon: "warning" });
+      return;
+    }
+    setIsProcessingPayment(true);
+    try {
+      await serviceOrderService.addPayment(
+        paymentOrder.id,
+        validPayments.map((f) => ({ amount: parseFloat(f.amount), forma_pagamento: f.forma_pagamento }))
+      );
+      setShowPaymentModal(false);
+      Swal.fire({ title: "Pagamento registrado!", icon: "success", timer: 2000, showConfirmButton: false });
+      fetchOrders(activeTab);
+    } catch (error) {
+      Swal.fire({ title: "Erro", text: error.response?.data?.error || "Erro ao registrar pagamento.", icon: "error" });
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
+
+  // Handler para abrir modal de alterar fase (admin)
+  const openPhaseModal = (order, event) => {
+    event.stopPropagation();
+    setPhaseOrder(order);
+    setTargetPhase("");
+    setShowPhaseModal(true);
+  };
+
+  const getBackwardPhases = () => {
+    const phaseOrder = ["PENDENTE", "EM_PRODUCAO", "AGUARDANDO_RETIRADA", "AGUARDANDO_DEVOLUCAO", "FINALIZADO"];
+    const currentIdx = phaseOrder.indexOf(activeTab);
+    if (currentIdx <= 0) return [];
+    return phaseOrder.slice(0, currentIdx).map((key) => {
+      const tab = tabs.find((t) => t.key === key);
+      return { value: key, label: tab?.label || key };
+    });
+  };
+
+  const handleChangePhaseSubmit = async () => {
+    if (!targetPhase) {
+      Swal.fire({ title: "Selecione uma fase", icon: "warning" });
+      return;
+    }
+    setIsProcessingPhase(true);
+    try {
+      await serviceOrderService.changePhase(phaseOrder.id, targetPhase);
+      setShowPhaseModal(false);
+      Swal.fire({ title: "Fase alterada!", icon: "success", timer: 2000, showConfirmButton: false });
+      fetchOrders(activeTab);
+    } catch (error) {
+      Swal.fire({ title: "Erro", text: error.response?.data?.error || "Erro ao alterar fase.", icon: "error" });
+    } finally {
+      setIsProcessingPhase(false);
     }
   };
 
@@ -1519,24 +1637,37 @@ const ServiceOrderList = ({
                           title="Marcar como produzida"
                           onClick={(e) => handleMarkAsReady(order, e)}
                         >
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                          >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                           </svg>
                         </button>
+                        <button
+                          className="action-btn"
+                          onClick={(e) => openPaymentModal(order, e)}
+                          title="Adicionar pagamento"
+                          style={{ color: "#4caf50" }}
+                        >
+                          <i className="bi bi-cash-coin" style={{ fontSize: "14px" }}></i>
+                        </button>
                         {isAdministrator && (
-                          <button
-                            className="action-btn delete"
-                            onClick={(e) => handleDeleteOrder(order, e)}
-                            title="Deletar ordem"
-                            style={{ color: "#d33" }}
-                          >
-                            <i className="bi bi-trash" style={{ fontSize: "14px" }}></i>
-                          </button>
+                          <>
+                            <button
+                              className="action-btn"
+                              onClick={(e) => openPhaseModal(order, e)}
+                              title="Alterar fase"
+                              style={{ color: "#9c27b0" }}
+                            >
+                              <i className="bi bi-arrow-repeat" style={{ fontSize: "14px" }}></i>
+                            </button>
+                            <button
+                              className="action-btn delete"
+                              onClick={(e) => handleDeleteOrder(order, e)}
+                              title="Deletar ordem"
+                              style={{ color: "#d33" }}
+                            >
+                              <i className="bi bi-trash" style={{ fontSize: "14px" }}></i>
+                            </button>
+                          </>
                         )}
                       </>
                     )}
@@ -1547,12 +1678,7 @@ const ServiceOrderList = ({
                           onClick={(e) => handleRefuseOrder(order, e)}
                           title="Cancelar ordem"
                         >
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                          >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
                           </svg>
                         </button>
@@ -1561,12 +1687,7 @@ const ServiceOrderList = ({
                           onClick={(e) => handleEditOrder(order, e)}
                           title="Editar ordem"
                         >
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                          >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
                           </svg>
                         </button>
@@ -1577,15 +1698,33 @@ const ServiceOrderList = ({
                         >
                           <i className="bi bi-box-arrow-right"></i>
                         </button>
+                        <button
+                          className="action-btn"
+                          onClick={(e) => openPaymentModal(order, e)}
+                          title="Adicionar pagamento"
+                          style={{ color: "#4caf50" }}
+                        >
+                          <i className="bi bi-cash-coin" style={{ fontSize: "14px" }}></i>
+                        </button>
                         {isAdministrator && (
-                          <button
-                            className="action-btn delete"
-                            onClick={(e) => handleDeleteOrder(order, e)}
-                            title="Deletar ordem"
-                            style={{ color: "#d33" }}
-                          >
-                            <i className="bi bi-trash" style={{ fontSize: "14px" }}></i>
-                          </button>
+                          <>
+                            <button
+                              className="action-btn"
+                              onClick={(e) => openPhaseModal(order, e)}
+                              title="Alterar fase"
+                              style={{ color: "#9c27b0" }}
+                            >
+                              <i className="bi bi-arrow-repeat" style={{ fontSize: "14px" }}></i>
+                            </button>
+                            <button
+                              className="action-btn delete"
+                              onClick={(e) => handleDeleteOrder(order, e)}
+                              title="Deletar ordem"
+                              style={{ color: "#d33" }}
+                            >
+                              <i className="bi bi-trash" style={{ fontSize: "14px" }}></i>
+                            </button>
+                          </>
                         )}
                       </>
                     )}
@@ -1605,15 +1744,41 @@ const ServiceOrderList = ({
                             <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                           </svg>
                         </button>
+                        <button
+                          className="action-btn"
+                          onClick={(e) => openPaymentModal(order, e)}
+                          title="Adicionar pagamento"
+                          style={{ color: "#4caf50" }}
+                        >
+                          <i className="bi bi-cash-coin" style={{ fontSize: "14px" }}></i>
+                        </button>
                         {isAdministrator && (
-                          <button
-                            className="action-btn delete"
-                            onClick={(e) => handleDeleteOrder(order, e)}
-                            title="Deletar ordem"
-                            style={{ color: "#d33" }}
-                          >
-                            <i className="bi bi-trash" style={{ fontSize: "14px" }}></i>
-                          </button>
+                          <>
+                            <button
+                              className="action-btn"
+                              onClick={(e) => openRefundModal(order, e)}
+                              title="Lançar estorno"
+                              style={{ color: "#ff9800" }}
+                            >
+                              <i className="bi bi-arrow-return-left" style={{ fontSize: "14px" }}></i>
+                            </button>
+                            <button
+                              className="action-btn"
+                              onClick={(e) => openPhaseModal(order, e)}
+                              title="Alterar fase"
+                              style={{ color: "#9c27b0" }}
+                            >
+                              <i className="bi bi-arrow-repeat" style={{ fontSize: "14px" }}></i>
+                            </button>
+                            <button
+                              className="action-btn delete"
+                              onClick={(e) => handleDeleteOrder(order, e)}
+                              title="Deletar ordem"
+                              style={{ color: "#d33" }}
+                            >
+                              <i className="bi bi-trash" style={{ fontSize: "14px" }}></i>
+                            </button>
+                          </>
                         )}
                       </>
                     )}
@@ -1692,14 +1857,32 @@ const ServiceOrderList = ({
                           <i className="bi bi-eye" style={{}}></i>
                         </button>
                         {isAdministrator && (
-                          <button
-                            className="action-btn delete"
-                            onClick={(e) => handleDeleteOrder(order, e)}
-                            title="Deletar ordem"
-                            style={{ color: "#d33" }}
-                          >
-                            <i className="bi bi-trash" style={{ fontSize: "14px" }}></i>
-                          </button>
+                          <>
+                            <button
+                              className="action-btn"
+                              onClick={(e) => openRefundModal(order, e)}
+                              title="Lançar estorno"
+                              style={{ color: "#ff9800" }}
+                            >
+                              <i className="bi bi-arrow-return-left" style={{ fontSize: "14px" }}></i>
+                            </button>
+                            <button
+                              className="action-btn"
+                              onClick={(e) => openPhaseModal(order, e)}
+                              title="Alterar fase"
+                              style={{ color: "#9c27b0" }}
+                            >
+                              <i className="bi bi-arrow-repeat" style={{ fontSize: "14px" }}></i>
+                            </button>
+                            <button
+                              className="action-btn delete"
+                              onClick={(e) => handleDeleteOrder(order, e)}
+                              title="Deletar ordem"
+                              style={{ color: "#d33" }}
+                            >
+                              <i className="bi bi-trash" style={{ fontSize: "14px" }}></i>
+                            </button>
+                          </>
                         )}
                       </>
                     )}
@@ -2063,6 +2246,173 @@ const ServiceOrderList = ({
                   background: "#CBA135",
                   border: "none",
                 }}
+              />
+            </div>
+          </div>
+        }
+      />
+      {/* Modal de Estorno */}
+      <Modal
+        isOpen={showRefundModal}
+        onClose={() => setShowRefundModal(false)}
+        title={`Lançar Estorno - OS #${refundOrder?.id || ""}`}
+        content={
+          <div>
+            <div className="form-group" style={{ marginBottom: 16 }}>
+              <label>Valor do estorno (R$)</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                value={refundAmount}
+                onChange={(e) => setRefundAmount(e.target.value)}
+                placeholder="0,00"
+                className="form-control"
+              />
+            </div>
+            <div className="form-group" style={{ marginBottom: 16 }}>
+              <label>Forma de pagamento</label>
+              <select
+                value={refundMethod}
+                onChange={(e) => setRefundMethod(e.target.value)}
+                className="form-control"
+              >
+                <option value="">Selecione</option>
+                <option value="PIX">PIX</option>
+                <option value="DINHEIRO">Dinheiro</option>
+                <option value="CREDITO">Crédito</option>
+                <option value="DEBITO">Débito</option>
+                <option value="TRANSFERENCIA">Transferência</option>
+              </select>
+            </div>
+            <div className="form-group" style={{ marginBottom: 16 }}>
+              <label>Motivo do estorno</label>
+              <textarea
+                value={refundMotivo}
+                onChange={(e) => setRefundMotivo(e.target.value)}
+                placeholder="Descreva o motivo do estorno"
+                className="form-control"
+                rows={3}
+              />
+            </div>
+            <div className="form-actions">
+              <Button variant="light" text="Cancelar" onClick={() => setShowRefundModal(false)} disabled={isProcessingRefund} />
+              <Button
+                variant="primary"
+                text={isProcessingRefund ? "Processando..." : "Confirmar Estorno"}
+                onClick={handleRefundSubmit}
+                disabled={isProcessingRefund}
+                style={{ background: "#ff9800", border: "none" }}
+              />
+            </div>
+          </div>
+        }
+      />
+
+      {/* Modal de Pagamento Parcial */}
+      <Modal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        title={`Adicionar Pagamento - OS #${paymentOrder?.id || ""}`}
+        content={
+          <div>
+            <p style={{ fontSize: 14, marginBottom: 16 }}>
+              Valor restante: <strong>R$ {parseFloat(paymentOrder?.remaining_payment || 0).toFixed(2)}</strong>
+            </p>
+            {paymentForms.map((form, idx) => (
+              <div key={idx} style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "center" }}>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  placeholder="Valor"
+                  value={form.amount}
+                  onChange={(e) => {
+                    const updated = [...paymentForms];
+                    updated[idx].amount = e.target.value;
+                    setPaymentForms(updated);
+                  }}
+                  className="form-control"
+                  style={{ flex: 1 }}
+                />
+                <select
+                  value={form.forma_pagamento}
+                  onChange={(e) => {
+                    const updated = [...paymentForms];
+                    updated[idx].forma_pagamento = e.target.value;
+                    setPaymentForms(updated);
+                  }}
+                  className="form-control"
+                  style={{ flex: 1 }}
+                >
+                  <option value="">Forma</option>
+                  <option value="PIX">PIX</option>
+                  <option value="DINHEIRO">Dinheiro</option>
+                  <option value="CREDITO">Crédito</option>
+                  <option value="DEBITO">Débito</option>
+                  <option value="TRANSFERENCIA">Transferência</option>
+                </select>
+                {paymentForms.length > 1 && (
+                  <button
+                    onClick={() => setPaymentForms(paymentForms.filter((_, i) => i !== idx))}
+                    style={{ border: "none", background: "none", color: "#d33", cursor: "pointer", fontSize: 18 }}
+                  >
+                    &times;
+                  </button>
+                )}
+              </div>
+            ))}
+            <button
+              onClick={() => setPaymentForms([...paymentForms, { amount: "", forma_pagamento: "" }])}
+              style={{ border: "1px dashed #ccc", background: "none", padding: "6px 12px", borderRadius: 4, cursor: "pointer", marginBottom: 16, fontSize: 13 }}
+            >
+              + Adicionar forma de pagamento
+            </button>
+            <div className="form-actions">
+              <Button variant="light" text="Cancelar" onClick={() => setShowPaymentModal(false)} disabled={isProcessingPayment} />
+              <Button
+                variant="primary"
+                text={isProcessingPayment ? "Processando..." : "Confirmar Pagamento"}
+                onClick={handleAddPaymentSubmit}
+                disabled={isProcessingPayment}
+                style={{ background: "#4caf50", border: "none" }}
+              />
+            </div>
+          </div>
+        }
+      />
+
+      {/* Modal de Alterar Fase (Admin) */}
+      <Modal
+        isOpen={showPhaseModal}
+        onClose={() => setShowPhaseModal(false)}
+        title={`Alterar Fase - OS #${phaseOrder?.id || ""}`}
+        content={
+          <div>
+            <p style={{ fontSize: 14, marginBottom: 16 }}>
+              Fase atual: <strong>{activeTab}</strong>
+            </p>
+            <div className="form-group" style={{ marginBottom: 16 }}>
+              <label>Nova fase</label>
+              <select
+                value={targetPhase}
+                onChange={(e) => setTargetPhase(e.target.value)}
+                className="form-control"
+              >
+                <option value="">Selecione a fase</option>
+                {getBackwardPhases().map((p) => (
+                  <option key={p.value} value={p.value}>{p.label}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-actions">
+              <Button variant="light" text="Cancelar" onClick={() => setShowPhaseModal(false)} disabled={isProcessingPhase} />
+              <Button
+                variant="primary"
+                text={isProcessingPhase ? "Processando..." : "Confirmar Alteração"}
+                onClick={handleChangePhaseSubmit}
+                disabled={isProcessingPhase}
+                style={{ background: "#9c27b0", border: "none" }}
               />
             </div>
           </div>

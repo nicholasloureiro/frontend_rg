@@ -35,9 +35,10 @@ export const serviceOrderService = {
     },
 
     // Atualizar ordem de serviço
-    updateServiceOrder: async (id, orderData) => {
+    updateServiceOrder: async (id, orderData, draft = false) => {
         try {
-            const response = await api.put(`/api/v1/service-orders/${id}/update/`, orderData);
+            const url = `/api/v1/service-orders/${id}/update/${draft ? '?draft=true' : ''}`;
+            const response = await api.put(url, orderData);
             return response.data;
         } catch (error) {
             console.error('Erro ao atualizar ordem de serviço:', error);
@@ -206,5 +207,38 @@ export const serviceOrderService = {
             console.error('Erro ao deletar lançamento:', error);
             throw error;
         }
-    }
-}; 
+    },
+
+    // Lançar estorno (admin only)
+    refundServiceOrder: async (id, { amount, forma_pagamento, motivo }) => {
+        try {
+            const response = await api.post(`/api/v1/service-orders/${id}/refund/`, { amount, forma_pagamento, motivo });
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao lançar estorno:', error);
+            throw error;
+        }
+    },
+
+    // Adicionar pagamento parcial sem mudar fase
+    addPayment: async (id, payments) => {
+        try {
+            const response = await api.post(`/api/v1/service-orders/${id}/add-payment/`, { payments });
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao adicionar pagamento:', error);
+            throw error;
+        }
+    },
+
+    // Alterar fase da OS (admin only)
+    changePhase: async (id, targetPhase) => {
+        try {
+            const response = await api.post(`/api/v1/service-orders/${id}/change-phase/`, { target_phase: targetPhase });
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao alterar fase:', error);
+            throw error;
+        }
+    },
+};

@@ -88,6 +88,8 @@ const typeLabels = {
   sinal: 'Sinal',
   restante: 'Restante',
   indenizacao: 'Indenização',
+  estorno: 'Estorno',
+  parcial: 'Parcial',
 };
 
 const formatTransactionType = (type) => {
@@ -900,7 +902,9 @@ const Financeiro = () => {
                           </span>
                         </td>
                         <td>{capitalizeText(tx.payment_method) || '—'}</td>
-                        <td>{formatCurrency(tx.amount)}</td>
+                        <td style={tx.transaction_type === 'estorno' ? { color: '#d33', fontWeight: 'bold' } : {}}>
+                          {tx.transaction_type === 'estorno' ? '- ' : ''}{formatCurrency(Math.abs(tx.amount))}
+                        </td>
                         <td>{formatDate(tx.date)}</td>
                         <td>{formatTime(tx.date)}</td>
                         <td>{tx.description || '—'}</td>
