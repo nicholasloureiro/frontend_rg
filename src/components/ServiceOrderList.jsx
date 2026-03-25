@@ -1166,6 +1166,45 @@ const ServiceOrderList = ({
                 <AssignmentReturnedIcon fontSize="small" />
               </IconButton>
             )}
+            {["EM_PRODUCAO", "AGUARDANDO_RETIRADA", "AGUARDANDO_DEVOLUCAO"].includes(activeTab) && (
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openPaymentModal(row.original, e);
+                }}
+                title="Adicionar pagamento"
+                sx={{ color: "#4caf50" }}
+              >
+                <i className="bi bi-cash-coin" style={{ fontSize: "16px" }}></i>
+              </IconButton>
+            )}
+            {isAdministrator && ["FINALIZADO", "AGUARDANDO_DEVOLUCAO"].includes(activeTab) && (
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openRefundModal(row.original, e);
+                }}
+                title="Lançar estorno"
+                sx={{ color: "#ff9800" }}
+              >
+                <i className="bi bi-arrow-return-left" style={{ fontSize: "16px" }}></i>
+              </IconButton>
+            )}
+            {isAdministrator && ["EM_PRODUCAO", "AGUARDANDO_RETIRADA", "AGUARDANDO_DEVOLUCAO", "FINALIZADO"].includes(activeTab) && (
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openPhaseModal(row.original, e);
+                }}
+                title="Alterar fase"
+                sx={{ color: "#9c27b0" }}
+              >
+                <i className="bi bi-arrow-repeat" style={{ fontSize: "16px" }}></i>
+              </IconButton>
+            )}
             {isAdministrator && activeTab !== "RECUSADA" && (
               <IconButton
                 size="small"
