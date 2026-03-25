@@ -2292,10 +2292,10 @@ const ServiceOrderList = ({
       />
       {/* Modal de Estorno */}
       <Modal
-        isOpen={showRefundModal}
-        onClose={() => setShowRefundModal(false)}
+        show={showRefundModal}
+        onCloseX={() => setShowRefundModal(false)}
         title={`Lançar Estorno - OS #${refundOrder?.id || ""}`}
-        content={
+        bodyContent={
           <div>
             <div className="form-group" style={{ marginBottom: 16 }}>
               <label>Valor do estorno (R$)</label>
@@ -2350,10 +2350,10 @@ const ServiceOrderList = ({
 
       {/* Modal de Pagamento Parcial */}
       <Modal
-        isOpen={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
+        show={showPaymentModal}
+        onCloseX={() => setShowPaymentModal(false)}
         title={`Adicionar Pagamento - OS #${paymentOrder?.id || ""}`}
-        content={
+        bodyContent={
           <div>
             <p style={{ fontSize: 14, marginBottom: 16 }}>
               Valor restante: <strong>R$ {parseFloat(paymentOrder?.remaining_payment || 0).toFixed(2)}</strong>
@@ -2423,10 +2423,10 @@ const ServiceOrderList = ({
 
       {/* Modal de Alterar Fase (Admin) */}
       <Modal
-        isOpen={showPhaseModal}
-        onClose={() => setShowPhaseModal(false)}
+        show={showPhaseModal}
+        onCloseX={() => setShowPhaseModal(false)}
         title={`Alterar Fase - OS #${phaseOrder?.id || ""}`}
-        content={
+        bodyContent={
           <div>
             <p style={{ fontSize: 14, marginBottom: 16 }}>
               Fase atual: <strong>{activeTab}</strong>
