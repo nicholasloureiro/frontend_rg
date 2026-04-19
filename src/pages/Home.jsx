@@ -67,7 +67,9 @@ const Home = () => {
     tipoCliente: null,
     formaPagamento: null,
     canalOrigem: null,
-    dataInicio: getFirstDayOfMonth(),
+    // Default to TODAY (item #8) — users want to see today's result at a glance.
+    // They can widen to month/week via the filter buttons.
+    dataInicio: getTodayDate(),
     dataFim: getTodayDate(),
   });
 

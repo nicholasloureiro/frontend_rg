@@ -328,7 +328,8 @@ const Financeiro = () => {
                 { value: '', label: 'Selecione o tipo' },
                 { value: 'sinal', label: 'Sinal' },
                 { value: 'restante', label: 'Restante' },
-                { value: 'indenizacao', label: 'Indenização' }
+                { value: 'indenizacao', label: 'Indenização' },
+                { value: 'estorno', label: 'Estorno' }
               ]}
               placeholder="Selecione o tipo"
             />
@@ -642,6 +643,18 @@ const Financeiro = () => {
             ...clientPayload,
             total_value: valorFormatado,
             indenizacao: {
+              amount: valorFormatado,
+              forma_pagamento: formaPagamento,
+              data: dataHoraISO
+            },
+            observations: observacoes.trim() || null
+          };
+        } else if (tipoPagamento === 'estorno') {
+          // Estorno: dinheiro saindo. Backend decrementa advance_payment (item #5).
+          payload = {
+            ...clientPayload,
+            total_value: 0,
+            estorno: {
               amount: valorFormatado,
               forma_pagamento: formaPagamento,
               data: dataHoraISO

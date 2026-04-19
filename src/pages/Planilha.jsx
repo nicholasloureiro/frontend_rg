@@ -222,15 +222,24 @@ const Planilha = () => {
             }}
             muiTableBodyRowProps={({ row }) => {
               const fech = row.original.fechamento;
+              const fase = row.original.fase;
               let bgColor = undefined;
-              if (fech === "SIM") bgColor = "#e8f5e9";
-              else if (fech === "NÃO") bgColor = "#ffebee";
+              let hoverColor = "#e8f0fe";
+              // Virtual / lançamento manual — distinct neutral color (item #7)
+              if (fase === "VIRTUAL") {
+                bgColor = "#fff3e0"; // light orange — stands out from SIM/NÃO
+                hoverColor = "#ffe0b2";
+              } else if (fech === "SIM") {
+                bgColor = "#e8f5e9";
+                hoverColor = "#c8e6c9";
+              } else if (fech === "NÃO") {
+                bgColor = "#ffebee";
+                hoverColor = "#ffcdd2";
+              }
               return {
                 sx: {
                   backgroundColor: bgColor,
-                  "&:hover": {
-                    backgroundColor: fech === "SIM" ? "#c8e6c9" : fech === "NÃO" ? "#ffcdd2" : "#e8f0fe",
-                  },
+                  "&:hover": { backgroundColor: hoverColor },
                 },
               };
             }}

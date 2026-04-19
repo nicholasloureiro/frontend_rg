@@ -27,6 +27,7 @@ import useColors from "../hooks/useColors";
 import useBrands from "../hooks/useBrands";
 import CustomSelect from "../components/CustomSelect";
 import { useAuth } from "../hooks/useAuth";
+import validarCPF from "../utils/ValidarCPF";
 
 const OrdemServico = () => {
   const { id } = useParams();
@@ -1516,8 +1517,9 @@ const OrdemServico = () => {
         return (
           inputValues.nome.trim() !== "" &&
           inputValues.telefone.trim() !== "" &&
-          // CPF só é obrigatório se não for criança
-          (inputValues.isInfant || inputValues.cpf.trim() !== "") &&
+          // CPF deve ser válido (ou ausente quando criança)
+          (inputValues.isInfant ||
+            (inputValues.cpf.trim() !== "" && validarCPF(inputValues.cpf))) &&
           inputValues.rua.trim() !== "" &&
           inputValues.numero.trim() !== "" &&
           inputValues.bairro.trim() !== "" &&
@@ -1638,8 +1640,14 @@ const OrdemServico = () => {
         if (!inputValues.nome.trim()) errors.nome = "Nome é obrigatório";
         if (!inputValues.telefone.trim())
           errors.telefone = "Telefone é obrigatório";
-        // CPF só é obrigatório se não for criança
-        if (!inputValues.isInfant && !inputValues.cpf.trim()) errors.cpf = "CPF é obrigatório";
+        // CPF: obrigatório e algoritmicamente válido (exceto criança)
+        if (!inputValues.isInfant) {
+          if (!inputValues.cpf.trim()) {
+            errors.cpf = "CPF é obrigatório";
+          } else if (!validarCPF(inputValues.cpf)) {
+            errors.cpf = "CPF inválido";
+          }
+        }
         if (!inputValues.rua.trim()) errors.rua = "Endereço é obrigatório";
         if (!inputValues.numero.trim()) errors.numero = "Número é obrigatório";
         if (!inputValues.bairro.trim()) errors.bairro = "Bairro é obrigatório";
@@ -3915,28 +3923,32 @@ const OrdemServico = () => {
                         disabled={loading}
                       />
                     )}
-                    {currentStep < steps.length - 1 ? (
-                      <Button
-                        text="Próximo"
-                        onClick={nextStep}
-                        variant="primary"
-                        className="action-btn1"
-                        disabled={loading}
-                        style={{ marginLeft: "auto" }}
-                      />
-                    ) : (
-                      !selectedOrder?.data_finalizado && !selectedOrder?.data_recusa && (
-                        <div style={{ display: "flex", gap: "10px", marginLeft: "auto" }}>
-                          {selectedOrder && (
-                            <Button
-                              text={loading ? "Salvando..." : "Salvar Rascunho"}
-                              onClick={handleSaveDraft}
-                              variant="secondary"
-                              className="action-btn1"
-                              disabled={loading}
-                              style={{ width: "fit-content" }}
-                            />
-                          )}
+                    {/* Right-side buttons: draft (always when editing an existing,
+                        non-final OS) + either Próximo or Finalizar */}
+                    <div style={{ display: "flex", gap: "10px", marginLeft: "auto" }}>
+                      {selectedOrder &&
+                        !selectedOrder?.data_finalizado &&
+                        !selectedOrder?.data_recusa && (
+                          <Button
+                            text={loading ? "Salvando..." : "Salvar Rascunho"}
+                            onClick={handleSaveDraft}
+                            variant="secondary"
+                            className="action-btn1"
+                            disabled={loading}
+                            style={{ width: "fit-content" }}
+                          />
+                        )}
+                      {currentStep < steps.length - 1 ? (
+                        <Button
+                          text="Próximo"
+                          onClick={nextStep}
+                          variant="primary"
+                          className="action-btn1"
+                          disabled={loading}
+                        />
+                      ) : (
+                        !selectedOrder?.data_finalizado &&
+                        !selectedOrder?.data_recusa && (
                           <Button
                             text={loading ? "Salvando..." : "Finalizar OS"}
                             onClick={handleFinalizeOS}
@@ -3945,9 +3957,9 @@ const OrdemServico = () => {
                             disabled={loading}
                             style={{ width: "fit-content" }}
                           />
-                        </div>
-                      )
-                    )}
+                        )
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -3962,6 +3974,39 @@ const OrdemServico = () => {
                     OS #{selectedOrder?.id || "Nova"}
                   </div>
                 </div>
+
+                {/* Mostrar justificativa quando OS está recusada (item #11) */}
+                {selectedOrder?.data_recusa &&
+                  (selectedOrder?.justification_reason ||
+                    selectedOrder?.justification_refusal) && (
+                    <div
+                      className="preview-section-group"
+                      style={{
+                        background: "#ffebee",
+                        border: "1px solid #ffcdd2",
+                        borderRadius: 6,
+                        padding: "12px 16px",
+                      }}
+                    >
+                      <h4 style={{ color: "#c62828" }}>OS RECUSADA</h4>
+                      {selectedOrder.justification_reason && (
+                        <div className="info-item">
+                          <span className="label">Motivo:</span>
+                          <span className="value">
+                            {capitalizeText(selectedOrder.justification_reason)}
+                          </span>
+                        </div>
+                      )}
+                      {selectedOrder.justification_refusal && (
+                        <div className="info-item">
+                          <span className="label">Justificativa:</span>
+                          <span className="value">
+                            {capitalizeText(selectedOrder.justification_refusal)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                 <div className="preview-section-group">
                   <h4 style={{ display: "flex", alignItems: "center" }}>

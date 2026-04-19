@@ -1531,26 +1531,29 @@ const ServiceOrderList = ({
                         </span>
                       </div>
                     )}
-                    {activeTab === "RECUSADA" && order.justification_reason && (
-                      <>
-                        <div className="info-row">
-                          <span className="label">Motivo da Recusa:</span>
-                          <span className="value justification-reason">
-                            {capitalizeText(order.justification_reason)}
-                          </span>
-                        </div>
-                        {order.justification_refusal && (
-                          <div className="info-row">
-                            <span className="label">
-                              Justificativa da Recusa:
-                            </span>
-                            <span className="value justification-refusal">
-                              {capitalizeText(order.justification_refusal)}
-                            </span>
-                          </div>
-                        )}
-                      </>
-                    )}
+                    {activeTab === "RECUSADA" &&
+                      (order.justification_reason || order.justification_refusal) && (
+                        <>
+                          {order.justification_reason && (
+                            <div className="info-row">
+                              <span className="label">Motivo da Recusa:</span>
+                              <span className="value justification-reason">
+                                {capitalizeText(order.justification_reason)}
+                              </span>
+                            </div>
+                          )}
+                          {order.justification_refusal && (
+                            <div className="info-row">
+                              <span className="label">
+                                Justificativa da Recusa:
+                              </span>
+                              <span className="value justification-refusal">
+                                {capitalizeText(order.justification_refusal)}
+                              </span>
+                            </div>
+                          )}
+                        </>
+                      )}
                     {activeTab === "ATRASADO" && order.justificativa_atraso && (
                       <div className="info-row">
                         <span className="label">Motivo do Atraso:</span>
