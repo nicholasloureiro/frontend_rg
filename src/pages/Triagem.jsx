@@ -73,8 +73,12 @@ const Triagem = () => {
         setLoadingEventos(true);
         try {
             const eventosData = await eventService.listarEventosAbertos();
-            // Garante que eventos sempre será um array
-            const listaEventos = Array.isArray(eventosData) ? eventosData : [];
+            // Aceita tanto resposta paginada ({events: [...]}) quanto array simples
+            const listaEventos = Array.isArray(eventosData)
+                ? eventosData
+                : Array.isArray(eventosData?.events)
+                    ? eventosData.events
+                    : [];
             setEventos(listaEventos);
         } catch (error) {
             console.error('Erro ao carregar eventos:', error);
