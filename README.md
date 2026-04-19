@@ -103,7 +103,11 @@ npm install
 ```
 
 3. Configure as variáveis de ambiente:
-Crie um arquivo `.env` na raiz do projeto:
+Copie o template `.env.example` para `.env` e ajuste:
+```bash
+cp .env.example .env
+```
+Exemplo:
 ```env
 VITE_API_BASE_URL=http://localhost:8000
 ```
@@ -121,6 +125,30 @@ npm run dev
 - `npm run build` - Gera build de produção
 - `npm run lint` - Executa o linter
 - `npm run preview` - Preview do build de produção
+- `npm test` - Roda os testes (vitest)
+- `npm run test:watch` - Modo watch
+- `npm run test:ui` - UI interativa do vitest
+
+## 🧪 Testes
+
+O projeto usa **Vitest** + **@testing-library/react**. Os testes ficam em `src/**/__tests__/` ou como `*.test.js[x]` ao lado do arquivo testado.
+
+```bash
+npm test                         # roda tudo
+npm test -- ValidarCPF           # filtra por nome
+npm run test:watch               # modo watch (re-roda ao salvar)
+```
+
+Configuração: `vitest.config.js` + `src/test/setup.js`.
+
+## 🏛️ Arquitetura
+
+Decisões arquiteturais estão documentadas em [`docs/adr/`](docs/adr/):
+
+1. [0001 — Record architecture decisions](docs/adr/0001-record-architecture-decisions.md)
+2. [0002 — React + Vite + Redux Toolkit](docs/adr/0002-react-vite-redux.md)
+3. [0003 — MaterialReactTable for data grids](docs/adr/0003-material-react-table.md)
+4. [0004 — JWT auth with auto-refresh](docs/adr/0004-jwt-auth-auto-refresh.md)
 
 ## 🔐 Autenticação
 
