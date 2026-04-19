@@ -46,6 +46,7 @@
   font-weight: 700;
   color: white;
   margin: 0;
+  white-space: nowrap;
 }
 
 .dashboard-grid {
