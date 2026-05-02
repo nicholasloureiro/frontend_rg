@@ -589,9 +589,43 @@ const Triagem = () => {
                             <span>
                                 <strong>Comece pelo CPF</strong> — se o cliente já existe, os outros campos são preenchidos automaticamente.
                             </span>
-                            <span style={{ marginLeft: 'auto', color: 'var(--color-text-secondary)', fontSize: '12px' }}>
-                                <kbd style={{ padding: '2px 6px', background: '#f4f4f5', border: '1px solid #d4d4d8', borderRadius: '4px' }}>Tab</kbd> avança ·{' '}
-                                <kbd style={{ padding: '2px 6px', background: '#f4f4f5', border: '1px solid #d4d4d8', borderRadius: '4px' }}>Enter</kbd> salva
+                            <span style={{ marginLeft: 'auto', color: '#52525b', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                <kbd
+                                    style={{
+                                        padding: '3px 8px',
+                                        background: '#ffffff',
+                                        border: '1px solid #a1a1aa',
+                                        borderBottomWidth: '2px',
+                                        borderRadius: '4px',
+                                        fontSize: '12px',
+                                        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+                                        fontWeight: 600,
+                                        color: '#18181b',
+                                        lineHeight: 1,
+                                        boxShadow: '0 1px 0 rgba(0,0,0,0.04)',
+                                    }}
+                                >
+                                    Tab
+                                </kbd>
+                                avança ·
+                                <kbd
+                                    style={{
+                                        padding: '3px 8px',
+                                        background: '#ffffff',
+                                        border: '1px solid #a1a1aa',
+                                        borderBottomWidth: '2px',
+                                        borderRadius: '4px',
+                                        fontSize: '12px',
+                                        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+                                        fontWeight: 600,
+                                        color: '#18181b',
+                                        lineHeight: 1,
+                                        boxShadow: '0 1px 0 rgba(0,0,0,0.04)',
+                                    }}
+                                >
+                                    Enter
+                                </kbd>
+                                salva
                             </span>
                         </div>
 
