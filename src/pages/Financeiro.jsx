@@ -590,8 +590,8 @@ const Financeiro = () => {
         const selectedClient = formValues.selectedClient;
         const observacoes = formValues.observacoes;
 
-        // Data local BR
-        const data = getTodayLocalDateStr();
+        // Honor the date the user picked in the form; fall back to today only if absent.
+        const data = formValues.data || getTodayLocalDateStr();
 
         // Validações
         if (!tipoPagamento || tipoPagamento === '') {
@@ -707,31 +707,40 @@ const Financeiro = () => {
 
   const handleDeleteTransaction = async (tx) => {
     const isVirtual = tx.is_virtual;
-    const orderType = isVirtual ? 'lançamento' : 'ordem de serviço';
+    // If the transaction has a stable entry_id we delete just that one payment
+    // entry (preserving the rest of the OS history). Legacy rows without entry_id
+    // fall back to the old behavior of deleting the whole OS.
+    const targetingEntry = Boolean(tx.entry_id);
 
     const result = await Swal.fire({
-      title: `Deletar ${orderType}`,
-      text: `Tem certeza que deseja deletar permanentemente ${isVirtual ? 'este lançamento' : `a ordem de serviço #${tx.order_id}`}? Esta ação não pode ser desfeita.`,
+      title: targetingEntry ? 'Remover esse pagamento?' : `Deletar ${isVirtual ? 'lançamento' : 'ordem de serviço'}`,
+      text: targetingEntry
+        ? `Vai apagar somente este lançamento de R$ ${Math.abs(tx.amount).toFixed(2)} da OS #${tx.order_id}. O restante da OS permanece.`
+        : `Tem certeza que deseja deletar permanentemente ${isVirtual ? 'este lançamento' : `a ordem de serviço #${tx.order_id}`}? Esta ação não pode ser desfeita.`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
       cancelButtonColor: '#ffffff',
-      confirmButtonText: 'Sim, deletar',
+      confirmButtonText: targetingEntry ? 'Sim, remover' : 'Sim, deletar',
       cancelButtonText: 'Cancelar',
       reverseButtons: true,
     });
 
     if (result.isConfirmed) {
       try {
-        if (isVirtual) {
+        if (targetingEntry) {
+          await serviceOrderService.deletePaymentEntry(tx.order_id, tx.entry_id);
+        } else if (isVirtual) {
           await serviceOrderService.deleteVirtualServiceOrder(tx.order_id);
         } else {
           await serviceOrderService.deleteServiceOrder(tx.order_id);
         }
 
         Swal.fire({
-          title: 'Deletado!',
-          text: `${isVirtual ? 'O lançamento' : `A ordem de serviço #${tx.order_id}`} foi deletado com sucesso.`,
+          title: targetingEntry ? 'Pagamento removido!' : 'Deletado!',
+          text: targetingEntry
+            ? `Pagamento da OS #${tx.order_id} removido com sucesso.`
+            : `${isVirtual ? 'O lançamento' : `A ordem de serviço #${tx.order_id}`} foi deletado com sucesso.`,
           icon: 'success',
           timer: 2000,
           showConfirmButton: false,
@@ -747,6 +756,8 @@ const Financeiro = () => {
           errorMessage = 'Você não tem permissão para deletar este registro.';
         } else if (error.response?.status === 400) {
           errorMessage = error.response?.data?.message || 'Este registro não pode ser deletado.';
+        } else if (error.response?.status === 404) {
+          errorMessage = 'Pagamento não encontrado (talvez já tenha sido removido).';
         }
 
         Swal.fire({
@@ -756,6 +767,86 @@ const Financeiro = () => {
           icon: 'error',
         });
       }
+    }
+  };
+
+  const handleEditTransaction = async (tx) => {
+    if (!tx.entry_id) {
+      Swal.fire({
+        title: 'Edição não disponível',
+        text: 'Este lançamento foi criado antes do controle por entrada. Remova e relance, ou edite a OS diretamente.',
+        icon: 'info',
+        confirmButtonColor: '#CBA135',
+      });
+      return;
+    }
+
+    const formaOptions = ['DINHEIRO', 'PIX', 'CREDITO', 'DEBITO', 'BOLETO', 'TRANSFERENCIA', 'OUTROS'];
+    const currentForma = (tx.payment_method || '').toUpperCase();
+    const formaSelectHtml = formaOptions
+      .map((f) => `<option value="${f}" ${f === currentForma ? 'selected' : ''}>${methodLabels[f] || f}</option>`)
+      .join('');
+
+    const dateValue = (tx.date && String(tx.date).slice(0, 10)) || '';
+
+    const { value: formData } = await Swal.fire({
+      title: `Editar pagamento — OS #${tx.order_id}`,
+      html: `
+        <div style="display:flex; flex-direction:column; gap:12px; text-align:left;">
+          <label style="font-weight:bold; font-size:14px;">Valor (R$)
+            <input id="swal-edit-amount" type="number" step="0.01" min="0" value="${Math.abs(tx.amount)}"
+              style="width:100%; padding:8px; border:2px solid var(--color-border); border-radius:6px; margin-top:4px;" />
+          </label>
+          <label style="font-weight:bold; font-size:14px;">Forma de pagamento
+            <select id="swal-edit-forma" style="width:100%; padding:8px; border:2px solid var(--color-border); border-radius:6px; margin-top:4px;">
+              ${formaSelectHtml}
+            </select>
+          </label>
+          <label style="font-weight:bold; font-size:14px;">Data
+            <input id="swal-edit-data" type="date" value="${dateValue}"
+              style="width:100%; padding:8px; border:2px solid var(--color-border); border-radius:6px; margin-top:4px;" />
+          </label>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: 'Salvar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#CBA135',
+      cancelButtonColor: '#ffffff',
+      reverseButtons: true,
+      focusConfirm: false,
+      preConfirm: () => {
+        const amount = parseFloat(document.getElementById('swal-edit-amount').value);
+        const forma_pagamento = document.getElementById('swal-edit-forma').value;
+        const data = document.getElementById('swal-edit-data').value;
+        if (!amount || amount <= 0) {
+          Swal.showValidationMessage('Informe um valor válido');
+          return false;
+        }
+        if (!data) {
+          Swal.showValidationMessage('Informe a data');
+          return false;
+        }
+        return { amount, forma_pagamento, data };
+      },
+    });
+
+    if (!formData) return;
+
+    try {
+      await serviceOrderService.updatePaymentEntry(tx.order_id, tx.entry_id, formData);
+      Swal.fire({
+        title: 'Pagamento atualizado!',
+        icon: 'success',
+        timer: 1800,
+        showConfirmButton: false,
+      });
+      fetchSummary();
+    } catch (error) {
+      const msg = error.response?.status === 403
+        ? 'Apenas administradores podem editar pagamentos.'
+        : (error.response?.data?.error || 'Erro ao atualizar pagamento.');
+      Swal.fire({ title: 'Erro', text: msg, icon: 'error', confirmButtonColor: '#d33' });
     }
   };
 
@@ -921,10 +1012,32 @@ const Financeiro = () => {
                         <td>{formatDate(tx.date)}</td>
                         <td>{formatTime(tx.date)}</td>
                         <td>{tx.description || '—'}</td>
-                        <td>
+                        <td style={{ display: 'flex', gap: '4px' }}>
+                          {tx.entry_id && (
+                            <button
+                              onClick={() => handleEditTransaction(tx)}
+                              title="Editar pagamento"
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: '#CBA135',
+                                padding: '4px 8px',
+                                borderRadius: '4px',
+                                transition: 'background-color 0.2s',
+                              }}
+                              onMouseEnter={(e) => e.target.style.backgroundColor = '#fef3c7'}
+                              onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 20h9"></path>
+                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                              </svg>
+                            </button>
+                          )}
                           <button
                             onClick={() => handleDeleteTransaction(tx)}
-                            title="Deletar"
+                            title={tx.entry_id ? 'Remover este pagamento' : 'Deletar OS'}
                             style={{
                               background: 'none',
                               border: 'none',

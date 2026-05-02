@@ -210,9 +210,11 @@ export const serviceOrderService = {
     },
 
     // Lançar estorno (admin only)
-    refundServiceOrder: async (id, { amount, forma_pagamento, motivo }) => {
+    refundServiceOrder: async (id, { amount, forma_pagamento, motivo, data }) => {
         try {
-            const response = await api.post(`/api/v1/service-orders/${id}/refund/`, { amount, forma_pagamento, motivo });
+            const payload = { amount, forma_pagamento, motivo };
+            if (data) payload.data = data;
+            const response = await api.post(`/api/v1/service-orders/${id}/refund/`, payload);
             return response.data;
         } catch (error) {
             console.error('Erro ao lançar estorno:', error);
@@ -220,13 +222,40 @@ export const serviceOrderService = {
         }
     },
 
-    // Adicionar pagamento parcial sem mudar fase
+    // Adicionar pagamento parcial sem mudar fase. Each payment may include `data` (YYYY-MM-DD).
     addPayment: async (id, payments) => {
         try {
             const response = await api.post(`/api/v1/service-orders/${id}/add-payment/`, { payments });
             return response.data;
         } catch (error) {
             console.error('Erro ao adicionar pagamento:', error);
+            throw error;
+        }
+    },
+
+    // Editar uma entrada de pagamento (admin only). fields: { amount, forma_pagamento, tipo, data, motivo }
+    updatePaymentEntry: async (orderId, entryId, fields) => {
+        try {
+            const response = await api.patch(
+                `/api/v1/service-orders/${orderId}/payments/${entryId}/`,
+                fields,
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao editar pagamento:', error);
+            throw error;
+        }
+    },
+
+    // Remover uma entrada de pagamento (admin only)
+    deletePaymentEntry: async (orderId, entryId) => {
+        try {
+            const response = await api.delete(
+                `/api/v1/service-orders/${orderId}/payments/${entryId}/`,
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao remover pagamento:', error);
             throw error;
         }
     },
