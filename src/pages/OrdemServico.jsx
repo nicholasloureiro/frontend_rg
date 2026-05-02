@@ -1838,6 +1838,35 @@ const OrdemServico = () => {
     }
   };
 
+  // Enter on a normal input advances to the next step (or finalizes on the last
+  // one). Skips textareas (Enter = newline) and CustomSelect dropdowns (Enter
+  // is part of their own selection UX). Shift+Enter is always passed through.
+  const formContentRef = useRef(null);
+  const handleFormKeyDown = (e) => {
+    if (e.key !== "Enter" || e.shiftKey || loading) return;
+    const target = e.target;
+    if (!target) return;
+    const tag = target.tagName;
+    if (tag === "TEXTAREA") return;
+    if (typeof target.closest === "function" && target.closest(".custom-select, [role='combobox'], [role='listbox']")) return;
+    e.preventDefault();
+    if (currentStep < steps.length - 1) {
+      nextStep();
+    } else if (!selectedOrder?.data_finalizado && !selectedOrder?.data_recusa) {
+      handleFinalizeOS();
+    }
+  };
+
+  // Cursor lands in the first input of the new step so staff can start typing
+  // immediately after pressing Enter / clicking Próximo.
+  useEffect(() => {
+    if (!formContentRef.current) return;
+    const focusable = formContentRef.current.querySelector(
+      "input:not([disabled]):not([type='hidden']), textarea:not([disabled]), select:not([disabled])"
+    );
+    focusable?.focus?.();
+  }, [currentStep]);
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 0: // Cliente
@@ -3909,7 +3938,7 @@ const OrdemServico = () => {
                 {/* Informações do responsável removidas daqui — atribuição passa a ser feita na lista de ordens */}
 
                 {/* Form Content */}
-                <div className="form-content">
+                <div className="form-content" ref={formContentRef} onKeyDown={handleFormKeyDown}>
                   {renderStepContent()}
                   <ValidationError errors={validationErrors} />
 
@@ -3925,7 +3954,13 @@ const OrdemServico = () => {
                     )}
                     {/* Right-side buttons: draft (always when editing an existing,
                         non-final OS) + either Próximo or Finalizar */}
-                    <div style={{ display: "flex", gap: "10px", marginLeft: "auto" }}>
+                    <div style={{ display: "flex", gap: "10px", marginLeft: "auto", alignItems: "center" }}>
+                      <small style={{ color: "var(--color-text-secondary)", fontSize: "11px" }}>
+                        ou pressione{" "}
+                        <kbd style={{ padding: "1px 5px", background: "#f4f4f5", border: "1px solid #d4d4d8", borderRadius: "3px", fontSize: "10px" }}>
+                          Enter
+                        </kbd>
+                      </small>
                       {selectedOrder &&
                         !selectedOrder?.data_finalizado &&
                         !selectedOrder?.data_recusa && (
