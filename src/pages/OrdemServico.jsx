@@ -3955,9 +3955,23 @@ const OrdemServico = () => {
                     {/* Right-side buttons: draft (always when editing an existing,
                         non-final OS) + either Próximo or Finalizar */}
                     <div style={{ display: "flex", gap: "10px", marginLeft: "auto", alignItems: "center" }}>
-                      <small style={{ color: "var(--color-text-secondary)", fontSize: "11px" }}>
-                        ou pressione{" "}
-                        <kbd style={{ padding: "1px 5px", background: "#f4f4f5", border: "1px solid #d4d4d8", borderRadius: "3px", fontSize: "10px" }}>
+                      <small style={{ color: "#52525b", fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                        ou pressione
+                        <kbd
+                          style={{
+                            padding: "3px 8px",
+                            background: "#ffffff",
+                            border: "1px solid #a1a1aa",
+                            borderBottomWidth: "2px",
+                            borderRadius: "4px",
+                            fontSize: "12px",
+                            fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                            fontWeight: 600,
+                            color: "#18181b",
+                            lineHeight: 1,
+                            boxShadow: "0 1px 0 rgba(0,0,0,0.04)",
+                          }}
+                        >
                           Enter
                         </kbd>
                       </small>
