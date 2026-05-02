@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import Header from '../components/Header';
@@ -15,6 +15,29 @@ import eventService from '../services/eventService';
 import { capitalizeText } from '../utils/capitalizeText';
 import Swal from 'sweetalert2';
 import '../styles/Triagem.css';
+
+// Stale-while-revalidate cache for the two dropdowns. Both lists rarely change
+// during a shift, so showing the cached version instantly and refreshing in the
+// background eliminates the "Carregando..." stutter on every page open.
+const CACHE_TTL_MS = 5 * 60 * 1000;
+const cacheGet = (key) => {
+    try {
+        const raw = sessionStorage.getItem(key);
+        if (!raw) return null;
+        const { ts, value } = JSON.parse(raw);
+        if (!ts || Date.now() - ts > CACHE_TTL_MS) return null;
+        return value;
+    } catch {
+        return null;
+    }
+};
+const cacheSet = (key, value) => {
+    try {
+        sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), value }));
+    } catch {
+        // sessionStorage may be disabled — silently fall back to no cache
+    }
+};
 
 const Triagem = () => {
     const [formData, setFormData] = useState({
@@ -48,38 +71,56 @@ const Triagem = () => {
     const [emailValido, setEmailValido] = useState(true);
     const [buscandoCliente, setBuscandoCliente] = useState(false);
 
-    // Função para carregar atendentes da API
+    const cpfInputRef = useRef(null);
+
+    // Cursor lands in CPF on every visit so staff starts typing immediately.
+    useEffect(() => {
+        cpfInputRef.current?.focus();
+    }, []);
+
+    // Função para carregar atendentes da API.
+    // Stale-while-revalidate: paint cached value first (skip the loading state),
+    // then refresh in the background.
     const carregarAtendentes = async () => {
-        setLoadingAtendentes(true);
+        const cached = cacheGet('triagem.atendentes');
+        if (cached) {
+            setAtendentes(cached);
+        } else {
+            setLoadingAtendentes(true);
+        }
         try {
             const funcionarios = await getEmployees();
-            // Garante que funcionarios sempre será um array
             const listaFuncionarios = Array.isArray(funcionarios) ? funcionarios : [];
-            // Filtrar apenas funcionários com role ATENDENTE ou ADMINISTRADOR e que estejam ativos
-            const atendentesFiltrados = listaFuncionarios.filter(func => 
+            const atendentesFiltrados = listaFuncionarios.filter(func =>
                 (func.role === 'ATENDENTE' || func.role === 'ADMINISTRADOR') && func.active === true
             );
             setAtendentes(atendentesFiltrados);
+            cacheSet('triagem.atendentes', atendentesFiltrados);
         } catch (error) {
             console.error('Erro ao carregar atendentes:', error);
-
         } finally {
             setLoadingAtendentes(false);
         }
     };
 
-    // Função para carregar eventos abertos da API
+    // Função para carregar eventos abertos da API.
+    // Same stale-while-revalidate pattern as atendentes.
     const carregarEventos = async () => {
-        setLoadingEventos(true);
+        const cached = cacheGet('triagem.eventos');
+        if (cached) {
+            setEventos(cached);
+        } else {
+            setLoadingEventos(true);
+        }
         try {
             const eventosData = await eventService.listarEventosAbertos();
-            // Aceita tanto resposta paginada ({events: [...]}) quanto array simples
             const listaEventos = Array.isArray(eventosData)
                 ? eventosData
                 : Array.isArray(eventosData?.events)
                     ? eventosData.events
                     : [];
             setEventos(listaEventos);
+            cacheSet('triagem.eventos', listaEventos);
         } catch (error) {
             console.error('Erro ao carregar eventos:', error);
         } finally {
@@ -351,42 +392,64 @@ const Triagem = () => {
         }
     };
 
-    // Função para buscar dados do cliente por CPF
+    // Função para buscar dados do cliente por CPF.
+    // Non-blocking: the CPF input stays editable during the lookup so staff can
+    // keep tabbing. Autofill is also non-destructive — only fills fields the
+    // user hasn't already typed into, so a fast typist won't lose work to a
+    // late-arriving response.
     const buscarClientePorCPF = async (cpf) => {
         setBuscandoCliente(true);
         try {
             const cliente = await clientService.buscarPorCPF(cpf);
 
             if (cliente) {
-                // Formatar o telefone para o componente PhoneInput
                 let telefoneFormatado = '';
                 if (cliente.phone) {
                     telefoneFormatado = cliente.phone.startsWith('+') ? cliente.phone : `+55${cliente.phone.substring(2)}`;
                 }
 
-                // Preencher os dados do formulário com os dados do cliente encontrado
-                setFormData(prev => ({
-                    ...prev,
-                    nomeCliente: cliente.name || '',
-                    telefone: telefoneFormatado,
-                    cep: cliente.address?.cep || '',
-                    rua: cliente.address?.street || '',
-                    bairro: cliente.address?.neighborhood || '',
-                    cidade: cliente.address?.city || '',
-                    numero: cliente.address?.number || '',
-                    complemento: cliente.address?.complement || '',
-                    email: cliente.email || ''
-                }));
+                const filledFields = [];
+                setFormData(prev => {
+                    const next = { ...prev };
+                    const fillIfEmpty = (key, value) => {
+                        if (value && !prev[key]) {
+                            next[key] = value;
+                            filledFields.push(key);
+                        }
+                    };
+                    fillIfEmpty('nomeCliente', cliente.name);
+                    fillIfEmpty('telefone', telefoneFormatado);
+                    fillIfEmpty('cep', cliente.address?.cep);
+                    fillIfEmpty('rua', cliente.address?.street);
+                    fillIfEmpty('bairro', cliente.address?.neighborhood);
+                    fillIfEmpty('cidade', cliente.address?.city);
+                    fillIfEmpty('numero', cliente.address?.number);
+                    fillIfEmpty('complemento', cliente.address?.complement);
+                    fillIfEmpty('email', cliente.email);
+                    return next;
+                });
 
-                // Se o CEP foi preenchido, buscar dados do endereço
-                if (cliente.address?.cep) {
+                if (filledFields.length > 0) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Cliente encontrado',
+                        text: `${filledFields.length} campo(s) preenchido(s) automaticamente`,
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 2000,
+                    });
+                }
+                // Skip the redundant ViaCEP round-trip — the client record already
+                // carries street/bairro/cidade. Only call ViaCEP if we have a CEP
+                // but the address fields are still empty.
+                if (cliente.address?.cep && !cliente.address?.street) {
                     const cepFormatado = mascaraCEP(cliente.address.cep);
                     buscarCEP(cepFormatado);
                 }
             }
         } catch (error) {
             console.error('Erro ao buscar cliente:', error);
-            // Não mostrar erro se o cliente não for encontrado (404)
             if (error.response?.status !== 404) {
                 Swal.fire({
                     icon: 'error',
@@ -506,6 +569,32 @@ const Triagem = () => {
                 <div className="triagem-card">
 
                     <form onSubmit={handleSubmit} className="triagem-form">
+                        <div
+                            className="triagem-fast-path-hint"
+                            style={{
+                                background: 'linear-gradient(90deg, rgba(203, 161, 53, 0.12), rgba(203, 161, 53, 0.04))',
+                                border: '1px solid rgba(203, 161, 53, 0.35)',
+                                borderRadius: '8px',
+                                padding: '10px 14px',
+                                marginBottom: '16px',
+                                fontSize: '13px',
+                                color: 'var(--color-text)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                flexWrap: 'wrap',
+                            }}
+                        >
+                            <i className="bi bi-lightning-charge-fill" style={{ color: 'var(--color-accent)', fontSize: '16px' }}></i>
+                            <span>
+                                <strong>Comece pelo CPF</strong> — se o cliente já existe, os outros campos são preenchidos automaticamente.
+                            </span>
+                            <span style={{ marginLeft: 'auto', color: 'var(--color-text-secondary)', fontSize: '12px' }}>
+                                <kbd style={{ padding: '2px 6px', background: '#f4f4f5', border: '1px solid #d4d4d8', borderRadius: '4px' }}>Tab</kbd> avança ·{' '}
+                                <kbd style={{ padding: '2px 6px', background: '#f4f4f5', border: '1px solid #d4d4d8', borderRadius: '4px' }}>Enter</kbd> salva
+                            </span>
+                        </div>
+
                         {/* Seção: Dados do Cliente */}
                         <div className="form-section">
                             <h3 className="section-title mb-3">Dados do Cliente</h3>
@@ -518,6 +607,7 @@ const Triagem = () => {
                                     </label>
                                     <div className="cpf-container">
                                         <input
+                                            ref={cpfInputRef}
                                             type="text"
                                             id="cpf"
                                             className={`form-input ${errors.cpf ? 'error' : ''}`}
@@ -526,14 +616,20 @@ const Triagem = () => {
                                             placeholder={formData.isInfant ? 'Criança (sem CPF)' : '000.000.000-00'}
                                             autoComplete="off"
                                             maxLength="14"
-                                            disabled={buscandoCliente || formData.isInfant}
+                                            disabled={formData.isInfant}
+                                            autoFocus
                                         />
                                         {buscandoCliente && (
-                                            <div className="cpf-loading">
+                                            <div className="cpf-loading" title="Buscando cliente...">
                                                 <i className="bi bi-arrow-clockwise"></i>
                                             </div>
                                         )}
                                     </div>
+                                    {buscandoCliente && (
+                                        <small style={{ color: 'var(--color-accent)', fontSize: '11px' }}>
+                                            Buscando cliente... pode continuar digitando
+                                        </small>
+                                    )}
                                     {errors.cpf && (
                                         <span className="error-message">{errors.cpf}</span>
                                     )}
