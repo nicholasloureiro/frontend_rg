@@ -6,6 +6,7 @@ import "../styles/ServiceOrderList.css";
 import { capitalizeText } from "../utils/capitalizeText";
 import { mascaraTelefoneInternacional } from "../utils/Mascaras";
 import { parseCurrency } from "../utils/parseCurrency";
+import { orderHasPayment } from "../utils/orderHasPayment";
 import Button from "./Button";
 import InputDate from "./InputDate";
 import CustomSelect from "./CustomSelect";
@@ -841,7 +842,11 @@ const ServiceOrderList = ({
 
     const result = await Swal.fire({
       title: "Deletar Ordem de Serviço",
-      text: `Tem certeza que deseja deletar permanentemente a ordem de serviço #${order.id}? Esta ação não pode ser desfeita.`,
+      text: `Tem certeza que deseja deletar permanentemente a ordem de serviço #${order.id}? Esta ação não pode ser desfeita.${
+        orderHasPayment(order)
+          ? ` Atenção: esta OS tem ${formatCurrency(order.advance_payment)} pagos, e esse valor sairá do Financeiro.`
+          : ""
+      }`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -1205,7 +1210,7 @@ const ServiceOrderList = ({
                 <i className="bi bi-arrow-repeat" style={{ fontSize: "16px" }}></i>
               </IconButton>
             )}
-            {isAdministrator && activeTab !== "RECUSADA" && (
+            {isAdministrator && (
               <IconButton
                 size="small"
                 onClick={(e) => {
@@ -1825,13 +1830,25 @@ const ServiceOrderList = ({
                       </>
                     )}
                     {activeTab === "RECUSADA" && (
-                      <button
-                        className="action-btn return"
-                        onClick={(e) => handleReturnToPending(order, e)}
-                        title="Voltar ordem para 'Pendentes'"
-                      >
-                        <i className="bi bi-arrow-clockwise"></i>
-                      </button>
+                      <>
+                        <button
+                          className="action-btn return"
+                          onClick={(e) => handleReturnToPending(order, e)}
+                          title="Voltar ordem para 'Pendentes'"
+                        >
+                          <i className="bi bi-arrow-clockwise"></i>
+                        </button>
+                        {isAdministrator && (
+                          <button
+                            className="action-btn delete"
+                            onClick={(e) => handleDeleteOrder(order, e)}
+                            title="Deletar ordem"
+                            style={{ color: "#d33" }}
+                          >
+                            <i className="bi bi-trash" style={{ fontSize: "14px" }}></i>
+                          </button>
+                        )}
+                      </>
                     )}
                     {activeTab === "ATRASADO" && (
                       <>
