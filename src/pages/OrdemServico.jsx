@@ -21,8 +21,6 @@ import Swal from "sweetalert2";
 import InputDate from "../components/InputDate";
 import { formatCurrency } from "../utils/format";
 import { addBusinessDays } from "../utils/addBusinessDays";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 import useColors from "../hooks/useColors";
 import useBrands from "../hooks/useBrands";
 import CustomSelect from "../components/CustomSelect";
@@ -40,7 +38,6 @@ const OrdemServico = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
-  const [isLoadingOrders, setIsLoadingOrders] = useState(true);
   const [atendentes, setAtendentes] = useState([]);
   const [loadingAtendentes, setLoadingAtendentes] = useState(false);
   const [atualizandoAtendente, setAtualizandoAtendente] = useState(false);
@@ -237,8 +234,8 @@ const OrdemServico = () => {
     { label: "Pagamento" },
   ];
 
-  const { colors, loading: loadingColors } = useColors();
-  const { brands, loading: loadingBrands } = useBrands();
+  const { colors, loading: loadingColors } = useColors(showForm);
+  const { brands, loading: loadingBrands } = useBrands(showForm);
 
   const handleInputChange = (field, value) => {
     // Para campos de moeda, tratar valor numérico
@@ -649,31 +646,6 @@ const OrdemServico = () => {
     }
   }, [inputValues.dataEvento, inputValues.dataDevolucao, loading, inputValues.tipoPagamento]);
 
-  // Função para carregar ordens de serviço
-  const loadOrders = async () => {
-    setIsLoadingOrders(true);
-    setError(null);
-    try {
-      // A lógica de carregamento será feita pelo ServiceOrderList
-      // Aqui apenas simulamos o carregamento inicial
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    } catch (error) {
-      console.error("Erro ao carregar ordens de serviço:", error);
-      setError(
-        "Não foi possível carregar a lista de ordens de serviço. Tente novamente."
-      );
-      Swal.fire({
-        icon: "error",
-        title: "Erro ao carregar ordens de serviço",
-        text: "Não foi possível carregar a lista de ordens de serviço.",
-        timer: 2000,
-        showConfirmButton: false,
-      });
-    } finally {
-      setIsLoadingOrders(false);
-    }
-  };
-
   // Função para carregar uma ordem específica por ID
   const loadOrderById = async (orderId) => {
     setLoading(true);
@@ -773,19 +745,18 @@ const OrdemServico = () => {
 
   // Carregar ordens ao montar o componente
   useEffect(() => {
+    // Se há um ID na URL, carrega a ordem específica; a lista busca os próprios dados
     if (id) {
-      // Se há um ID na URL, carrega a ordem específica
       loadOrderById(id);
-    } else {
-      // Caso contrário, carrega a lista de ordens
-      loadOrders();
     }
   }, [id]);
 
-  // Carregar atendentes ao montar o componente
+  // Carregar atendentes quando o formulário abrir
   useEffect(() => {
-    carregarAtendentes();
-  }, []);
+    if (showForm && atendentes.length === 0) {
+      carregarAtendentes();
+    }
+  }, [showForm]);
 
   // Atualizar atendente selecionado quando a ordem mudar
   useEffect(() => {
@@ -3696,6 +3667,10 @@ const OrdemServico = () => {
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Configurar o canvas com dimensões fixas
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf"),
+      ]);
       const canvas = await html2canvas(clonedPreview, {
         scale: 2,
         useCORS: true,
@@ -3898,13 +3873,15 @@ const OrdemServico = () => {
   return (
     <>
       <Header nomeHeader={"Ordem de Serviço"} />
-      {!showForm ? (
+      {!showForm && id && !error ? (
+        <div className="d-flex justify-content-center p-5">
+          <div className="spinner-border" role="status" aria-label="Carregando ordem de serviço"></div>
+        </div>
+      ) : !showForm ? (
         <ServiceOrderList
           onSelectOrder={handleSelectOrder}
           onCreateNew={handleCreateNew}
-          isLoading={isLoadingOrders}
           error={error}
-          onRetry={loadOrders}
         />
       ) : (
         <div className="ordem-servico-container">

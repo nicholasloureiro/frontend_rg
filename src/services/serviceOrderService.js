@@ -113,7 +113,7 @@ export const serviceOrderService = {
     },
 
     // Buscar ordens de serviço com filtros
-    searchServiceOrders: async (phase, filters = {}) => {
+    searchServiceOrders: async (phase, filters = {}, options = {}) => {
         try {
             const params = new URLSearchParams();
 
@@ -146,12 +146,20 @@ export const serviceOrderService = {
             const queryString = params.toString();
             const url = `/api/v1/service-orders/v2/phase/${phase}/${queryString ? `?${queryString}` : ''}`;
 
-            const response = await api.get(url);
+            const response = await api.get(url, { signal: options.signal });
             return response.data;
         } catch (error) {
-            console.error('Erro ao buscar ordens de serviço:', error);
+            if (error.code !== 'ERR_CANCELED') {
+                console.error('Erro ao buscar ordens de serviço:', error);
+            }
             throw error;
         }
+    },
+
+    // Contagem de OS de cada aba da tela de ordens
+    getPhaseCounts: async () => {
+        const response = await api.get('/api/v1/service-orders/phase-counts/');
+        return response.data;
     },
 
     // Buscar ordens de serviço por cliente (locatário)

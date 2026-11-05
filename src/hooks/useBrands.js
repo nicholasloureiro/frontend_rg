@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { productService } from '../services/productService';
 
-const useBrands = () => {
+const useBrands = (enabled = true) => {
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (!enabled || brands.length > 0) return;
+
     const fetchBrands = async () => {
       setLoading(true);
       setError(null);
@@ -21,7 +23,7 @@ const useBrands = () => {
       }
     };
     fetchBrands();
-  }, []);
+  }, [enabled]);
 
   return { brands, loading, error };
 };

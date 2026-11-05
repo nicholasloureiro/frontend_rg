@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { productService } from '../services/productService';
 
-const useColors = () => {
+const useColors = (enabled = true) => {
   const [colors, setColors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (!enabled || colors.length > 0) return;
+
     const fetchColors = async () => {
       setLoading(true);
       setError(null);
@@ -21,7 +23,7 @@ const useColors = () => {
       }
     };
     fetchColors();
-  }, []);
+  }, [enabled]);
 
   return { colors, loading, error };
 };

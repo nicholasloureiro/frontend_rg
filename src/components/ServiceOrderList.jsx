@@ -25,6 +25,11 @@ import Swal from "sweetalert2";
 import { getEmployees } from "../services/employeeService";
 import { useAuth } from "../hooks/useAuth";
 
+const currencyFormatter = new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+});
+
 const ServiceOrderList = ({
   onSelectOrder,
   onCreateNew,
@@ -40,7 +45,7 @@ const ServiceOrderList = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const [totalCount, setTotalCount] = useState(0);
+  const ordersRequest = useRef(null);
   const [loading, setLoading] = useState(false);
   const [internalError, setInternalError] = useState(null);
   const [refusalReasons, setRefusalReasons] = useState([]);
@@ -212,6 +217,11 @@ const ServiceOrderList = ({
   };
 
   const fetchOrders = async (phase, filters = {}, page = 1, orderingParam = null) => {
+    // Só a última busca vale: uma resposta lenta não pode sobrescrever a aba atual
+    ordersRequest.current?.abort();
+    const request = new AbortController();
+    ordersRequest.current = request;
+
     setLoading(true);
     setInternalError(null);
     try {
@@ -225,7 +235,8 @@ const ServiceOrderList = ({
       };
       data = await serviceOrderService.searchServiceOrders(
         phase,
-        effectiveFilters
+        effectiveFilters,
+        { signal: request.signal }
       );
 
       // Se a API retornou objeto paginado
@@ -234,21 +245,31 @@ const ServiceOrderList = ({
         setCurrentPage(data.page || page);
         setTotalPages(data.total_pages || 1);
         setPageSize(data.page_size || pageSize);
-        setTotalCount(data.count || 0);
       } else {
         // Compatibilidade: se retornou array simples
         setOrders(Array.isArray(data) ? data : []);
         setCurrentPage(1);
         setTotalPages(1);
         setPageSize(Array.isArray(data) ? data.length : pageSize);
-        setTotalCount(Array.isArray(data) ? data.length : 0);
       }
     } catch (err) {
+      if (err.code === "ERR_CANCELED") return;
+      // A última linha da última página saiu da lista: volta uma página
+      if (err.response?.status === 404 && page > 1) {
+        await fetchOrders(phase, filters, page - 1, orderingParam);
+        return;
+      }
       setInternalError("Erro ao carregar ordens de serviço");
       console.error("Erro:", err);
     } finally {
-      setLoading(false);
+      if (ordersRequest.current === request) setLoading(false);
     }
+  };
+
+  // Recarrega depois de uma ação, mantendo filtros e página, e atualiza as abas
+  const reloadOrders = () => {
+    fetchOrders(activeTab, buildFiltersFromState(), currentPage);
+    fetchTabCounts();
   };
 
   const fetchRefusalReasons = async () => {
@@ -262,18 +283,8 @@ const ServiceOrderList = ({
 
   // Busca contagem de ordens para cada fase (para exibir nos tabs)
   const fetchTabCounts = async () => {
-    const phases = ["PENDENTE", "EM_PRODUCAO", "AGUARDANDO_RETIRADA", "AGUARDANDO_DEVOLUCAO", "ATRASADO", "RECUSADA", "FINALIZADO"];
     try {
-      const results = await Promise.all(
-        phases.map(phase =>
-          serviceOrderService.searchServiceOrders(phase, { page: 1, page_size: 1 })
-        )
-      );
-      const counts = {};
-      phases.forEach((phase, index) => {
-        counts[phase] = results[index]?.count || 0;
-      });
-      setTabCounts(counts);
+      setTabCounts(await serviceOrderService.getPhaseCounts());
     } catch (err) {
       console.error("Erro ao carregar contagem de ordens:", err);
     }
@@ -327,7 +338,7 @@ const ServiceOrderList = ({
       });
 
       // Recarrega a lista de ordens
-      fetchOrders(activeTab);
+      reloadOrders();
     } catch (error) {
       console.error("Erro ao cancelar ordem:", error);
 
@@ -346,20 +357,14 @@ const ServiceOrderList = ({
     setCurrentPage(1);
     // chama o endpoint por fase sem filtros
     fetchOrders(activeTab);
-    fetchRefusalReasons();
+    return () => ordersRequest.current?.abort();
   }, [activeTab]);
 
-  // Busca contagem de todas as fases ao montar o componente
+  // Contagem das abas e motivos de recusa não dependem da aba selecionada
   useEffect(() => {
     fetchTabCounts();
+    fetchRefusalReasons();
   }, []);
-
-  // Atualiza a contagem do tab atual quando totalCount muda
-  useEffect(() => {
-    if (totalCount !== undefined) {
-      setTabCounts(prev => ({ ...prev, [activeTab]: totalCount }));
-    }
-  }, [totalCount, activeTab]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "-";
@@ -371,12 +376,7 @@ const ServiceOrderList = ({
     return date.toLocaleDateString("pt-BR");
   };
 
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value || 0);
-  };
+  const formatCurrency = (value) => currencyFormatter.format(value || 0);
 
   const getStatusBadge = (phase) => {
     const tab = tabs.find((t) => t.key === phase);
@@ -500,7 +500,7 @@ const ServiceOrderList = ({
         });
 
         // Recarrega a lista de ordens
-        fetchOrders(activeTab);
+        reloadOrders();
       } catch (error) {
         console.error("Erro ao marcar como devolvida:", error);
 
@@ -543,7 +543,7 @@ const ServiceOrderList = ({
         });
 
         // Recarrega a lista de ordens
-        fetchOrders(activeTab);
+        reloadOrders();
       } catch (error) {
         console.error("Erro ao marcar como produzida:", error);
 
@@ -674,7 +674,7 @@ const ServiceOrderList = ({
         confirmButtonColor: "#CBA135",
       });
 
-      fetchOrders(activeTab);
+      reloadOrders();
     } catch (error) {
       console.error("Erro ao marcar como retirada:", error);
 
@@ -733,7 +733,7 @@ const ServiceOrderList = ({
         });
       } finally {
         // Recarrega a lista
-          fetchOrders(activeTab);
+          reloadOrders();
       }
     }
   };
@@ -762,7 +762,7 @@ const ServiceOrderList = ({
       });
       setShowRefundModal(false);
       Swal.fire({ title: "Estorno lançado!", icon: "success", timer: 2000, showConfirmButton: false });
-      fetchOrders(activeTab);
+      reloadOrders();
     } catch (error) {
       Swal.fire({ title: "Erro", text: error.response?.data?.error || "Erro ao lançar estorno.", icon: "error" });
     } finally {
@@ -792,7 +792,7 @@ const ServiceOrderList = ({
       );
       setShowPaymentModal(false);
       Swal.fire({ title: "Pagamento registrado!", icon: "success", timer: 2000, showConfirmButton: false });
-      fetchOrders(activeTab);
+      reloadOrders();
     } catch (error) {
       Swal.fire({ title: "Erro", text: error.response?.data?.error || "Erro ao registrar pagamento.", icon: "error" });
     } finally {
@@ -828,7 +828,7 @@ const ServiceOrderList = ({
       await serviceOrderService.changePhase(phaseOrder.id, targetPhase);
       setShowPhaseModal(false);
       Swal.fire({ title: "Fase alterada!", icon: "success", timer: 2000, showConfirmButton: false });
-      fetchOrders(activeTab);
+      reloadOrders();
     } catch (error) {
       Swal.fire({ title: "Erro", text: error.response?.data?.error || "Erro ao alterar fase.", icon: "error" });
     } finally {
@@ -869,7 +869,7 @@ const ServiceOrderList = ({
         });
 
         // Recarrega a lista
-        fetchOrders(activeTab);
+        reloadOrders();
       } catch (error) {
         console.error("Erro ao deletar ordem de serviço:", error);
 
@@ -1003,7 +1003,7 @@ const ServiceOrderList = ({
         confirmButtonColor: "#3085d6",
       });
 
-      fetchOrders(activeTab);
+      reloadOrders();
     } catch (error) {
       console.error("Erro ao atribuir atendente:", error);
       await Swal.fire({
@@ -1234,6 +1234,8 @@ const ServiceOrderList = ({
           columns={cols}
           data={displayedOrders}
           enableSorting={false}
+          enablePagination={false}
+          enableBottomToolbar={false}
           muiTableBodyRowProps={({ row }) => ({
             onClick: () => handleOrderClick(row.original),
             sx: { cursor: "pointer" },
@@ -1438,7 +1440,7 @@ const ServiceOrderList = ({
               text="Tentar novamente"
               iconName="arrow-clockwise"
               iconPosition="left"
-              onClick={onRetry || (() => fetchOrders(activeTab))}
+              onClick={onRetry || reloadOrders}
               disabled={isLoading || loading}
               style={{ width: "fit-content" }}
             />
