@@ -23,19 +23,16 @@
     "@nivo/bar": "^0.99.0",
     "@nivo/core": "^0.99.0",
     "@nivo/line": "^0.99.0",
-    "@nivo/pie": "^0.99.0",
     "@phosphor-icons/react": "^2.1.10",
     "@reduxjs/toolkit": "^2.8.2",
     "axios": "^1.10.0",
-    "bootstrap": "^5.3.7",
     "bootstrap-icons": "^1.13.1",
     "browser-image-compression": "^2.0.2",
-    "google-libphonenumber": "^3.2.42",
+    "date-fns": "^4.1.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
     "lucide-react": "^0.525.0",
     "material-react-table": "^3.2.1",
-    "phosphor-react": "^1.4.1",
     "react": "^18.3.1",
     "react-datepicker": "^8.4.0",
     "react-dom": "^18.3.1",
@@ -59,7 +56,6 @@
     "globals": "^16.2.0",
     "jsdom": "^25.0.1",
     "vite": "^7.0.0",
-    "vite-plugin-svgr": "^4.3.0",
     "vitest": "^2.1.8"
   }
 }

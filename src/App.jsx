@@ -1,27 +1,34 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import Login from './pages/Login'
-import Home from './pages/Home'
-import Funcionarios from './pages/Funcionarios'
-import Clientes from './pages/Clientes'
 import Sidebar from './components/Sidebar'
 import ProtectedRoute from './components/ProtectedRoute'
 import { useTheme } from './hooks/useTheme'
 import { useNavigate } from 'react-router-dom'
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { setSidebarState } from './store/slices/sidebarSlice'
 import { useAuth } from './hooks/useAuth'
 import 'react-phone-number-input/style.css';
 import './App.css'
-import Triagem from './pages/Triagem'
-import OrdemServico from './pages/OrdemServico'
-import Produtos from './pages/Produtos'
-import ProdutosConfig from './pages/ProdutosConfig'
-import Eventos from './pages/Eventos'
-import EventoDetalhes from './pages/EventoDetalhes'
-import ClienteHistorico from './pages/ClienteHistorico'
-import Financeiro from './pages/Financeiro'
-import Planilha from './pages/Planilha'
+
+const Home = lazy(() => import('./pages/Home'))
+const Funcionarios = lazy(() => import('./pages/Funcionarios'))
+const Clientes = lazy(() => import('./pages/Clientes'))
+const Triagem = lazy(() => import('./pages/Triagem'))
+const OrdemServico = lazy(() => import('./pages/OrdemServico'))
+const Produtos = lazy(() => import('./pages/Produtos'))
+const ProdutosConfig = lazy(() => import('./pages/ProdutosConfig'))
+const Eventos = lazy(() => import('./pages/Eventos'))
+const EventoDetalhes = lazy(() => import('./pages/EventoDetalhes'))
+const ClienteHistorico = lazy(() => import('./pages/ClienteHistorico'))
+const Financeiro = lazy(() => import('./pages/Financeiro'))
+const Planilha = lazy(() => import('./pages/Planilha'))
+
+const PageFallback = () => (
+  <div className="d-flex justify-content-center p-5">
+    <div className="spinner-border" role="status" aria-label="Carregando página"></div>
+  </div>
+)
 
 function AppContent() {
   const { theme } = useTheme();
@@ -83,6 +90,7 @@ function AppContent() {
     <div className="App">
       {!isLoginPage && <Sidebar setSideOpen={(c) => dispatch(setSidebarState(c))} />}
       <main className={`main-content ${isSidebarCollapsed && !isLoginPage ? 'collapsed' : ''} ${isLoginPage ? 'no-sidebar' : ''}`} id='main'>
+        <Suspense fallback={<PageFallback />}>
         <Routes>
           {/* Rota raiz - redireciona para dashboard se autenticado, senão para login */}
           <Route path="/" element={
@@ -180,6 +188,7 @@ function AppContent() {
             </ProtectedRoute>
           } />
         </Routes>
+        </Suspense>
       </main>
     </div>
   )
