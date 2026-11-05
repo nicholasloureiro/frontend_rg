@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { serviceOrderService } from "../services/serviceOrderService";
 import { MaterialReactTable } from "material-react-table";
 import { Pagination } from "@mui/material";
@@ -67,13 +67,21 @@ const Planilha = () => {
     }
   }, [currentPage, pageSize, startDate, endDate, searchDebounced, fechamentoFilter, canalFilter, atendenteFilter]);
 
-  useEffect(() => {
-    if (isAdministrator) fetchData();
-  }, [fetchData, isAdministrator]);
+  // Filtro novo volta à página 1 com uma única busca
+  const filtersKey = JSON.stringify([startDate, endDate, searchDebounced, fechamentoFilter, canalFilter, atendenteFilter]);
+  const lastFiltersKey = useRef(filtersKey);
 
   useEffect(() => {
-    setCurrentPage(1);
-  }, [startDate, endDate, searchDebounced, fechamentoFilter, canalFilter, atendenteFilter]);
+    if (!isAdministrator) return;
+    if (lastFiltersKey.current !== filtersKey) {
+      lastFiltersKey.current = filtersKey;
+      if (currentPage !== 1) {
+        setCurrentPage(1);
+        return;
+      }
+    }
+    fetchData();
+  }, [fetchData, isAdministrator]);
 
   const formatDate = (val) => {
     if (!val) return "";

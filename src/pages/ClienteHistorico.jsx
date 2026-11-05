@@ -29,23 +29,11 @@ const ClienteHistorico = () => {
         setIsLoading(true);
         setError(null);
         try {
-            // Carregar lista de clientes e encontrar o cliente específico
-            const response = await clientService.listarTodos({ page_size: 1000 }); // Buscar todos
-            
-            // Verificar se a resposta é paginada
-            const clientes = response.clients || response;
-            const clientData = Array.isArray(clientes) 
-                ? clientes.find(cliente => cliente.id === parseInt(id))
-                : null;
-
-            if (!clientData) {
-                throw new Error('Cliente não encontrado');
-            }
-
+            const [clientData] = await Promise.all([
+                clientService.buscarPorId(id),
+                loadServiceOrders(),
+            ]);
             setClient(clientData);
-
-            // Carregar histórico de ordens de serviço
-            await loadServiceOrders();
         } catch (error) {
             console.error('Erro ao carregar dados do cliente:', error);
             setError('Não foi possível carregar os dados do cliente.');

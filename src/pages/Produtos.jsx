@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Produtos.css";
 import Header from "../components/Header";
@@ -23,6 +23,8 @@ const Produtos = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [filtroTipo, setFiltroTipo] = useState([]);
   const [filtroMarca, setFiltroMarca] = useState([]);
+  const [searchDebounced, setSearchDebounced] = useState("");
+  const latestRequest = useRef(0);
   const [showImportModal, setShowImportModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadLoading, setUploadLoading] = useState(false);
@@ -35,6 +37,7 @@ const Produtos = () => {
     tipo = "",
     marca = ""
   ) => {
+    const requestId = ++latestRequest.current;
     setLoading(true);
     try {
       // Chamada para a API real usando o productService
@@ -45,30 +48,39 @@ const Produtos = () => {
         marca
       );
 
+      if (requestId !== latestRequest.current) return; // resposta de uma busca antiga
       setProdutos(response.results);
       setTotalPages(Math.ceil(response.count / 12));
       setError(null);
     } catch (err) {
+      if (requestId !== latestRequest.current) return;
       setError("Erro ao carregar produtos");
       console.error("Erro:", err);
     } finally {
-      setLoading(false);
+      if (requestId === latestRequest.current) setLoading(false);
     }
   };
 
   useEffect(() => {
     buscarProdutos(
       currentPage,
-      searchTerm,
+      searchDebounced,
       filtroTipo.join(","),
       filtroMarca.join(",")
     );
-  }, [currentPage, searchTerm, filtroTipo, filtroMarca]);
+  }, [currentPage, searchDebounced, filtroTipo, filtroMarca]);
+
+  // Espera a pessoa parar de digitar antes de buscar
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchDebounced(searchTerm);
+      setCurrentPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   const handleSearch = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    setCurrentPage(1); // Reset para primeira página ao buscar
+    setSearchTerm(e.target.value);
   };
 
   const handlePageChange = (page) => {
@@ -163,7 +175,7 @@ const Produtos = () => {
     // Limpa todos os estados relacionados ao modal de importação
   };
 
-  const ProdutoCard = ({ produto }) => {
+  const renderProdutoCard = (produto) => {
     // Função para determinar a cor do badge baseada no tipo do produto
     const getTipoColor = (tipo) => {
       switch (tipo.toLowerCase()) {
@@ -255,7 +267,7 @@ const Produtos = () => {
     );
   };
 
-  const Paginacao = () => {
+  const renderPaginacao = () => {
     // Lógica para calcular as páginas a serem exibidas na paginação
     const pages = [];
     const maxPages = Math.min(5, totalPages);
@@ -315,7 +327,7 @@ const Produtos = () => {
     );
   };
 
-  const ImportModal = () => (
+  const renderImportModal = () => (
     <div className="import-modal">
       {/* Área de upload de arquivo */}
       <div className="mb-4">
@@ -535,7 +547,7 @@ const Produtos = () => {
                         key={produto.id}
                         className="col-xl-2 col-lg-6 col-md-6 col-sm-12"
                       >
-                        <ProdutoCard produto={produto} />
+                        {renderProdutoCard(produto)}
                       </div>
                     ))}
                   </div>
@@ -544,7 +556,7 @@ const Produtos = () => {
                   {totalPages > 1 && (
                     <div className="row mt-4">
                       <div className="col-12">
-                        <Paginacao />
+                        {renderPaginacao()}
                       </div>
                     </div>
                   )}
@@ -561,7 +573,7 @@ const Produtos = () => {
         onClose={handleCloseModal}
         onCloseX={handleCloseModal}
         title="Importar Produtos"
-        bodyContent={<ImportModal />}
+        bodyContent={renderImportModal()}
       />
     </>
   );
